@@ -24,7 +24,7 @@ export function ProductRow({ items }: { items?: HammerexProduct[] }) {
         <h2 className="text-sm font-semibold text-brand-text">Featured products</h2>
         <a href="/products" className="text-xs text-brand-accent hover:underline">See all</a>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         {data.map((p) => (
           <article key={p.id} className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
             <a href={p.slug ? `/product/${p.slug}` : "#"} className="block h-40 w-full overflow-hidden bg-black">
