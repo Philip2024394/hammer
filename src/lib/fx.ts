@@ -5,7 +5,8 @@ export const FX = {
   USD: { code: "USD", symbol: "$",  perIDR: 1 / 16000 },
   SGD: { code: "SGD", symbol: "S$", perIDR: 1 / 12000 },
   AUD: { code: "AUD", symbol: "A$", perIDR: 1 / 10500 },
-  EUR: { code: "EUR", symbol: "€",  perIDR: 1 / 17500 }
+  EUR: { code: "EUR", symbol: "€",  perIDR: 1 / 17500 },
+  GBP: { code: "GBP", symbol: "£",  perIDR: 1 / 20000 }
 } as const;
 
 export type Currency = keyof typeof FX;

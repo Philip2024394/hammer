@@ -39,6 +39,11 @@ export type HammerexProduct = {
   is_accessory: boolean | null;
   rating_avg: number | null;
   rating_count: number | null;
+  base_currency: string | null;
+  sizes: string[] | null;
+  dispatch_lead_days: number | null;
+  delivery_quote_only: boolean | null;
+  purchase_notes: string[] | null;
 };
 
 export type HammerexBundle = {

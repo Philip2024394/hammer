@@ -4,7 +4,9 @@ const emptyExtras = {
   slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
   dispatch_cutoff_local: null, warranty_years: null, country_of_assembly: null,
   overview: null, features: null, stock_count: null, compare_at_idr: null,
-  qty_discount_tiers: null, is_accessory: null, rating_avg: null, rating_count: null
+  qty_discount_tiers: null, is_accessory: null, rating_avg: null, rating_count: null,
+  base_currency: null, sizes: null, dispatch_lead_days: null,
+  delivery_quote_only: null, purchase_notes: null
 };
 const FALLBACK: HammerexProduct[] = [
   { id: "p1", category_id: null, name: "Cordless Drill", description: "20V brushless with 2 batteries.", price_idr: 1_850_000, image_url: "https://images.unsplash.com/photo-1581147036324-c47a03a81d48?auto=format&fit=crop&w=600&q=70", is_featured: true, ...emptyExtras, slug: "cordless-drill-20v" },
@@ -15,7 +17,7 @@ const FALLBACK: HammerexProduct[] = [
 const fmt = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
 
 export function ProductRow({ items }: { items?: HammerexProduct[] }) {
-  const data = (items?.length ? items : FALLBACK).slice(0, 6);
+  const data = (items?.length ? items : FALLBACK).slice(0, 8);
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8">
       <div className="mb-3 flex items-end justify-between">

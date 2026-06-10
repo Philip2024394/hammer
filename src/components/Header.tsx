@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CartCount } from "./CartCount";
 
 export function Header() {
   const [q, setQ] = useState("");
@@ -26,17 +27,18 @@ export function Header() {
           />
         </div>
 
-        <button
-          type="button"
+        <a
+          href="/cart"
           aria-label="Cart"
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-surface text-brand-text hover:border-brand-accent"
+          className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-surface text-brand-text hover:border-brand-accent"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="9" cy="21" r="1" />
             <circle cx="20" cy="21" r="1" />
             <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
           </svg>
-        </button>
+          <CartCount />
+        </a>
       </div>
     </header>
   );

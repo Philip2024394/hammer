@@ -11,7 +11,7 @@ async function loadData() {
   try {
     const [cats, prods] = await Promise.all([
       supabase.from("hammerex_categories").select("id, slug, name, image_url, sort_order").order("sort_order"),
-      supabase.from("hammerex_products").select("id, category_id, name, description, price_idr, image_url, is_featured, slug, sku, brand, model_number, weight_kg, dispatch_cutoff_local, warranty_years, country_of_assembly, overview, features, stock_count, compare_at_idr, qty_discount_tiers, is_accessory, rating_avg, rating_count").eq("is_featured", true).order("price_idr", { ascending: false }).limit(6)
+      supabase.from("hammerex_products").select("*").eq("is_featured", true).order("price_idr", { ascending: false }).limit(8)
     ]);
     return {
       categories: (cats.data ?? []) as HammerexCategory[],

@@ -3,16 +3,24 @@
 import { useMemo, useState } from "react";
 import { CURRENCIES, formatPrice, type Currency } from "@/lib/fx";
 import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
+import { cart } from "@/lib/cart";
 import type { HammerexProduct, HammerexShippingZone } from "@/lib/supabase";
 import { LiveETA } from "./LiveETA";
 import { StockBadge } from "./StockBadge";
 import { WishlistButton } from "./WishlistButton";
+import { SizeSelector } from "./SizeSelector";
+import { PurchaseNotes } from "./PurchaseNotes";
+import { DeliveryQuoteBanner } from "./DeliveryQuoteBanner";
 
 export function BuyColumn({ product, zones }: { product: HammerexProduct; zones: HammerexShippingZone[] }) {
-  const [currency, setCurrency] = useState<Currency>("IDR");
+  const defaultCurrency = (product.base_currency as Currency | undefined) ?? "IDR";
+  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [qty, setQty] = useState(1);
+  const [size, setSize] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [sizeError, setSizeError] = useState(false);
 
+  const sizes = product.sizes ?? [];
   const tiers = product.qty_discount_tiers ?? [];
   const unitPrice = useMemo(() => effectivePricePerUnit(product.price_idr, tiers, qty), [product.price_idr, tiers, qty]);
   const lineTotal = unitPrice * qty;
@@ -21,12 +29,27 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
     ? Math.round(((product.compare_at_idr - product.price_idr) / product.compare_at_idr) * 100)
     : 0;
 
+  const soldOut = product.stock_count === 0;
+
   const onAdd = () => {
+    if (sizes.length && !size) {
+      setSizeError(true);
+      setTimeout(() => setSizeError(false), 2000);
+      return;
+    }
+    cart.add({
+      productId: product.id,
+      slug: product.slug ?? product.id,
+      name: product.name,
+      image: product.image_url,
+      unitPriceIdr: unitPrice,
+      qty,
+      size,
+      baseCurrency: product.base_currency ?? "IDR"
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
-
-  const soldOut = product.stock_count === 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,7 +93,7 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
               {qty} × {formatPrice(unitPrice, currency)} = <span className="text-brand-text">{formatPrice(lineTotal, currency)}</span>
             </div>
           )}
-          {currency !== "IDR" && <div className="text-xs text-brand-muted">Indicative · charged in IDR</div>}
+          {currency !== defaultCurrency && <div className="text-xs text-brand-muted">Indicative · charged in {defaultCurrency}</div>}
         </div>
         <select
           value={currency}
@@ -81,6 +104,10 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
           {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
+
+      {sizes.length > 0 && (
+        <SizeSelector sizes={sizes} value={size} onChange={(s) => { setSize(s); setSizeError(false); }} />
+      )}
 
       {tiers.length > 0 && (
         <div className="rounded-xl border border-brand-line bg-black/40 p-3">
@@ -133,27 +160,32 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
           disabled={soldOut}
           className="h-12 flex-1 rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90 disabled:opacity-40"
         >
-          {soldOut ? "Notify me when back" : added ? "Added to cart" : "Add to cart"}
+          {soldOut ? "Notify me when back" : added ? "Added to cart ✓" : sizeError ? "Pick a size first" : "Add to cart"}
         </button>
 
         <WishlistButton productId={product.id} />
       </div>
 
-      <button
-        type="button"
-        disabled={soldOut}
-        className="h-12 rounded-full border border-brand-line bg-brand-surface text-sm font-semibold text-brand-text hover:border-brand-accent disabled:opacity-40"
+      <a
+        href="/cart"
+        className="grid h-12 place-items-center rounded-full border border-brand-line bg-brand-surface text-sm font-semibold text-brand-text hover:border-brand-accent"
       >
-        Buy now
-      </button>
+        View cart & checkout
+      </a>
 
-      <LiveETA
-        zones={zones}
-        cutoffLocal={product.dispatch_cutoff_local ?? "14:00"}
-        weightKg={Number(product.weight_kg ?? 1)}
-        currency={currency}
-        lineTotalIdr={lineTotal}
-      />
+      {product.delivery_quote_only ? (
+        <DeliveryQuoteBanner />
+      ) : (
+        <LiveETA
+          zones={zones}
+          cutoffLocal={product.dispatch_cutoff_local ?? "14:00"}
+          weightKg={Number(product.weight_kg ?? 1)}
+          currency={currency}
+          lineTotalIdr={lineTotal}
+        />
+      )}
+
+      <PurchaseNotes notes={product.purchase_notes} />
 
       <ul className="grid grid-cols-2 gap-2 text-xs text-brand-muted">
         <li className="flex items-center gap-2 rounded-lg border border-brand-line bg-brand-surface p-2">
