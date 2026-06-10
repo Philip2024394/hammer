@@ -15,7 +15,7 @@ const FALLBACK: HammerexProduct[] = [
 const fmt = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
 
 export function ProductRow({ items }: { items?: HammerexProduct[] }) {
-  const data = (items?.length ? items : FALLBACK).slice(0, 3);
+  const data = (items?.length ? items : FALLBACK).slice(0, 6);
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8">
       <div className="mb-3 flex items-end justify-between">
