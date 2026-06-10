@@ -6,9 +6,13 @@ export function Header() {
   const [q, setQ] = useState("");
   return (
     <header className="sticky top-0 z-30 border-b border-brand-line bg-brand-bg/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-        <a href="/" className="shrink-0 text-base font-bold tracking-tight text-brand-text">
-          Hammerex
+      <div className="flex h-14 items-center gap-3 pr-4">
+        <a href="/" aria-label="Hammerex home" className="block h-14 shrink-0">
+          <img
+            src="https://ik.imagekit.io/pinky/ChatGPT%20Image%20Jun%2010,%202026,%2006_31_32%20PM.png"
+            alt="Hammerex"
+            className="block h-14 w-auto"
+          />
         </a>
 
         <div className="flex-1">
