@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { adminWhatsapp, quoteUrl } from "@/lib/whatsapp";
 
 export function ProductRequestModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -82,7 +84,7 @@ export function ProductRequestModal({ onClose }: { onClose: () => void }) {
             aria-disabled={!valid}
             onClick={(e) => {
               if (!valid) { e.preventDefault(); return; }
-              setTimeout(onClose, 50);
+              setTimeout(() => router.push("/thank-you"), 80);
             }}
             className={`grid h-12 place-items-center rounded-md text-xs font-bold uppercase tracking-wider ${
               valid ? "bg-brand-accent text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"

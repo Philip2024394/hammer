@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { FreightSelector } from "@/components/checkout/FreightSelector";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
@@ -9,6 +10,7 @@ import { formatPrice } from "@/lib/fx";
 import { adminWhatsapp, buildQuoteMessage, quoteUrl, type FreightChoice } from "@/lib/whatsapp";
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
   const [freight, setFreight] = useState<FreightChoice>("sea");
@@ -118,7 +120,11 @@ export default function CheckoutPage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-disabled={!formValid}
-              onClick={(e) => { if (!formValid) e.preventDefault(); }}
+              onClick={(e) => {
+                if (!formValid) { e.preventDefault(); return; }
+                cart.clear();
+                setTimeout(() => router.push("/thank-you"), 80);
+              }}
               className={`mt-5 grid h-12 place-items-center rounded-full text-sm font-semibold ${
                 formValid ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
               }`}
