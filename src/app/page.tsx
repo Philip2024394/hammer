@@ -2,6 +2,7 @@ import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { CategoryCarousel } from "@/components/CategoryCarousel";
 import { ProductRow } from "@/components/ProductRow";
+import { ShippingBanner } from "@/components/ShippingBanner";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
 
@@ -30,6 +31,7 @@ export default async function HomePage() {
       <Hero />
       <CategoryCarousel items={categories} />
       <ProductRow items={products} />
+      <ShippingBanner />
       <DeliveryFooter />
     </main>
   );
