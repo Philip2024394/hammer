@@ -55,7 +55,11 @@ export function ProductRow({ items }: { items?: HammerexProduct[] }) {
                     </span>
                   )}
                   {p.image_url && (
-                    <img src={p.image_url} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img
+                      src={p.image_url}
+                      alt={p.name}
+                      className="h-full w-full object-contain p-2 transition-transform duration-500 sm:p-3"
+                    />
                   )}
                 </a>
 
