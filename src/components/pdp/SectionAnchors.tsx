@@ -6,7 +6,7 @@ const anchors = [
   { id: "specs", label: "Specifications" },
   { id: "reviews", label: "Reviews" },
   { id: "qa", label: "Q&A" },
-  { id: "shipping", label: "Shipping" },
+  { id: "delivery", label: "Delivery" },
   { id: "warranty", label: "Warranty" }
 ];
 

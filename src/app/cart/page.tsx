@@ -94,11 +94,10 @@ export default function CartPage() {
                   <dt>Subtotal ({lines.reduce((s, l) => s + l.qty, 0)} items)</dt>
                   <dd className="text-brand-text">{formatPrice(subtotal, "IDR")}</dd>
                 </div>
-                <div className="flex justify-between text-xs text-brand-muted">
-                  <dt>Delivery</dt>
-                  <dd className="text-brand-accent">Quoted at checkout</dd>
-                </div>
               </dl>
+              <p className="mt-3 text-[11px] leading-relaxed text-brand-muted">
+                Delivery is quoted per order — sea or air, your choice — once we see your destination and quantities.
+              </p>
               <div className="my-4 border-t border-brand-line" />
               <a
                 href="/checkout"

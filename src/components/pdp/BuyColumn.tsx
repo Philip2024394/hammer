@@ -4,15 +4,14 @@ import { useMemo, useState } from "react";
 import { CURRENCIES, formatPrice, type Currency } from "@/lib/fx";
 import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
-import type { HammerexProduct, HammerexShippingZone } from "@/lib/supabase";
-import { LiveETA } from "./LiveETA";
+import type { HammerexProduct } from "@/lib/supabase";
 import { StockBadge } from "./StockBadge";
 import { WishlistButton } from "./WishlistButton";
 import { SizeSelector } from "./SizeSelector";
 import { PurchaseNotes } from "./PurchaseNotes";
 import { DeliveryQuoteBanner } from "./DeliveryQuoteBanner";
 
-export function BuyColumn({ product, zones }: { product: HammerexProduct; zones: HammerexShippingZone[] }) {
+export function BuyColumn({ product }: { product: HammerexProduct }) {
   const defaultCurrency = (product.base_currency as Currency | undefined) ?? "IDR";
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [qty, setQty] = useState(1);
@@ -173,17 +172,7 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
         View cart & checkout
       </a>
 
-      {product.delivery_quote_only ? (
-        <DeliveryQuoteBanner />
-      ) : (
-        <LiveETA
-          zones={zones}
-          cutoffLocal={product.dispatch_cutoff_local ?? "14:00"}
-          weightKg={Number(product.weight_kg ?? 1)}
-          currency={currency}
-          lineTotalIdr={lineTotal}
-        />
-      )}
+      <DeliveryQuoteBanner />
 
       <PurchaseNotes notes={product.purchase_notes} />
 

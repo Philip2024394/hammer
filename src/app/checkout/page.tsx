@@ -55,7 +55,12 @@ export default function CheckoutPage() {
       <Header />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
-        <p className="mb-6 text-xs text-brand-muted">Delivery is quoted by WhatsApp once you submit — we confirm the price before you pay.</p>
+        <div className="mb-6 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
+          <p className="text-sm font-semibold text-brand-text">Delivery is quoted per order.</p>
+          <p className="mt-1 text-xs leading-relaxed text-brand-muted">
+            Because shipping cost depends on the destination country and the quantities in your cart, we quote each order direct at today's rates. Pick your preferred freight option below, share your details, and we confirm the delivery price on WhatsApp before you pay.
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-6">

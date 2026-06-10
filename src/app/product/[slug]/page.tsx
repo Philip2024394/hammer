@@ -19,7 +19,6 @@ import {
   type HammerexProductMedia,
   type HammerexProductSpec,
   type HammerexWhatInBox,
-  type HammerexShippingZone,
   type HammerexBundle,
   type HammerexPairWith,
   type HammerexReview,
@@ -37,11 +36,10 @@ async function loadProduct(slug: string) {
   const product = productRes.data as HammerexProduct | null;
   if (!product) return null;
 
-  const [mediaRes, specsRes, boxRes, zonesRes, reviewsRes, qRes, pairsRes, bundleRes] = await Promise.all([
+  const [mediaRes, specsRes, boxRes, reviewsRes, qRes, pairsRes, bundleRes] = await Promise.all([
     supabase.from("hammerex_product_media").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_product_specs").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_what_in_box").select("*").eq("product_id", product.id).order("sort_order"),
-    supabase.from("hammerex_shipping_zones").select("*").order("country_name"),
     supabase.from("hammerex_reviews").select("*").eq("product_id", product.id).order("created_at", { ascending: false }),
     supabase.from("hammerex_questions").select("*, hammerex_answers(*)").eq("product_id", product.id).order("created_at", { ascending: false }),
     supabase.from("hammerex_pair_with")
@@ -84,7 +82,6 @@ async function loadProduct(slug: string) {
     media: (mediaRes.data ?? []) as HammerexProductMedia[],
     specs: (specsRes.data ?? []) as HammerexProductSpec[],
     box: (boxRes.data ?? []) as HammerexWhatInBox[],
-    zones: (zonesRes.data ?? []) as HammerexShippingZone[],
     reviews: (reviewsRes.data ?? []) as HammerexReview[],
     questions,
     pairs,
@@ -97,7 +94,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const data = await loadProduct(slug);
   if (!data) notFound();
 
-  const { product, media, specs, box, zones, reviews, questions, pairs, bundle } = data;
+  const { product, media, specs, box, reviews, questions, pairs, bundle } = data;
   const stickyImage = media.find((m) => m.kind === "image")?.url ?? product.image_url;
 
   return (
@@ -118,7 +115,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <ProductGallery media={media} fallbackImage={product.image_url} name={product.name} />
           <div id="pdp-buy-sentinel">
-            <BuyColumn product={product} zones={zones} />
+            <BuyColumn product={product} />
           </div>
         </div>
       </section>
@@ -135,9 +132,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <ReviewsBlock productId={product.id} reviews={reviews} />
       <QABlock questions={questions} />
       <ShippingReturns
-        zones={zones}
-        weightKg={Number(product.weight_kg ?? 1)}
         warrantyYears={product.warranty_years ?? 1}
+        dispatchLeadDays={product.dispatch_lead_days ?? 0}
       />
       <WarrantyTimeline warrantyYears={product.warranty_years ?? 1} />
 

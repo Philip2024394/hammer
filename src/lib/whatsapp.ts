@@ -58,5 +58,5 @@ export function quoteUrl(message: string, target: string): string {
 }
 
 export function adminWhatsapp(): string {
-  return process.env.NEXT_PUBLIC_HAMMEREX_WHATSAPP ?? "+62812337669";
+  return process.env.NEXT_PUBLIC_HAMMEREX_WHATSAPP ?? "+6281392000050";
 }
