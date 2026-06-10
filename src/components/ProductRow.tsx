@@ -1,9 +1,14 @@
 import type { HammerexProduct } from "@/lib/supabase";
 
+const emptyExtras = {
+  slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
+  dispatch_cutoff_local: null, warranty_years: null, country_of_assembly: null,
+  overview: null, features: null
+};
 const FALLBACK: HammerexProduct[] = [
-  { id: "p1", category_id: null, name: "Cordless Drill", description: "20V brushless with 2 batteries.", price_idr: 1_850_000, image_url: "https://images.unsplash.com/photo-1581147036324-c47a03a81d48?auto=format&fit=crop&w=600&q=70", is_featured: true },
-  { id: "p2", category_id: null, name: "Tool Belt", description: "Heavy-duty canvas, 12 pockets.", price_idr: 420_000, image_url: "https://images.unsplash.com/photo-1521989588531-cf2073a3a9f4?auto=format&fit=crop&w=600&q=70", is_featured: true },
-  { id: "p3", category_id: null, name: "Headlamp 1200lm", description: "USB-C rechargeable, IP65.", price_idr: 285_000, image_url: "https://images.unsplash.com/photo-1592920448607-a26f5cf06ad9?auto=format&fit=crop&w=600&q=70", is_featured: true }
+  { id: "p1", category_id: null, name: "Cordless Drill", description: "20V brushless with 2 batteries.", price_idr: 1_850_000, image_url: "https://images.unsplash.com/photo-1581147036324-c47a03a81d48?auto=format&fit=crop&w=600&q=70", is_featured: true, ...emptyExtras, slug: "cordless-drill-20v" },
+  { id: "p2", category_id: null, name: "Tool Belt", description: "Heavy-duty canvas, 12 pockets.", price_idr: 420_000, image_url: "https://images.unsplash.com/photo-1521989588531-cf2073a3a9f4?auto=format&fit=crop&w=600&q=70", is_featured: true, ...emptyExtras, slug: "tool-belt" },
+  { id: "p3", category_id: null, name: "Headlamp 1200lm", description: "USB-C rechargeable, IP65.", price_idr: 285_000, image_url: "https://images.unsplash.com/photo-1592920448607-a26f5cf06ad9?auto=format&fit=crop&w=600&q=70", is_featured: true, ...emptyExtras, slug: "headlamp-1200lm" }
 ];
 
 const fmt = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
@@ -19,21 +24,22 @@ export function ProductRow({ items }: { items?: HammerexProduct[] }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {data.map((p) => (
           <article key={p.id} className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
-            <div className="h-40 w-full overflow-hidden bg-black">
-              {p.image_url && <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" />}
-            </div>
+            <a href={p.slug ? `/product/${p.slug}` : "#"} className="block h-40 w-full overflow-hidden bg-black">
+              {p.image_url && <img src={p.image_url} alt={p.name} className="h-full w-full object-cover transition-transform hover:scale-105" />}
+            </a>
             <div className="flex flex-col gap-2 p-4">
-              <h3 className="text-sm font-semibold text-brand-text">{p.name}</h3>
+              <a href={p.slug ? `/product/${p.slug}` : "#"} className="text-sm font-semibold text-brand-text hover:text-brand-accent">
+                <h3>{p.name}</h3>
+              </a>
               {p.description && <p className="text-xs text-brand-muted">{p.description}</p>}
               <div className="mt-2 flex items-center justify-between">
                 <span className="text-sm font-bold text-brand-text">{fmt.format(p.price_idr)}</span>
-                <button
-                  type="button"
-                  className="h-11 rounded-full bg-brand-accent px-4 text-xs font-semibold text-black hover:opacity-90"
-                  aria-label={`Add ${p.name} to cart`}
+                <a
+                  href={p.slug ? `/product/${p.slug}` : "#"}
+                  className="grid h-11 place-items-center rounded-full bg-brand-accent px-4 text-xs font-semibold text-black hover:opacity-90"
                 >
-                  Add to cart
-                </button>
+                  View
+                </a>
               </div>
             </div>
           </article>
