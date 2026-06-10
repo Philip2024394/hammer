@@ -1,53 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CURRENCIES, formatPrice, type Currency } from "@/lib/fx";
+import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
 import type { HammerexProduct, HammerexShippingZone } from "@/lib/supabase";
 import { LiveETA } from "./LiveETA";
+import { StockBadge } from "./StockBadge";
+import { WishlistButton } from "./WishlistButton";
 
 export function BuyColumn({ product, zones }: { product: HammerexProduct; zones: HammerexShippingZone[] }) {
   const [currency, setCurrency] = useState<Currency>("IDR");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
+  const tiers = product.qty_discount_tiers ?? [];
+  const unitPrice = useMemo(() => effectivePricePerUnit(product.price_idr, tiers, qty), [product.price_idr, tiers, qty]);
+  const lineTotal = unitPrice * qty;
+  const nextT = useMemo(() => nextTier(tiers, qty), [tiers, qty]);
+  const savedPct = product.compare_at_idr && product.compare_at_idr > product.price_idr
+    ? Math.round(((product.compare_at_idr - product.price_idr) / product.compare_at_idr) * 100)
+    : 0;
+
   const onAdd = () => {
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
 
+  const soldOut = product.stock_count === 0;
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full border border-brand-line bg-brand-surface px-2 py-1 text-brand-muted">{product.brand ?? "Hammerex"}</span>
         {product.model_number && <span className="text-brand-muted">Model {product.model_number}</span>}
         {product.sku && <span className="text-brand-muted">· SKU {product.sku}</span>}
+        <StockBadge count={product.stock_count} />
       </div>
 
       <h1 className="text-2xl font-bold leading-tight text-brand-text sm:text-3xl">{product.name}</h1>
 
-      {/* Pillar rating placeholder — beats DeWalt's empty star block.
-          Wired to real data in Phase 2 once reviews ship. */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
           {[0, 1, 2, 3, 4].map((i) => (
-            <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < 4 ? "#ff5a1f" : "none"} stroke="#ff5a1f" strokeWidth="2" aria-hidden="true">
+            <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < 4 ? "#FFD60A" : "none"} stroke="#FFD60A" strokeWidth="2" aria-hidden="true">
               <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
             </svg>
           ))}
-          <span className="ml-1 text-xs text-brand-muted">4.6 · 0 reviews</span>
+          <span className="ml-1 text-xs text-brand-muted">
+            {product.rating_count ? `${product.rating_avg?.toFixed(1)} · ${product.rating_count} reviews` : "Be the first to review"}
+          </span>
         </div>
-        <span className="text-xs text-brand-muted">·</span>
-        <span className="text-xs text-brand-muted">Power 4.8 · Build 4.7 · Battery 4.4</span>
       </div>
 
       {product.overview && <p className="text-sm leading-relaxed text-brand-muted">{product.overview}</p>}
 
       <div className="flex items-end justify-between border-t border-brand-line pt-4">
         <div>
-          <div className="text-2xl font-bold text-brand-text">{formatPrice(product.price_idr, currency)}</div>
-          {currency !== "IDR" && (
-            <div className="text-xs text-brand-muted">Indicative · charged in IDR</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-brand-text">{formatPrice(unitPrice, currency)}</span>
+            {product.compare_at_idr && product.compare_at_idr > unitPrice && (
+              <span className="text-sm text-brand-muted line-through">{formatPrice(product.compare_at_idr, currency)}</span>
+            )}
+            {savedPct > 0 && (
+              <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-[11px] font-semibold text-brand-accent">−{savedPct}%</span>
+            )}
+          </div>
+          {qty > 1 && (
+            <div className="text-xs text-brand-muted">
+              {qty} × {formatPrice(unitPrice, currency)} = <span className="text-brand-text">{formatPrice(lineTotal, currency)}</span>
+            </div>
           )}
+          {currency !== "IDR" && <div className="text-xs text-brand-muted">Indicative · charged in IDR</div>}
         </div>
         <select
           value={currency}
@@ -58,6 +81,34 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
           {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
+
+      {tiers.length > 0 && (
+        <div className="rounded-xl border border-brand-line bg-black/40 p-3">
+          <div className="text-[11px] uppercase tracking-widest text-brand-muted">Buy more, save more</div>
+          <ul className="mt-2 grid grid-cols-3 gap-2">
+            {[{ min: 1, pct: 0 }, ...tiers].map((t) => {
+              const active = qty >= t.min;
+              return (
+                <li
+                  key={t.min}
+                  onClick={() => setQty(t.min)}
+                  className={`cursor-pointer rounded-lg border p-2 text-center ${
+                    active ? "border-brand-accent bg-brand-accent/10" : "border-brand-line bg-brand-surface"
+                  }`}
+                >
+                  <div className="text-xs font-semibold text-brand-text">{t.min}+ unit{t.min === 1 ? "" : "s"}</div>
+                  <div className="text-[11px] text-brand-muted">{t.pct === 0 ? "Standard" : `−${t.pct}% each`}</div>
+                </li>
+              );
+            })}
+          </ul>
+          {nextT && (
+            <p className="mt-2 text-[11px] text-brand-accent">
+              Add {nextT.min - qty} more and pay only {formatPrice(effectivePricePerUnit(product.price_idr, tiers, nextT.min), currency)} each.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <div className="flex h-12 items-center rounded-full border border-brand-line bg-brand-surface">
@@ -70,7 +121,7 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
           <span className="w-8 text-center text-sm font-semibold text-brand-text" aria-live="polite">{qty}</span>
           <button
             type="button"
-            onClick={() => setQty((q) => Math.min(99, q + 1))}
+            onClick={() => setQty((q) => Math.min(product.stock_count ?? 99, q + 1))}
             aria-label="Increase quantity"
             className="grid h-12 w-12 place-items-center text-brand-text hover:text-brand-accent"
           >+</button>
@@ -79,15 +130,19 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
         <button
           type="button"
           onClick={onAdd}
-          className="h-12 flex-1 rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90"
+          disabled={soldOut}
+          className="h-12 flex-1 rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90 disabled:opacity-40"
         >
-          {added ? "Added to cart" : "Add to cart"}
+          {soldOut ? "Notify me when back" : added ? "Added to cart" : "Add to cart"}
         </button>
+
+        <WishlistButton productId={product.id} />
       </div>
 
       <button
         type="button"
-        className="h-12 rounded-full border border-brand-line bg-brand-surface text-sm font-semibold text-brand-text hover:border-brand-accent"
+        disabled={soldOut}
+        className="h-12 rounded-full border border-brand-line bg-brand-surface text-sm font-semibold text-brand-text hover:border-brand-accent disabled:opacity-40"
       >
         Buy now
       </button>
@@ -97,6 +152,7 @@ export function BuyColumn({ product, zones }: { product: HammerexProduct; zones:
         cutoffLocal={product.dispatch_cutoff_local ?? "14:00"}
         weightKg={Number(product.weight_kg ?? 1)}
         currency={currency}
+        lineTotalIdr={lineTotal}
       />
 
       <ul className="grid grid-cols-2 gap-2 text-xs text-brand-muted">

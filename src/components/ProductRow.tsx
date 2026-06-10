@@ -3,7 +3,8 @@ import type { HammerexProduct } from "@/lib/supabase";
 const emptyExtras = {
   slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
   dispatch_cutoff_local: null, warranty_years: null, country_of_assembly: null,
-  overview: null, features: null
+  overview: null, features: null, stock_count: null, compare_at_idr: null,
+  qty_discount_tiers: null, is_accessory: null, rating_avg: null, rating_count: null
 };
 const FALLBACK: HammerexProduct[] = [
   { id: "p1", category_id: null, name: "Cordless Drill", description: "20V brushless with 2 batteries.", price_idr: 1_850_000, image_url: "https://images.unsplash.com/photo-1581147036324-c47a03a81d48?auto=format&fit=crop&w=600&q=70", is_featured: true, ...emptyExtras, slug: "cordless-drill-20v" },

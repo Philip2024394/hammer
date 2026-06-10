@@ -8,13 +8,22 @@ import { SpecsTable } from "@/components/pdp/SpecsTable";
 import { ShippingReturns } from "@/components/pdp/ShippingReturns";
 import { StickyBuyBar } from "@/components/pdp/StickyBuyBar";
 import { SectionAnchors } from "@/components/pdp/SectionAnchors";
+import { BundleBlock } from "@/components/pdp/BundleBlock";
+import { PairsWith } from "@/components/pdp/PairsWith";
+import { ReviewsBlock } from "@/components/pdp/ReviewsBlock";
+import { QABlock } from "@/components/pdp/QABlock";
+import { WarrantyTimeline } from "@/components/pdp/WarrantyTimeline";
 import {
   supabase,
   type HammerexProduct,
   type HammerexProductMedia,
   type HammerexProductSpec,
   type HammerexWhatInBox,
-  type HammerexShippingZone
+  type HammerexShippingZone,
+  type HammerexBundle,
+  type HammerexPairWith,
+  type HammerexReview,
+  type HammerexQuestion
 } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -28,19 +37,58 @@ async function loadProduct(slug: string) {
   const product = productRes.data as HammerexProduct | null;
   if (!product) return null;
 
-  const [mediaRes, specsRes, boxRes, zonesRes] = await Promise.all([
+  const [mediaRes, specsRes, boxRes, zonesRes, reviewsRes, qRes, pairsRes, bundleRes] = await Promise.all([
     supabase.from("hammerex_product_media").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_product_specs").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_what_in_box").select("*").eq("product_id", product.id).order("sort_order"),
-    supabase.from("hammerex_shipping_zones").select("*").order("country_name")
+    supabase.from("hammerex_shipping_zones").select("*").order("country_name"),
+    supabase.from("hammerex_reviews").select("*").eq("product_id", product.id).order("created_at", { ascending: false }),
+    supabase.from("hammerex_questions").select("*, hammerex_answers(*)").eq("product_id", product.id).order("created_at", { ascending: false }),
+    supabase.from("hammerex_pair_with")
+      .select("*, accessory:hammerex_products!hammerex_pair_with_accessory_product_id_fkey(*)")
+      .eq("product_id", product.id)
+      .order("sort_order"),
+    supabase.from("hammerex_bundles")
+      .select("*, hammerex_bundle_items(id, qty, sort_order, item:hammerex_products!hammerex_bundle_items_item_product_id_fkey(*))")
+      .eq("anchor_product_id", product.id)
+      .order("sort_order")
+      .limit(1)
+      .maybeSingle()
   ]);
+
+  const questions: HammerexQuestion[] = (qRes.data ?? []).map((q: any) => ({
+    id: q.id, product_id: q.product_id, asked_by: q.asked_by, body: q.body, created_at: q.created_at,
+    answers: (q.hammerex_answers ?? []).map((a: any) => ({
+      id: a.id, body: a.body, by_name: a.by_name, by_vendor: a.by_vendor, created_at: a.created_at
+    }))
+  }));
+
+  const pairs: HammerexPairWith[] = (pairsRes.data ?? []).map((p: any) => ({
+    id: p.id, product_id: p.product_id, accessory_product_id: p.accessory_product_id,
+    reason: p.reason, sort_order: p.sort_order, accessory: p.accessory as HammerexProduct
+  }));
+
+  let bundle: HammerexBundle | null = null;
+  if (bundleRes.data) {
+    const b: any = bundleRes.data;
+    bundle = {
+      id: b.id, anchor_product_id: b.anchor_product_id, title: b.title, discount_pct: b.discount_pct,
+      items: (b.hammerex_bundle_items ?? [])
+        .sort((x: any, y: any) => x.sort_order - y.sort_order)
+        .map((it: any) => ({ id: it.id, qty: it.qty, product: it.item as HammerexProduct }))
+    };
+  }
 
   return {
     product,
     media: (mediaRes.data ?? []) as HammerexProductMedia[],
     specs: (specsRes.data ?? []) as HammerexProductSpec[],
     box: (boxRes.data ?? []) as HammerexWhatInBox[],
-    zones: (zonesRes.data ?? []) as HammerexShippingZone[]
+    zones: (zonesRes.data ?? []) as HammerexShippingZone[],
+    reviews: (reviewsRes.data ?? []) as HammerexReview[],
+    questions,
+    pairs,
+    bundle
   };
 }
 
@@ -49,7 +97,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const data = await loadProduct(slug);
   if (!data) notFound();
 
-  const { product, media, specs, box, zones } = data;
+  const { product, media, specs, box, zones, reviews, questions, pairs, bundle } = data;
   const stickyImage = media.find((m) => m.kind === "image")?.url ?? product.image_url;
 
   return (
@@ -81,12 +129,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <KeyFeatures features={product.features} />
       <InTheBox items={box} />
+      <BundleBlock bundle={bundle} />
+      <PairsWith pairs={pairs} />
       <SpecsTable specs={specs} />
+      <ReviewsBlock productId={product.id} reviews={reviews} />
+      <QABlock questions={questions} />
       <ShippingReturns
         zones={zones}
         weightKg={Number(product.weight_kg ?? 1)}
         warrantyYears={product.warranty_years ?? 1}
       />
+      <WarrantyTimeline warrantyYears={product.warranty_years ?? 1} />
 
       <StickyBuyBar product={product} image={stickyImage} />
     </main>

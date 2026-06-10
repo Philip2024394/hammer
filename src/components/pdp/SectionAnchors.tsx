@@ -1,8 +1,13 @@
 const anchors = [
   { id: "features", label: "Features" },
   { id: "in-the-box", label: "In the box" },
+  { id: "bundle", label: "Bundle deal" },
+  { id: "pairs-with", label: "Pairs with" },
   { id: "specs", label: "Specifications" },
-  { id: "shipping", label: "Shipping & returns" }
+  { id: "reviews", label: "Reviews" },
+  { id: "qa", label: "Q&A" },
+  { id: "shipping", label: "Shipping" },
+  { id: "warranty", label: "Warranty" }
 ];
 
 export function SectionAnchors() {

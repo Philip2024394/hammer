@@ -33,6 +33,53 @@ export type HammerexProduct = {
   country_of_assembly: string | null;
   overview: string | null;
   features: { icon: string; label: string }[] | null;
+  stock_count: number | null;
+  compare_at_idr: number | null;
+  qty_discount_tiers: { min: number; pct: number }[] | null;
+  is_accessory: boolean | null;
+  rating_avg: number | null;
+  rating_count: number | null;
+};
+
+export type HammerexBundle = {
+  id: string;
+  anchor_product_id: string;
+  title: string;
+  discount_pct: number;
+  items: { id: string; qty: number; product: HammerexProduct }[];
+};
+
+export type HammerexPairWith = {
+  id: string;
+  product_id: string;
+  accessory_product_id: string;
+  reason: string | null;
+  sort_order: number;
+  accessory: HammerexProduct;
+};
+
+export type HammerexReview = {
+  id: string;
+  product_id: string;
+  reviewer_name: string;
+  reviewer_type: "pro" | "hobbyist" | "first-timer" | "vendor" | null;
+  rating: number;
+  pillars: Record<string, number> | null;
+  title: string | null;
+  body: string | null;
+  photos: string[] | null;
+  verified_purchase: boolean;
+  helpful_count: number;
+  created_at: string;
+};
+
+export type HammerexQuestion = {
+  id: string;
+  product_id: string;
+  asked_by: string | null;
+  body: string;
+  created_at: string;
+  answers: { id: string; body: string; by_name: string | null; by_vendor: boolean; created_at: string }[];
 };
 
 export type HammerexProductMedia = {
@@ -72,4 +119,5 @@ export type HammerexShippingZone = {
   eta_min_days: number;
   eta_max_days: number;
   is_default: boolean;
+  free_shipping_threshold_idr: number;
 };

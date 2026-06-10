@@ -9,7 +9,8 @@ const config: Config = {
           bg: "#000000",
           surface: "#0c0c0c",
           line: "#1f1f1f",
-          accent: "#ff5a1f",
+          accent: "#FFD60A",
+        accentSoft: "#fff59c",
           text: "#f5f5f5",
           muted: "#a3a3a3"
         }
