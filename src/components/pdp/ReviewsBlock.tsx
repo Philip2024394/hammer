@@ -20,7 +20,7 @@ function Stars({ value }: { value: number }) {
   return (
     <span className="inline-flex" aria-label={`${value.toFixed(1)} stars`}>
       {[0, 1, 2, 3, 4].map((i) => (
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < Math.round(value) ? "#FFD60A" : "none"} stroke="#FFD60A" strokeWidth="2" aria-hidden="true">
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < Math.round(value) ? "#FFB300" : "none"} stroke="#FFB300" strokeWidth="2" aria-hidden="true">
           <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
         </svg>
       ))}

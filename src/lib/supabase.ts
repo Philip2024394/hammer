@@ -44,6 +44,9 @@ export type HammerexProduct = {
   dispatch_lead_days: number | null;
   delivery_quote_only: boolean | null;
   purchase_notes: string[] | null;
+  badge_label: string | null;
+  subtitle: string | null;
+  home_sort_order: number | null;
 };
 
 export type HammerexBundle = {

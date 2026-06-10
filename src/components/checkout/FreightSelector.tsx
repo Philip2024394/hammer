@@ -34,7 +34,7 @@ export function FreightSelector({ value, onChange }: { value: FreightChoice; onC
                   value={o.value}
                   checked={value === o.value}
                   onChange={() => onChange(o.value)}
-                  className="h-4 w-4 accent-[#FFD60A]"
+                  className="h-4 w-4 accent-[#FFB300]"
                 />
                 <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-accent">{o.tag}</span>
               </div>

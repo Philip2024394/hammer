@@ -39,7 +39,7 @@ export function BundleBlock({ bundle }: { bundle: HammerexBundle | null }) {
                       type="checkbox"
                       checked={!!picked[item.id]}
                       onChange={(e) => setPicked((p) => ({ ...p, [item.id]: e.target.checked }))}
-                      className="h-4 w-4 accent-[#FFD60A]"
+                      className="h-4 w-4 accent-[#FFB300]"
                       aria-label={`Include ${item.product.name}`}
                     />
                     {idx < bundle.items.length - 1 && (

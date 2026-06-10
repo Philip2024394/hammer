@@ -64,7 +64,7 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
           {[0, 1, 2, 3, 4].map((i) => (
-            <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < 4 ? "#FFD60A" : "none"} stroke="#FFD60A" strokeWidth="2" aria-hidden="true">
+            <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < 4 ? "#FFB300" : "none"} stroke="#FFB300" strokeWidth="2" aria-hidden="true">
               <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
             </svg>
           ))}
