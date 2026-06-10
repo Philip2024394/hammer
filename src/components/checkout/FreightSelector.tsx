@@ -1,6 +1,7 @@
 "use client";
 
 import type { FreightChoice } from "@/lib/whatsapp";
+import { HeaderIcon, Truck } from "./Icons";
 
 const OPTIONS: { value: FreightChoice; title: string; tag: string; body: string }[] = [
   {
@@ -20,7 +21,10 @@ const OPTIONS: { value: FreightChoice; title: string; tag: string; body: string 
 export function FreightSelector({ value, onChange }: { value: FreightChoice; onChange: (v: FreightChoice) => void }) {
   return (
     <fieldset>
-      <legend className="mb-3 text-sm font-semibold text-brand-text">Freight method</legend>
+      <legend className="mb-3 flex items-center gap-2 text-sm font-semibold text-brand-text">
+        <HeaderIcon icon={<Truck size={16} />} />
+        Freight method
+      </legend>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {OPTIONS.map((o) => (
           <li key={o.value}>
