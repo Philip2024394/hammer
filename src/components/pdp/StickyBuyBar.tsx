@@ -18,7 +18,7 @@ export function StickyBuyBar({ product, image }: { product: HammerexProduct; ima
   if (!show) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-line bg-brand-bg/95 backdrop-blur sm:top-14 sm:bottom-auto sm:border-b sm:border-t-0">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-line bg-brand-bg/95 backdrop-blur sm:top-28 sm:bottom-auto sm:border-b sm:border-t-0">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
         {image && <img src={image} alt="" className="h-10 w-10 rounded-md object-cover" />}
         <div className="flex min-w-0 flex-1 flex-col">
