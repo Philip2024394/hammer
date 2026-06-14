@@ -1,11 +1,12 @@
 import { formatPrice } from "./fx";
 import type { CartLine } from "./cart";
+import { threadColorLabel } from "./threadColor";
 
 export type FreightChoice = "sea" | "air";
 
 const FREIGHT_LABEL: Record<FreightChoice, string> = {
-  sea: "Sea freight (4–6 weeks · most economical)",
-  air: "Air freight (~6 working days · express)"
+  sea: "Sea freight (4–6 weeks transit · most economical)",
+  air: "Air freight (5–6 days transit worldwide)"
 };
 
 export type QuoteInput = {
@@ -21,11 +22,19 @@ export type QuoteInput = {
 export function buildQuoteMessage(input: QuoteInput): string {
   const items = input.lines.length
     ? input.lines.map((l) => {
+        const variant = l.variantLabel && l.variantLabel !== "WELCOME GIFT" ? ` — ${l.variantLabel}` : "";
         const size = l.size ? ` (${l.size})` : "";
-        const price = l.baseCurrency && l.baseCurrency !== "IDR"
-          ? formatPrice(l.unitPriceIdr, l.baseCurrency as any)
-          : formatPrice(l.unitPriceIdr, "IDR");
-        return `• ${l.qty}× ${l.name}${size} — ${price} each`;
+        const thread = l.threadColor ? ` — Thread: ${threadColorLabel(l.threadColor)}` : "";
+        const straps = l.backpackStraps ? " — + Backpack straps add-on" : "";
+        const ref = l.sku ? ` [Ref ${l.sku}]` : "";
+        const isGift = l.variantLabel === "WELCOME GIFT";
+        const price = isGift
+          ? "FREE — welcome gift 🎁"
+          : l.baseCurrency && l.baseCurrency !== "IDR"
+            ? formatPrice(l.unitPriceIdr, l.baseCurrency as any)
+            : formatPrice(l.unitPriceIdr, "IDR");
+        const suffix = isGift ? "" : " each";
+        return `• ${l.qty}× ${l.name}${variant}${size}${thread}${straps}${ref} — ${price}${suffix}`;
       }).join("\n")
     : "(empty cart)";
 

@@ -1,70 +1,113 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CURRENCIES, formatPrice, type Currency } from "@/lib/fx";
 import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
-import type { HammerexProduct } from "@/lib/supabase";
+import { sparkBurst } from "@/lib/sparks";
+import type { HammerexProduct, HammerexDealBreaker } from "@/lib/supabase";
+import { THREAD_COLORS, DEFAULT_THREAD_COLOR, isFreeThreadColor, type ThreadColor } from "@/lib/threadColor";
 import { StockBadge } from "./StockBadge";
-import { WishlistButton } from "./WishlistButton";
 import { SizeSelector } from "./SizeSelector";
 import { PurchaseNotes } from "./PurchaseNotes";
 import { DeliveryQuoteBanner } from "./DeliveryQuoteBanner";
+import { DispatchCountdown } from "./DispatchCountdown";
+import { QuoteSignalBadge } from "./QuoteSignalBadge";
+import { useVariant } from "./VariantContext";
+import { VariantSelector } from "./VariantSelector";
+import { DealBreakerCard } from "./DealBreakerCard";
 
-export function BuyColumn({ product }: { product: HammerexProduct }) {
+export function BuyColumn({ product, dealBreakers = [] }: { product: HammerexProduct; dealBreakers?: HammerexDealBreaker[] }) {
+  const variantCtx = useVariant();
+  const activeVariant = variantCtx?.active ?? null;
+  const variantPriceIdr = activeVariant?.price_idr ?? product.price_idr;
+  const variantSku = activeVariant?.sku ?? product.sku;
+  const variantImage = activeVariant?.image_url ?? product.image_url;
+  const variantStock = activeVariant?.stock_count ?? product.stock_count;
   const defaultCurrency = (product.base_currency as Currency | undefined) ?? "IDR";
   const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [qty, setQty] = useState(1);
   const [size, setSize] = useState<string | null>(null);
+  const threadDelta = product.thread_color_option_idr ?? 0;
+  const threadOptionEnabled = threadDelta > 0;
+  const [threadColor, setThreadColor] = useState<ThreadColor | null>(
+    threadOptionEnabled ? DEFAULT_THREAD_COLOR : null
+  );
+  const strapDelta = product.backpack_straps_option_idr ?? 0;
+  const strapOptionEnabled = strapDelta > 0;
+  const [backpackStraps, setBackpackStraps] = useState(false);
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   const sizes = product.sizes ?? [];
   const tiers = product.qty_discount_tiers ?? [];
-  const unitPrice = useMemo(() => effectivePricePerUnit(product.price_idr, tiers, qty), [product.price_idr, tiers, qty]);
+  const basePrice = useMemo(() => effectivePricePerUnit(variantPriceIdr, tiers, qty), [variantPriceIdr, tiers, qty]);
+  const threadCharged = threadColor && !isFreeThreadColor(threadColor);
+  const unitPrice = basePrice + (threadCharged ? threadDelta : 0) + (backpackStraps ? strapDelta : 0);
+
+  const baseDispatchDays = product.dispatch_lead_days ?? 3;
+  const customThreadDispatchDelay = threadOptionEnabled && threadCharged ? 2 : 0;
+  const dispatchDays = baseDispatchDays + customThreadDispatchDelay;
   const lineTotal = unitPrice * qty;
   const nextT = useMemo(() => nextTier(tiers, qty), [tiers, qty]);
-  const savedPct = product.compare_at_idr && product.compare_at_idr > product.price_idr
-    ? Math.round(((product.compare_at_idr - product.price_idr) / product.compare_at_idr) * 100)
+  const savedPct = product.compare_at_idr && product.compare_at_idr > variantPriceIdr
+    ? Math.round(((product.compare_at_idr - variantPriceIdr) / product.compare_at_idr) * 100)
     : 0;
 
-  const soldOut = product.stock_count === 0;
+  const soldOut = variantStock === 0;
 
   const onAdd = () => {
     if (sizes.length && !size) {
       setSizeError(true);
       setTimeout(() => setSizeError(false), 2000);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        try { navigator.vibrate?.([20, 40, 20]); } catch {}
+      }
       return;
+    }
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { navigator.vibrate?.([10, 30, 10]); } catch {}
     }
     cart.add({
       productId: product.id,
       slug: product.slug ?? product.id,
       name: product.name,
-      image: product.image_url,
+      sku: variantSku ?? null,
+      image: variantImage,
       unitPriceIdr: unitPrice,
       qty,
       size,
-      baseCurrency: product.base_currency ?? "IDR"
+      baseCurrency: product.base_currency ?? "IDR",
+      threadColor,
+      variantId: activeVariant?.id ?? null,
+      variantLabel: activeVariant?.label ?? null,
+      backpackStraps
     });
+    sparkBurst(addButtonRef.current);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="rounded-full border border-brand-line bg-brand-surface px-2 py-1 text-brand-muted">{product.brand ?? "Hammerex"}</span>
-        {product.model_number && <span className="text-brand-muted">Model {product.model_number}</span>}
-        {product.sku && <span className="text-brand-muted">· SKU {product.sku}</span>}
-        <StockBadge count={product.stock_count} />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-brand-muted">
+        <span className="font-semibold text-brand-text">{product.brand ?? "Hammerex"}</span>
+        <StockBadge count={variantStock} productId={product.id} isAccessory={product.is_accessory ?? false} />
       </div>
 
       <h1 className="text-2xl font-bold leading-tight text-brand-text sm:text-3xl">{product.name}</h1>
 
+      {variantSku && (
+        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-brand-accent/40 bg-brand-accent/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-accent">
+          Ref: <span className="text-brand-text">{variantSku}</span>
+        </span>
+      )}
+
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
           {[0, 1, 2, 3, 4].map((i) => (
-            <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < 4 ? "#FFB300" : "none"} stroke="#FFB300" strokeWidth="2" aria-hidden="true">
+            <svg key={i} width="16" height="16" viewBox="0 0 24 24" className="text-brand-accent" fill={i < 4 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
             </svg>
           ))}
@@ -76,6 +119,28 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
 
       {product.overview && <p className="text-sm leading-relaxed text-brand-muted">{product.overview}</p>}
 
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-brand-line bg-brand-surface px-4 py-3 text-xs text-brand-muted">
+        <span className="inline-flex items-center gap-2 text-brand-accent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 7h13l5 5v5h-3" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" />
+          </svg>
+          <span className="font-bold uppercase tracking-widest">Ships fast</span>
+        </span>
+        <span aria-hidden="true">·</span>
+        <span>
+          Dispatched in <span className="font-semibold text-brand-text">{dispatchDays} working days</span>
+          {customThreadDispatchDelay > 0 && (
+            <span className="ml-1 text-brand-accent">(+{customThreadDispatchDelay} for custom thread)</span>
+          )}
+        </span>
+        <span aria-hidden="true">·</span>
+        <span>Worldwide tracked courier</span>
+      </div>
+
+      <DispatchCountdown cutoffHHMM={product.dispatch_cutoff_local} />
+
+      <QuoteSignalBadge productId={product.id} />
+
       <div className="flex items-end justify-between border-t border-brand-line pt-4">
         <div>
           <div className="flex items-baseline gap-2">
@@ -84,7 +149,7 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
               <span className="text-sm text-brand-muted line-through">{formatPrice(product.compare_at_idr, currency)}</span>
             )}
             {savedPct > 0 && (
-              <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-[11px] font-semibold text-brand-accent">−{savedPct}%</span>
+              <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{savedPct}%</span>
             )}
           </div>
           {qty > 1 && (
@@ -94,23 +159,123 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
           )}
           {currency !== defaultCurrency && <div className="text-xs text-brand-muted">Indicative · charged in {defaultCurrency}</div>}
         </div>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value as Currency)}
-          aria-label="Currency"
-          className="h-9 rounded-md border border-brand-line bg-brand-surface px-2 text-xs text-brand-text focus:border-brand-accent focus:outline-none"
-        >
-          {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="flex items-center gap-2">
+          <div className="flex h-11 items-center rounded-full border border-brand-line bg-brand-surface">
+            <button
+              type="button"
+              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              aria-label="Decrease quantity"
+              className="grid h-11 w-11 place-items-center text-brand-text hover:text-brand-accent"
+            >−</button>
+            <span className="w-7 text-center text-sm font-semibold text-brand-text" aria-live="polite">{qty}</span>
+            <button
+              type="button"
+              onClick={() => setQty((q) => Math.min(variantStock ?? 99, q + 1))}
+              aria-label="Increase quantity"
+              className="grid h-11 w-11 place-items-center text-brand-text hover:text-brand-accent"
+            >+</button>
+          </div>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as Currency)}
+            aria-label="Currency"
+            className="h-11 rounded-md border border-brand-line bg-brand-surface px-2 text-xs text-brand-text focus:border-brand-accent focus:outline-none"
+          >
+            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
       </div>
+
+      {variantCtx && variantCtx.variants.length > 0 && <VariantSelector currency={currency} />}
+
+      <DealBreakerCard items={dealBreakers} currency={currency} anchorProductName={product.name} />
 
       {sizes.length > 0 && (
         <SizeSelector sizes={sizes} value={size} onChange={(s) => { setSize(s); setSizeError(false); }} />
       )}
 
+      {threadOptionEnabled && (
+        <div>
+          <div className="mb-2 flex items-baseline justify-between">
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-muted">
+              Thread colour
+            </span>
+            <span className="text-xs text-brand-muted">
+              Black free · others +{formatPrice(threadDelta, currency)} · +2 working days
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Thread colour">
+            {THREAD_COLORS.map((c) => {
+              const active = threadColor === c.value;
+              const free = isFreeThreadColor(c.value);
+              return (
+                <button
+                  key={c.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setThreadColor(c.value)}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${
+                    active ? "border-brand-accent bg-brand-accent/10 text-brand-text" : "border-brand-line bg-brand-surface text-brand-muted hover:border-brand-accent"
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-4 w-4 rounded-full border border-brand-line"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  {c.label}
+                  {!free && active && (
+                    <span className="text-xs font-semibold text-brand-accent">+{formatPrice(threadDelta, currency)}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {strapOptionEnabled && (
+        <div>
+          <div className="mb-2 flex items-baseline justify-between">
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-muted">
+              Backpack straps
+            </span>
+            <span className="text-xs text-brand-muted">
+              Standard carry free · add straps +{formatPrice(strapDelta, currency)}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Backpack straps option">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={!backpackStraps}
+              onClick={() => setBackpackStraps(false)}
+              className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${
+                !backpackStraps ? "border-brand-accent bg-brand-accent/10 text-brand-text" : "border-brand-line bg-brand-surface text-brand-muted hover:border-brand-accent"
+              }`}
+            >
+              Standard carry
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={backpackStraps}
+              onClick={() => setBackpackStraps(true)}
+              className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs ${
+                backpackStraps ? "border-brand-accent bg-brand-accent/10 text-brand-text" : "border-brand-line bg-brand-surface text-brand-muted hover:border-brand-accent"
+              }`}
+            >
+              Add backpack straps
+              <span className="text-xs font-semibold text-brand-accent">+{formatPrice(strapDelta, currency)}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {tiers.length > 0 && (
         <div className="rounded-xl border border-brand-line bg-black/40 p-3">
-          <div className="text-[11px] uppercase tracking-widest text-brand-muted">Buy more, save more</div>
+          <div className="text-xs uppercase tracking-widest text-brand-muted">Buy more, save more</div>
           <ul className="mt-2 grid grid-cols-3 gap-2">
             {[{ min: 1, pct: 0 }, ...tiers].map((t) => {
               const active = qty >= t.min;
@@ -123,13 +288,13 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
                   }`}
                 >
                   <div className="text-xs font-semibold text-brand-text">{t.min}+ unit{t.min === 1 ? "" : "s"}</div>
-                  <div className="text-[11px] text-brand-muted">{t.pct === 0 ? "Standard" : `−${t.pct}% each`}</div>
+                  <div className="text-xs text-brand-muted">{t.pct === 0 ? "Standard" : `−${t.pct}% each`}</div>
                 </li>
               );
             })}
           </ul>
           {nextT && (
-            <p className="mt-2 text-[11px] text-brand-accent">
+            <p className="mt-2 text-xs text-brand-accent">
               Add {nextT.min - qty} more and pay only {formatPrice(effectivePricePerUnit(product.price_idr, tiers, nextT.min), currency)} each.
             </p>
           )}
@@ -137,32 +302,15 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
       )}
 
       <div className="flex items-center gap-3">
-        <div className="flex h-12 items-center rounded-full border border-brand-line bg-brand-surface">
-          <button
-            type="button"
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
-            aria-label="Decrease quantity"
-            className="grid h-12 w-12 place-items-center text-brand-text hover:text-brand-accent"
-          >−</button>
-          <span className="w-8 text-center text-sm font-semibold text-brand-text" aria-live="polite">{qty}</span>
-          <button
-            type="button"
-            onClick={() => setQty((q) => Math.min(product.stock_count ?? 99, q + 1))}
-            aria-label="Increase quantity"
-            className="grid h-12 w-12 place-items-center text-brand-text hover:text-brand-accent"
-          >+</button>
-        </div>
-
         <button
+          ref={addButtonRef}
           type="button"
           onClick={onAdd}
           disabled={soldOut}
-          className="h-12 flex-1 rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90 disabled:opacity-40"
+          className="relative h-12 flex-1 overflow-visible rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90 disabled:opacity-40"
         >
           {soldOut ? "Notify me when back" : added ? "Added to cart ✓" : sizeError ? "Pick a size first" : "Add to cart"}
         </button>
-
-        <WishlistButton productId={product.id} />
       </div>
 
       <a

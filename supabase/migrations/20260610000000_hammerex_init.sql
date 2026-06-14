@@ -1,5 +1,4 @@
--- Hammerex Products — namespaced tables that live alongside indocity verticals.
--- Prefix every table with hammerex_ to avoid colliding with citydrivers/cityriders/beautician/etc.
+-- Hammerex Products — initial schema. All tables prefixed `hammerex_`.
 
 create table if not exists public.hammerex_categories (
   id uuid primary key default gen_random_uuid(),

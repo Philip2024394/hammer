@@ -1,0 +1,41 @@
+{
+  "category_id": "1423ced3-fdb3-40c4-8ed0-c0dadfd89b06",
+  "name": "3 Trowel Roll Holder",
+  "description": "Compact 3-trowel roll holder — protects trowel blades, two reinforced eyelets for wall or rack hanging, fits trowels up to 18\" × 5\".",
+  "price_idr": 440000,
+  "image_url": "https://ik.imagekit.io/pinky/nnnnnnnnnnnnnnnnn.png",
+  "is_featured": true,
+  "slug": "3-trowel-roll-holder",
+  "sku": "HX-3TRH-001",
+  "brand": "Hammerex",
+  "model_number": "HX-3TRH",
+  "dispatch_cutoff_local": "14:00",
+  "warranty_years": 1,
+  "country_of_assembly": "United Kingdom",
+  "overview": "**Hammerex 3-Trowel Holder Roll**\n\nKeep your finishing tools protected, organised, and ready for work with the Hammerex 3-Trowel Holder Roll — our most compact trowel storage solution.\n\nDesigned to securely hold up to 3 trowels measuring up to 18\" × 5\", this durable roll protects blades from damage during transport and storage while keeping your tools neatly organised throughout the workday.\n\nIts compact design makes it easy to carry around the job site, load into your tool bag, or store away at the end of the day. For added convenience, the holder features two reinforced eyelets, allowing it to be hung on a site wall, workshop board, or storage area for quick access and tidy organisation.\n\nBuilt for professionals who value protection, organisation and portability.",
+  "features": [
+    {"icon":"check","label":"Holds up to 3 trowels up to 18\" × 5\""},
+    {"icon":"check","label":"Compact and lightweight design"},
+    {"icon":"check","label":"Protects trowel blades during transport and storage"},
+    {"icon":"check","label":"Easy to carry on-site"},
+    {"icon":"check","label":"Two reinforced eyelets for hanging on walls or storage racks"},
+    {"icon":"check","label":"Keeps tools organised and readily accessible"},
+    {"icon":"check","label":"Ideal for plasterers, renderers and finishing professionals"}
+  ],
+  "base_currency": "GBP",
+  "dispatch_lead_days": 3,
+  "delivery_quote_only": true,
+  "purchase_notes": [
+    "Buy 2 save 10% · Buy 3 save 15% · Buy 4 save 20% — applied automatically at the quantity step.",
+    "Dispatched within 3 working days of order.",
+    "Typical UK delivery within 5 working days.",
+    "International shipping quoted on request."
+  ],
+  "subtitle": "3 TROWEL + 2 EYELETS",
+  "home_sort_order": 10,
+  "qty_discount_tiers": [
+    {"min":2,"pct":10},
+    {"min":3,"pct":15},
+    {"min":4,"pct":20}
+  ]
+}

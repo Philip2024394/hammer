@@ -14,7 +14,7 @@ export function ShippingReturns({ warrantyYears, dispatchLeadDays }: {
           <article className="rounded-2xl border border-brand-line bg-brand-surface p-5">
             <h3 className="text-sm font-semibold text-brand-text">Delivery — quoted per order</h3>
             <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-              Cost depends on your country and the items in your cart. Pick sea freight (4–6 weeks, most economical) or air freight (~6 working days, express) at checkout — we confirm today's rate direct on WhatsApp before you pay.
+              Dispatch is estimated at 3 working days and confirmed on the WhatsApp quote based on production readiness at the moment of order. After dispatch, pick sea freight (4–6 weeks transit) or air freight (5–6 days transit worldwide — UK, USA, Australia, EU). Cost depends on your country and the items in your cart — we confirm today's rate direct on WhatsApp before you pay.
             </p>
           </article>
 

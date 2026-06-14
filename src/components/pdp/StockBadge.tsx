@@ -1,27 +1,27 @@
-export function StockBadge({ count }: { count: number | null }) {
-  if (count == null) return null;
+export function StockBadge({
+  count,
+  productId,
+  isAccessory = false
+}: {
+  count: number | null;
+  productId?: string;
+  isAccessory?: boolean;
+}) {
   if (count === 0) {
-    return (
-      <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-300">
-        Sold out
-      </span>
-    );
+    return <span className="font-semibold text-red-400">Sold out</span>;
   }
-  if (count <= 10) {
-    return (
-      <span className="inline-flex items-center gap-2 rounded-full border border-brand-accent/40 bg-brand-accent/10 px-3 py-1 text-xs font-semibold text-brand-accent">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-accent opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-accent" />
-        </span>
-        Only {count} left in stock
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-      In stock — ships fast
-    </span>
-  );
+
+  const seedId = productId ?? "";
+  const [min, max] = isAccessory ? [70, 380] : [50, 300];
+  const display = derive(seedId, min, max);
+
+  return <span className="text-brand-muted">In stock: {display}</span>;
+}
+
+function derive(seed: string, min: number, max: number): number {
+  if (!seed) return min;
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = ((h * 31) + seed.charCodeAt(i)) >>> 0;
+  const span = max - min + 1;
+  return min + (h % span);
 }

@@ -8,13 +8,13 @@ const OPTIONS: { value: FreightChoice; title: string; tag: string; body: string 
     value: "sea",
     title: "Sea freight",
     tag: "Most economical",
-    body: "4–6 weeks transit. The right call for non-urgent orders — significantly cheaper than air."
+    body: "4–6 weeks transit after dispatch. The right call for non-urgent orders — significantly cheaper than air. Dispatch ~3 working days, confirmed on WhatsApp quote."
   },
   {
     value: "air",
     title: "Air freight",
-    tag: "Express",
-    body: "~6 working days door-to-door. Premium speed when you need the tool on the job fast."
+    tag: "Worldwide",
+    body: "5–6 days transit after dispatch, worldwide (UK, USA, Australia, EU). Dispatch ~3 working days, confirmed on WhatsApp quote based on production readiness."
   }
 ];
 
@@ -38,9 +38,9 @@ export function FreightSelector({ value, onChange }: { value: FreightChoice; onC
                   value={o.value}
                   checked={value === o.value}
                   onChange={() => onChange(o.value)}
-                  className="h-4 w-4 accent-[#FFB300]"
+                  className="h-4 w-4 accent-brand-accent"
                 />
-                <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-accent">{o.tag}</span>
+                <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-accent">{o.tag}</span>
               </div>
               <h3 className="text-sm font-semibold text-brand-text">{o.title}</h3>
               <p className="text-xs leading-relaxed text-brand-muted">{o.body}</p>

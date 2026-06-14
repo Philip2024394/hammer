@@ -2,12 +2,155 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-bg: 0 0 0;
+  --brand-surface: 12 12 12;
+  --brand-line: 31 31 31;
+  --brand-accent: 255 179 0;
+  --brand-accent-soft: 255 217 113;
+  --brand-text: 245 245 245;
+  --brand-muted: 163 163 163;
+  --brand-success: 16 185 129;
+  --brand-social-whatsapp: 37 211 102;
+  --brand-social-facebook: 24 119 242;
+  --brand-social-x: 245 245 245;
+}
+
 html, body {
-  background: #000;
-  color: #f5f5f5;
+  background: rgb(var(--brand-bg));
+  color: rgb(var(--brand-text));
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Hide native scrollbars on horizontal carousels but keep scrolling */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { scrollbar-width: none; }
+
+/* Right-to-left marquee that fades into the left edge of its container */
+@keyframes hammerex-marquee {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
+}
+.hammerex-marquee-track {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  animation: hammerex-marquee 28s linear infinite;
+}
+.hammerex-marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, rgb(var(--brand-bg)) 12%, rgb(var(--brand-bg)) 100%);
+          mask-image: linear-gradient(to right, transparent 0, rgb(var(--brand-bg)) 12%, rgb(var(--brand-bg)) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hammerex-marquee-track { animation: none; }
+  .hx-pulse,
+  .hx-fade-in-up,
+  .hx-shimmer,
+  .hx-pop { animation: none !important; }
+}
+
+/* Yellow ring pulse on primary tap (use on Add to cart / WhatsApp CTAs) */
+@keyframes hx-pulse-kf {
+  0%   { box-shadow: 0 0 0 0   rgb(var(--brand-accent) / 0.55); }
+  100% { box-shadow: 0 0 0 14px rgb(var(--brand-accent) / 0);    }
+}
+.hx-pulse { animation: hx-pulse-kf 600ms ease-out; }
+
+/* Fade-up reveal on scroll-in or mount */
+@keyframes hx-fade-in-up-kf {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+.hx-fade-in-up { animation: hx-fade-in-up-kf 350ms ease-out both; }
+
+/* Pop on add-to-cart */
+@keyframes hx-pop-kf {
+  0%   { transform: scale(1);    }
+  35%  { transform: scale(1.08); }
+  100% { transform: scale(1);    }
+}
+.hx-pop { animation: hx-pop-kf 280ms ease-out; }
+
+/* Skeleton shimmer */
+@keyframes hx-shimmer-kf {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0;  }
+}
+.hx-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--brand-surface)) 0%,
+    rgb(var(--brand-line)) 50%,
+    rgb(var(--brand-surface)) 100%
+  );
+  background-size: 200% 100%;
+  animation: hx-shimmer-kf 1.4s linear infinite;
+}
+
+/* Cart-count badge attention ping */
+@keyframes hx-ping-kf {
+  75%, 100% { transform: scale(2);   opacity: 0; }
+}
+.hx-ping::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgb(var(--brand-accent) / 0.55);
+  animation: hx-ping-kf 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Ken-Burns slow zoom for the active hero slide */
+@keyframes hx-kenburns-kf {
+  from { transform: scale(1);     }
+  to   { transform: scale(1.06);  }
+}
+.hx-kenburns { animation: hx-kenburns-kf 7s ease-out forwards; }
+
+/* Product card tilt lift — applied via group-hover */
+.hx-card-tilt {
+  transform: perspective(900px) rotateX(0) rotateY(0) translateZ(0);
+  transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 280ms ease;
+  will-change: transform;
+}
+.group:hover .hx-card-tilt {
+  transform: perspective(900px) rotateX(2deg) rotateY(-3deg) translateZ(6px);
+}
+
+/* Spark burst for Add-to-cart — placed as absolutely-positioned children */
+@keyframes hx-spark-kf {
+  0%   { transform: translate(0,0) scale(1);    opacity: 1; }
+  100% { transform: var(--hx-spark-end) scale(0.2); opacity: 0; }
+}
+.hx-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgb(var(--brand-accent));
+  pointer-events: none;
+  animation: hx-spark-kf 700ms ease-out forwards;
+}
+
+/* Cutoff countdown pulse when under 60 minutes remain */
+@keyframes hx-cutoff-pulse-kf {
+  0%, 100% { box-shadow: 0 0 0 0   rgb(var(--brand-accent) / 0.55); }
+  50%      { box-shadow: 0 0 0 6px rgb(var(--brand-accent) / 0);    }
+}
+.hx-cutoff-urgent { animation: hx-cutoff-pulse-kf 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-kenburns,
+  .hx-card-tilt,
+  .hx-spark,
+  .hx-cutoff-urgent { animation: none !important; transition: none !important; }
+  .group:hover .hx-card-tilt { transform: none; }
+}

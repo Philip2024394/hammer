@@ -11,7 +11,9 @@ export function DeliveryFooter() {
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-brand-text">International delivery</h3>
             <p className="mt-1 text-xs text-brand-muted">
-              We ship Hammerex products worldwide via tracked courier. Duties calculated at checkout.
+              We ship Hammerex products worldwide via tracked courier. Delivery cost is quoted at
+              checkout — import duties and local taxes are not included and are paid by the buyer
+              on arrival.
             </p>
           </div>
         </article>
@@ -30,6 +32,39 @@ export function DeliveryFooter() {
           </div>
         </article>
       </div>
+
+      <nav className="mt-6 flex flex-wrap items-center justify-center gap-1 text-xs font-semibold uppercase tracking-widest text-brand-muted" aria-label="Site links">
+        {[
+          { href: "/", label: "Home" },
+          { href: "/hammerex-group", label: "Hammerex Group" },
+          { href: "/purchasing-tips", label: "Purchasing tips" },
+          { href: "/partners", label: "Distribution partners" },
+          { href: "/terms-and-conditions", label: "Terms & conditions" }
+        ].map((l) => (
+          <a key={l.href} href={l.href} className="inline-flex min-h-11 items-center rounded-full px-3 transition hover:text-brand-accent">{l.label}</a>
+        ))}
+      </nav>
+
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <a
+          href="https://www.instagram.com/hammerexproductsdirect/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Follow Hammerex on Instagram"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold uppercase tracking-widest text-brand-muted transition hover:border-brand-accent hover:text-brand-accent active:scale-95"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none" />
+          </svg>
+          @hammerexproductsdirect
+        </a>
+      </div>
+
+      <p className="mt-3 text-center text-xs text-brand-muted">
+        © {new Date().getFullYear()} Hammerex Products. All rights reserved.
+      </p>
     </section>
   );
 }

@@ -57,7 +57,7 @@ export function ProductRequestModal({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="grid h-9 w-9 place-items-center rounded-full text-brand-muted hover:bg-black/40 hover:text-brand-accent"
+            className="grid h-11 w-11 place-items-center rounded-full text-brand-muted hover:bg-black/40 hover:text-brand-accent"
           >×</button>
         </div>
 
@@ -92,7 +92,7 @@ export function ProductRequestModal({ onClose }: { onClose: () => void }) {
           >
             Submit via WhatsApp
           </a>
-          <p className="mt-2 text-center text-[11px] text-brand-muted">Opens WhatsApp prefilled with your project details.</p>
+          <p className="mt-2 text-center text-xs text-brand-muted">Opens WhatsApp prefilled with your project details.</p>
         </div>
       </div>
     </div>
@@ -109,7 +109,7 @@ function Field({ label, value, onChange, placeholder, multiline, inputMode }: {
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-widest text-brand-muted">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-widest text-brand-muted">{label}</span>
       {multiline ? (
         <textarea
           value={value}

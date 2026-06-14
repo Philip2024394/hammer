@@ -1,5 +1,7 @@
 import type { HammerexProduct } from "@/lib/supabase";
 import { SectionHeader } from "./SectionHeader";
+import { CardActionOverlay } from "./CardActionOverlay";
+import { imageUrl } from "@/lib/imageUrl";
 
 const FALLBACK_EXTRAS = {
   slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
@@ -8,7 +10,8 @@ const FALLBACK_EXTRAS = {
   qty_discount_tiers: null, is_accessory: null, rating_avg: null, rating_count: null,
   base_currency: null, sizes: null, dispatch_lead_days: null,
   delivery_quote_only: null, purchase_notes: null, badge_label: null,
-  subtitle: null, home_sort_order: null
+  subtitle: null, home_sort_order: null, thread_color_option_idr: null,
+  backpack_straps_option_idr: null, is_universal: null
 };
 
 const FALLBACK: HammerexProduct[] = [
@@ -31,24 +34,40 @@ function Check() {
   );
 }
 
-export function ProductRow({ items }: { items?: HammerexProduct[] }) {
+export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product" }: { items?: HammerexProduct[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category" }) {
   const data = (items?.length ? items : FALLBACK);
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8">
-      <SectionHeader title="Featured products" viewAllHref="/products" />
+      {!hideHeader && <SectionHeader title={title ?? "Featured products"} viewAllHref={viewAllHref ?? "/products"} />}
 
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
         {data.map((p) => {
           const features = (p.features ?? []).slice(0, 4);
-          const href = p.slug ? `/product/${p.slug}` : "#";
+          const productHref = p.slug ? `/product/${p.slug}` : "#";
+          const categoryHref = p.category ? `/c/${p.category.slug}` : productHref;
+          const href = linkTo === "category" ? categoryHref : productHref;
+          const ctaLabel = linkTo === "category" ? "Browse category" : "View product";
+          const stock = p.stock_count;
+          const stockTone = stock == null
+            ? null
+            : stock <= 0
+              ? { label: "Out of stock", color: "text-brand-muted", dot: "bg-brand-muted" }
+              : stock <= 5
+                ? { label: `Only ${stock} left`, color: "text-brand-accent", dot: "bg-brand-accent" }
+                : { label: "In stock", color: "text-brand-success", dot: "bg-brand-success" };
           return (
-            <li key={p.id}>
-              <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
-                <a href={href} className="relative block aspect-square overflow-hidden bg-black">
+            <li key={p.id} className="group relative">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-4 -bottom-2 h-6 rounded-full bg-brand-accent/0 blur-2xl transition-all duration-300 group-hover:bg-brand-accent/55"
+              />
+              <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition-colors duration-200 group-hover:border-brand-accent">
+                <a href={href} className="relative block aspect-square w-full overflow-hidden bg-brand-surface sm:aspect-auto">
+                  <CardActionOverlay slug={p.slug} />
                   {p.badge_label && (
                     <span
-                      className="absolute left-0 top-3 bg-brand-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-black"
+                      className="absolute left-0 top-3 z-10 inline-flex h-7 items-center bg-brand-accent px-3 text-xs font-bold uppercase tracking-wider text-black"
                       style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)", paddingRight: "1.25rem" }}
                     >
                       {p.badge_label}
@@ -56,43 +75,77 @@ export function ProductRow({ items }: { items?: HammerexProduct[] }) {
                   )}
                   {p.image_url && (
                     <img
-                      src={p.image_url}
+                      src={imageUrl(p.image_url, 720) ?? p.image_url}
+                      srcSet={`${imageUrl(p.image_url, 360) ?? p.image_url} 360w, ${imageUrl(p.image_url, 480) ?? p.image_url} 480w, ${imageUrl(p.image_url, 720) ?? p.image_url} 720w, ${imageUrl(p.image_url, 960) ?? p.image_url} 960w`}
+                      sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
                       alt={p.name}
-                      className="h-full w-full object-contain p-2 transition-transform duration-500 sm:p-3"
+                      loading="lazy"
+                      decoding="async"
+                      className="block h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 sm:h-auto"
                     />
                   )}
                 </a>
 
-                <div className="flex flex-1 flex-col gap-3 p-3 sm:p-4">
+                <div className="flex flex-1 flex-col gap-2 p-2.5 sm:gap-3 sm:p-4">
                   <div>
-                    <h3 className="text-sm font-bold uppercase leading-tight tracking-wide text-brand-text">
+                    {p.category && (
+                      <a
+                        href={`/c/${p.category.slug}`}
+                        className="mb-2 inline-flex min-h-6 items-center gap-1 rounded-full border border-brand-line bg-black/40 px-2.5 text-xs font-semibold uppercase tracking-widest text-brand-muted transition hover:border-brand-accent hover:text-brand-accent"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-brand-accent" />
+                        {p.category.name}
+                      </a>
+                    )}
+                    <h3 className="line-clamp-2 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text">
                       <a href={href} className="hover:text-brand-accent">{p.name}</a>
                     </h3>
                     {p.subtitle && (
-                      <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-brand-accent">{p.subtitle}</p>
+                      <p className="mt-0.5 line-clamp-1 text-xs font-bold uppercase tracking-wider text-brand-accent">{p.subtitle}</p>
+                    )}
+                    {p.sku && (
+                      <p className="mt-1 text-xs font-semibold tracking-wide text-brand-muted">
+                        Ref: <span className="text-brand-accent">{p.sku}</span>
+                      </p>
                     )}
                   </div>
 
                   {features.length > 0 && (
-                    <ul className="space-y-1.5">
+                    <ul className="hidden space-y-1.5 sm:block">
                       {features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-[11px] leading-snug text-brand-muted sm:text-xs">
+                        <li key={i} className="flex items-start gap-2 text-xs leading-snug text-brand-muted">
                           <span className="mt-0.5 text-brand-accent"><Check /></span>
                           <span>{f.label}</span>
                         </li>
                       ))}
                     </ul>
                   )}
+                  {features.length > 0 && (
+                    <ul className="space-y-1.5 sm:hidden">
+                      {features.slice(0, 2).map((f, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs leading-snug text-brand-muted">
+                          <span className="mt-0.5 text-brand-accent"><Check /></span>
+                          <span className="line-clamp-1">{f.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
                   <div className="mt-auto flex flex-col gap-2 pt-2">
+                    {stockTone && (
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${stockTone.color}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${stockTone.dot}`} />
+                        {stockTone.label}
+                      </span>
+                    )}
                     <div className="rounded-md border-2 border-brand-accent bg-black/40 px-3 py-2 text-center">
                       <div className="text-base font-bold text-brand-text sm:text-lg">{formatProductPrice(p)}</div>
                     </div>
                     <a
                       href={href}
-                      className="grid h-11 grid-cols-[1fr_auto] items-center gap-2 rounded-md bg-brand-accent px-3 text-xs font-bold uppercase tracking-wider text-black hover:opacity-90"
+                      className="grid h-11 grid-cols-[1fr_auto] items-center gap-2 rounded-md bg-brand-accent px-3 text-xs font-bold uppercase tracking-wider text-black transition active:scale-[0.98] hover:opacity-90"
                     >
-                      <span>View product</span>
+                      <span>{ctaLabel}</span>
                       <span aria-hidden="true">→</span>
                     </a>
                   </div>

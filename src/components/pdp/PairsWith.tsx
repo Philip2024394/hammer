@@ -14,7 +14,7 @@ export function PairsWith({ pairs }: { pairs: HammerexPairWith[] }) {
             <li key={p.id} className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
               <a href={p.accessory.slug ? `/product/${p.accessory.slug}` : "#"} className="block h-40 w-full overflow-hidden bg-black">
                 {p.accessory.image_url && (
-                  <img src={p.accessory.image_url} alt={p.accessory.name} className="h-full w-full object-cover transition-transform hover:scale-105" />
+                  <img src={p.accessory.image_url} alt={p.accessory.name} className="h-full w-full object-contain p-3 transition-transform hover:scale-105" />
                 )}
               </a>
               <div className="flex flex-col gap-2 p-4">

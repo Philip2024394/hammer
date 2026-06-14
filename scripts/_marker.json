@@ -1,0 +1,33 @@
+{
+  "name": "Hammerex Marker Belt Holder",
+  "description": "Compact leather marker belt holder — reinforced stud supports, fits markers of all sizes, low-profile design for belts up to 60mm.",
+  "price_idr": 219800,
+  "image_url": "https://ik.imagekit.io/pinky/ChatGPT%20Image%20Jun%2012,%202026,%2007_01_24%20PM.png?updatedAt=1781265714850",
+  "is_featured": true,
+  "slug": "marker-belt-holder",
+  "sku": "HX-MBH-001",
+  "brand": "Hammerex",
+  "model_number": "HX-MBH",
+  "dispatch_cutoff_local": "14:00",
+  "warranty_years": 1,
+  "country_of_assembly": "United Kingdom",
+  "overview": "**Simple. Effective. Compact.**\n\nThe Hammerex Marker Belt Holder is designed to carry markers of all sizes while requiring minimal belt space. Crafted from durable leather with reinforced stud supports, it offers secure retention and long-lasting performance.\n\nCompatible with belts up to 6 cm wide, it's the perfect low-profile solution for keeping your marker within easy reach.",
+  "features": [
+    {"icon":"check","label":"Durable leather construction"},
+    {"icon":"check","label":"Reinforced stud supports for secure retention"},
+    {"icon":"check","label":"Fits markers of all sizes"},
+    {"icon":"check","label":"Low-profile design — minimal belt space"},
+    {"icon":"check","label":"Fits belts up to 60mm (6cm) wide"},
+    {"icon":"check","label":"Long-lasting performance for daily site use"}
+  ],
+  "base_currency": "GBP",
+  "dispatch_lead_days": 3,
+  "delivery_quote_only": true,
+  "purchase_notes": [
+    "Low-profile design — pairs easily with other belt holders.",
+    "Orders dispatched within 3 working days.",
+    "UK delivery available — international shipping quoted on request."
+  ],
+  "subtitle": "COMPACT MARKER STATION",
+  "home_sort_order": 14
+}

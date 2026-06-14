@@ -10,7 +10,7 @@ export function SectionHeader({ title, viewAllHref }: { title: string; viewAllHr
       {viewAllHref && (
         <a
           href={viewAllHref}
-          className="text-[11px] font-bold uppercase tracking-widest text-brand-accent hover:underline sm:text-xs"
+          className="text-xs font-bold uppercase tracking-widest text-brand-accent hover:underline sm:text-xs"
         >
           View all ›
         </a>

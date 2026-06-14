@@ -7,11 +7,16 @@ export type CartLine = {
   productId: string;
   slug: string;
   name: string;
+  sku: string | null;
   image: string | null;
   unitPriceIdr: number;
   qty: number;
   size: string | null;
   baseCurrency: string;
+  threadColor: string | null;
+  variantId: string | null;
+  variantLabel: string | null;
+  backpackStraps: boolean;
 };
 
 function read(): CartLine[] {
@@ -24,8 +29,8 @@ function write(lines: CartLine[]) {
   window.dispatchEvent(new Event(EVENT));
 }
 
-function key(productId: string, size: string | null) {
-  return `${productId}::${size ?? ""}`;
+function key(productId: string, size: string | null, threadColor: string | null, variantId: string | null, backpackStraps: boolean) {
+  return `${productId}::${size ?? ""}::${threadColor ?? ""}::${variantId ?? ""}::${backpackStraps ? "bp1" : "bp0"}`;
 }
 
 export const cart = {
@@ -38,8 +43,8 @@ export const cart = {
   },
   add(line: CartLine) {
     const lines = read();
-    const k = key(line.productId, line.size);
-    const existing = lines.find((l) => key(l.productId, l.size) === k);
+    const k = key(line.productId, line.size, line.threadColor, line.variantId, line.backpackStraps);
+    const existing = lines.find((l) => key(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps) === k);
     if (existing) {
       existing.qty = Math.min(99, existing.qty + line.qty);
     } else {
@@ -47,16 +52,16 @@ export const cart = {
     }
     write(lines);
   },
-  setQty(productId: string, size: string | null, qty: number) {
+  setQty(productId: string, size: string | null, threadColor: string | null, variantId: string | null, backpackStraps: boolean, qty: number) {
     const lines = read().map((l) =>
-      key(l.productId, l.size) === key(productId, size)
+      key(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps) === key(productId, size, threadColor, variantId, backpackStraps)
         ? { ...l, qty: Math.max(1, Math.min(99, qty)) }
         : l
     );
     write(lines);
   },
-  remove(productId: string, size: string | null) {
-    write(read().filter((l) => key(l.productId, l.size) !== key(productId, size)));
+  remove(productId: string, size: string | null, threadColor: string | null, variantId: string | null, backpackStraps: boolean) {
+    write(read().filter((l) => key(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps) !== key(productId, size, threadColor, variantId, backpackStraps)));
   },
   clear() {
     write([]);

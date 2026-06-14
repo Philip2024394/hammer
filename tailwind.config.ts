@@ -6,13 +6,17 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          bg: "#000000",
-          surface: "#0c0c0c",
-          line: "#1f1f1f",
-          accent: "#FFB300",
-        accentSoft: "#FFD971",
-          text: "#f5f5f5",
-          muted: "#a3a3a3"
+          bg: "rgb(var(--brand-bg) / <alpha-value>)",
+          surface: "rgb(var(--brand-surface) / <alpha-value>)",
+          line: "rgb(var(--brand-line) / <alpha-value>)",
+          accent: "rgb(var(--brand-accent) / <alpha-value>)",
+          accentSoft: "rgb(var(--brand-accent-soft) / <alpha-value>)",
+          text: "rgb(var(--brand-text) / <alpha-value>)",
+          muted: "rgb(var(--brand-muted) / <alpha-value>)",
+          success: "rgb(var(--brand-success) / <alpha-value>)",
+          whatsapp: "rgb(var(--brand-social-whatsapp) / <alpha-value>)",
+          facebook: "rgb(var(--brand-social-facebook) / <alpha-value>)",
+          x: "rgb(var(--brand-social-x) / <alpha-value>)"
         }
       },
       fontSize: {

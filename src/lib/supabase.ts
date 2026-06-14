@@ -13,11 +13,15 @@ export type HammerexCategory = {
   name: string;
   image_url: string | null;
   sort_order: number;
+  is_tool_type?: boolean | null;
 };
+
+export type HammerexProductCategoryLite = { slug: string; name: string };
 
 export type HammerexProduct = {
   id: string;
   category_id: string | null;
+  category?: HammerexProductCategoryLite | null;
   name: string;
   description: string | null;
   price_idr: number;
@@ -47,6 +51,32 @@ export type HammerexProduct = {
   badge_label: string | null;
   subtitle: string | null;
   home_sort_order: number | null;
+  thread_color_option_idr: number | null;
+  backpack_straps_option_idr: number | null;
+  is_universal: boolean | null;
+};
+
+export type HammerexProductVariant = {
+  id: string;
+  product_id: string;
+  label: string;
+  sku: string | null;
+  price_idr: number;
+  image_url: string | null;
+  model_number: string | null;
+  stock_count: number | null;
+  sort_order: number;
+  is_default: boolean;
+};
+
+export type HammerexDealBreaker = {
+  id: string;
+  anchor_product_id: string;
+  item_product_id: string;
+  deal_price_idr: number;
+  sort_order: number;
+  item: HammerexProduct;
+  variants: HammerexProductVariant[];
 };
 
 export type HammerexBundle = {

@@ -10,7 +10,7 @@ export function InTheBox({ items }: { items: HammerexWhatInBox[] }) {
           {items.map((b) => (
             <li key={b.id} className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
               <div className="aspect-square overflow-hidden bg-black">
-                {b.image_url && <img src={b.image_url} alt={b.label} className="h-full w-full object-cover" />}
+                {b.image_url && <img src={b.image_url} alt={b.label} className="h-full w-full object-contain p-2" />}
               </div>
               <div className="flex items-center justify-between p-3">
                 <span className="text-xs font-medium text-brand-text">{b.label}</span>

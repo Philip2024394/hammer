@@ -7,7 +7,9 @@ import { FreightSelector } from "@/components/checkout/FreightSelector";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
 import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
+import { threadColorLabel } from "@/lib/threadColor";
 import { adminWhatsapp, buildQuoteMessage, quoteUrl, type FreightChoice } from "@/lib/whatsapp";
+import { logQuoteClick } from "@/lib/quoteSignals";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,7 +30,8 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
-  const formValid = name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0;
+  const hasPaidLine = lines.some((l) => l.unitPriceIdr > 0);
+  const formValid = name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
 
   const href = useMemo(() => {
     if (!formValid) return "#";
@@ -53,8 +56,10 @@ export default function CheckoutPage() {
     );
   }
 
+  const dominantCurrency = (lines.find((l) => l.baseCurrency && l.baseCurrency !== "IDR")?.baseCurrency ?? "IDR") as "IDR" | "USD" | "SGD" | "AUD" | "EUR" | "GBP";
+
   return (
-    <main>
+    <main className="pb-[calc(72px+56px+env(safe-area-inset-bottom))] lg:pb-0">
       <Header />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
@@ -77,11 +82,11 @@ export default function CheckoutPage() {
                 <HeaderIcon icon={<User size={16} />} />
                 Your details
               </legend>
-              <Field label="Full name"        icon={<User size={14} />}   value={name}     onChange={setName}     placeholder="John Smith" />
-              <Field label="Country"           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" />
-              <Field label="Delivery address" icon={<MapPin size={14} />} value={address}  onChange={setAddress}  placeholder="123 High Street, London, EC1A 1BB" multiline />
-              <Field label="WhatsApp number"  icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" />
-              <Field label="Email"             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" />
+              <Field label="Full name"        icon={<User size={14} />}   value={name}     onChange={setName}     placeholder="John Smith" autoComplete="name" name="name" />
+              <Field label="Country"           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
+              <Field label="Delivery address" icon={<MapPin size={14} />} value={address}  onChange={setAddress}  placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
+              <Field label="WhatsApp number"  icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="whatsapp" />
+              <Field label="Email"             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
             </fieldset>
           </div>
 
@@ -92,15 +97,19 @@ export default function CheckoutPage() {
             </h2>
             <ul className="mb-4 flex flex-col gap-3">
               {lines.map((l) => (
-                <li key={`${l.productId}::${l.size ?? ""}`} className="flex gap-3">
+                <li key={`${l.productId}::${l.size ?? ""}::${l.threadColor ?? ""}::${l.variantId ?? ""}::${l.backpackStraps ? "bp1" : "bp0"}`} className="flex gap-3">
                   <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-black">
-                    {l.image && <img src={l.image} alt={l.name} className="h-full w-full object-cover" />}
+                    {l.image && <img src={l.image} alt={l.name} loading="lazy" decoding="async" width="56" height="56" className="h-full w-full object-contain" />}
                   </div>
                   <div className="flex-1 text-xs">
                     <div className="font-semibold text-brand-text">{l.name}</div>
-                    <div className="text-brand-muted">{l.size ? `${l.size} · ` : ""}{l.qty}× {formatPrice(l.unitPriceIdr, "IDR")}</div>
+                    {l.sku && <div className="font-semibold text-brand-accent">Ref: {l.sku}</div>}
+                    {l.threadColor && <div className="text-brand-muted">Thread: {threadColorLabel(l.threadColor)}</div>}
+                    {l.backpackStraps && <div className="text-brand-accent">+ Backpack straps add-on</div>}
+                    {l.variantLabel === "WELCOME GIFT" && <div className="font-bold uppercase tracking-widest text-brand-accent">🎁 Welcome gift</div>}
+                    <div className="text-brand-muted">{l.size ? `${l.size} · ` : ""}{l.qty}× {l.unitPriceIdr === 0 ? "FREE" : formatPrice(l.unitPriceIdr, "IDR")}</div>
                   </div>
-                  <div className="text-xs font-semibold text-brand-text">{formatPrice(l.unitPriceIdr * l.qty, "IDR")}</div>
+                  <div className="text-xs font-semibold text-brand-text">{l.unitPriceIdr === 0 ? <span className="text-brand-accent">FREE</span> : formatPrice(l.unitPriceIdr * l.qty, "IDR")}</div>
                 </li>
               ))}
             </ul>
@@ -109,6 +118,12 @@ export default function CheckoutPage() {
                 <span>Subtotal</span>
                 <span className="text-brand-text">{formatPrice(subtotal, "IDR")}</span>
               </div>
+              {dominantCurrency !== "IDR" && (
+                <div className="mt-1 flex justify-between text-brand-muted">
+                  <span>Indicative</span>
+                  <span className="text-brand-accent">{formatPrice(subtotal, dominantCurrency)}</span>
+                </div>
+              )}
               <div className="mt-1 flex justify-between text-brand-muted">
                 <span>Delivery</span>
                 <span className="text-brand-accent">Quoted</span>
@@ -122,6 +137,7 @@ export default function CheckoutPage() {
               aria-disabled={!formValid}
               onClick={(e) => {
                 if (!formValid) { e.preventDefault(); return; }
+                for (const l of lines) void logQuoteClick(l.productId, "checkout_wa");
                 cart.clear();
                 setTimeout(() => router.push("/thank-you"), 80);
               }}
@@ -131,17 +147,47 @@ export default function CheckoutPage() {
             >
               Quote me delivery via WhatsApp
             </a>
-            <p className="mt-2 text-[11px] text-brand-muted">
+            {!hasPaidLine && lines.length > 0 && (
+              <p className="mt-2 rounded-xl border border-brand-accent/40 bg-brand-accent/10 p-2 text-xs text-brand-accent">
+                🎁 Your welcome gift comes with your first paid order — add at least one item to claim it.
+              </p>
+            )}
+            <p className="mt-2 text-xs text-brand-muted">
               Opens WhatsApp with your details and cart pre-filled. We reply with a delivery price for your selected freight method.
             </p>
           </aside>
         </div>
       </section>
+
+      <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 border-t border-brand-line bg-brand-bg/95 px-3 py-2 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-4xl items-center gap-3">
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="text-xs text-brand-muted">{lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"} · delivery quoted</span>
+            <span className="truncate text-sm font-bold text-brand-text">
+              {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
+            </span>
+          </div>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-disabled={!formValid}
+            onClick={(e) => {
+              if (!formValid) { e.preventDefault(); return; }
+              cart.clear();
+              setTimeout(() => router.push("/thank-you"), 80);
+            }}
+            className={`grid h-12 place-items-center rounded-full px-4 text-xs font-bold uppercase tracking-widest transition active:scale-[0.98] ${
+              formValid ? "bg-brand-whatsapp text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"
+            }`}
+          >Quote on WhatsApp</a>
+        </div>
+      </div>
     </main>
   );
 }
 
-function Field({ label, icon, value, onChange, placeholder, multiline, inputMode }: {
+function Field({ label, icon, value, onChange, placeholder, multiline, inputMode, type, autoComplete, name }: {
   label: string;
   icon?: React.ReactNode;
   value: string;
@@ -149,6 +195,9 @@ function Field({ label, icon, value, onChange, placeholder, multiline, inputMode
   placeholder?: string;
   multiline?: boolean;
   inputMode?: "text" | "tel" | "email";
+  type?: "text" | "tel" | "email";
+  autoComplete?: string;
+  name?: string;
 }) {
   return (
     <label className="flex flex-col gap-1">
@@ -161,6 +210,8 @@ function Field({ label, icon, value, onChange, placeholder, multiline, inputMode
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          autoComplete={autoComplete}
+          name={name}
           rows={3}
           className="rounded-xl border border-brand-line bg-brand-surface px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
         />
@@ -170,7 +221,10 @@ function Field({ label, icon, value, onChange, placeholder, multiline, inputMode
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           inputMode={inputMode}
-          className="h-11 rounded-full border border-brand-line bg-brand-surface px-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+          type={type ?? "text"}
+          autoComplete={autoComplete}
+          name={name}
+          className="h-12 rounded-full border border-brand-line bg-brand-surface px-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
         />
       )}
     </label>
