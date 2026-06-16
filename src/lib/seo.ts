@@ -1,4 +1,4 @@
-import type { HammerexCategory, HammerexProduct } from "./supabase";
+import type { HammerexCategory, HammerexGuide, HammerexProduct } from "./supabase";
 
 const FALLBACK = "http://localhost:3007";
 
@@ -19,7 +19,7 @@ export const BRAND = {
   legalName: "Hammerex Products",
   tagline: "International tools & construction supplier",
   description:
-    "Hammerex supplies tools, PPE and construction goods worldwide. Cross-border delivery by sea or air freight, quoted in your local currency via WhatsApp.",
+    "Hammerex supplies tools, PPE and construction goods worldwide. Flat £20 shipping to UK, USA and Australia via EMS Air Mail — 5–6 days transit. Other countries confirmed on WhatsApp.",
   logo: "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/85e5e067cf0cb299.png",
   whatsapp: process.env.NEXT_PUBLIC_HAMMEREX_WHATSAPP ?? "+6281392000050",
   locale: "en_US"
@@ -125,7 +125,7 @@ export function collectionJsonLd(category: HammerexCategory, products: HammerexP
     "@type": "CollectionPage",
     name: `${category.name} — ${BRAND.name}`,
     url: absolute(`/c/${category.slug}`),
-    description: `${category.name} products supplied by ${BRAND.name} with international freight.`,
+    description: `${category.name} products supplied by ${BRAND.name} — flat £20 shipping to UK, USA, Australia (others quoted on WhatsApp).`,
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: products.length,
@@ -136,6 +136,43 @@ export function collectionJsonLd(category: HammerexCategory, products: HammerexP
         name: p.name
       }))
     }
+  };
+}
+
+// FAQPage JSON-LD — Google's required shape for the AI Overview / featured
+// snippet panel. Only emit when there is at least one Q/A pair, otherwise
+// validators flag it as an empty mainEntity array.
+export function faqJsonLd(faq: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a }
+    }))
+  };
+}
+
+// Article JSON-LD for /guides/[slug]. Pairs with FAQPage on the same page
+// so a single guide can populate both the "Featured snippet" panel and the
+// "Top stories / News" panel for an information query.
+export function articleJsonLd(guide: HammerexGuide) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: guide.title,
+    description: guide.meta_description,
+    image: guide.hero_image_url ?? BRAND.logo,
+    author: { "@type": "Organization", name: BRAND.name },
+    publisher: {
+      "@type": "Organization",
+      name: BRAND.name,
+      logo: { "@type": "ImageObject", url: BRAND.logo }
+    },
+    datePublished: guide.created_at,
+    dateModified: guide.updated_at,
+    mainEntityOfPage: { "@type": "WebPage", "@id": absolute(`/guides/${guide.slug}`) }
   };
 }
 

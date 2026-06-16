@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
-import { absolute, breadcrumbJsonLd, productJsonLd, BRAND } from "@/lib/seo";
+import { absolute, breadcrumbJsonLd, faqJsonLd, productJsonLd, BRAND } from "@/lib/seo";
 import { ProductGallery } from "@/components/pdp/ProductGallery";
 import { BuyColumn } from "@/components/pdp/BuyColumn";
 import { KeyFeatures } from "@/components/pdp/KeyFeatures";
@@ -14,6 +14,7 @@ import { BundleBlock } from "@/components/pdp/BundleBlock";
 import { PairsWith } from "@/components/pdp/PairsWith";
 import { ReviewsBlock } from "@/components/pdp/ReviewsBlock";
 import { QABlock } from "@/components/pdp/QABlock";
+import { ProductFAQ } from "@/components/pdp/ProductFAQ";
 import { WarrantyTimeline } from "@/components/pdp/WarrantyTimeline";
 import {
   supabase,
@@ -191,6 +192,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
+      {product.faq && product.faq.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(product.faq)) }}
+        />
+      )}
       <Header />
 
       <nav className="mx-auto max-w-6xl px-4 pt-4 text-xs text-brand-muted" aria-label="Breadcrumb">
@@ -208,7 +215,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             <ProductGallery media={media} fallbackImage={product.image_url} name={product.name} />
             <div id="pdp-buy-sentinel">
-              <BuyColumn product={product} dealBreakers={dealBreakers} />
+              <BuyColumn product={product} />
             </div>
           </div>
         </section>
@@ -230,6 +237,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         productSku={product.sku}
         reviews={reviews}
       />
+      <ProductFAQ faq={product.faq} />
       <QABlock questions={questions} />
       <ShippingReturns
         warrantyYears={product.warranty_years ?? 1}

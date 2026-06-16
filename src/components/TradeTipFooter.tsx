@@ -8,7 +8,7 @@ const TIPS = [
   "Tap the heart on any card to save it — your wishlist survives across visits, no login needed.",
   "Use Compare (the three-line icon) to put up to 3 products side-by-side on /compare.",
   "Dispatch is ~3 working days for most items (confirmed on the WhatsApp quote). Then 5–6 days transit worldwide.",
-  "International orders: pick sea or air freight at checkout — delivery is quoted per order on WhatsApp.",
+  "Flat £20 shipping to UK, USA and Australia — one fee per order via EMS Air Mail. Other countries confirmed on WhatsApp.",
   "Heavy-duty leather is fully repairable — we re-stitch and re-rivet your belts at cost."
 ];
 

@@ -54,6 +54,22 @@ export type HammerexProduct = {
   thread_color_option_idr: number | null;
   backpack_straps_option_idr: number | null;
   is_universal: boolean | null;
+  faq: { q: string; a: string }[] | null;
+};
+
+export type HammerexGuide = {
+  id: string;
+  slug: string;
+  title: string;
+  meta_description: string;
+  intro: string;
+  body_md: string;
+  hero_image_url: string | null;
+  faq: { q: string; a: string }[] | null;
+  related_product_slugs: string[] | null;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 export type HammerexProductVariant = {

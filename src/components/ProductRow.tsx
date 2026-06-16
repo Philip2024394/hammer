@@ -62,8 +62,8 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-x-4 -bottom-2 h-6 rounded-full bg-brand-accent/0 blur-2xl transition-all duration-300 group-hover:bg-brand-accent/55"
               />
-              <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition-colors duration-200 group-hover:border-brand-accent">
-                <a href={href} className="relative block aspect-square w-full overflow-hidden bg-brand-surface sm:aspect-auto">
+              <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-black transition-colors duration-200 group-hover:border-brand-accent">
+                <a href={href} className="relative block aspect-square w-full overflow-hidden bg-black">
                   <CardActionOverlay slug={p.slug} />
                   {p.badge_label && (
                     <span
@@ -81,7 +81,18 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
                       alt={p.name}
                       loading="lazy"
                       decoding="async"
-                      className="block h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 sm:h-auto"
+                      // Product cards must show the WHOLE product — no crop.
+                      // Uniform aspect-square container + object-contain on
+                      // every breakpoint so every photo is fully visible AND
+                      // every grid row has perfectly even card heights. The
+                      // black background makes any letterbox area look
+                      // intentional on the brand surface.
+                      //
+                      // Different policy from the Hero on purpose: Hero uses
+                      // object-cover (full-bleed banner, crop is fine).
+                      // Product cards must NEVER crop — the product would
+                      // get its edges sliced off and look broken.
+                      className="block h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   )}
                 </a>

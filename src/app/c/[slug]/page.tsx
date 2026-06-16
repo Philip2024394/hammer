@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { ProductRow } from "@/components/ProductRow";
+import { CategoryHero } from "@/components/CategoryHero";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
@@ -109,7 +110,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!cat) return { title: "Category not found" };
 
   const title = `${cat.name}`;
-  const description = `${cat.name} tools and supplies from ${BRAND.name}. International freight by sea or air, quoted in your local currency.`;
+  const description = `${cat.name} tools and supplies from ${BRAND.name}. Flat £20 shipping to UK, USA and Australia via EMS Air Mail (others quoted on WhatsApp).`;
   const image = cat.image_url ?? BRAND.logo;
   const url = absolute(`/c/${cat.slug ?? slug}`);
 
@@ -158,20 +159,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collection) }}
       />
       <Header />
-      <section className="mx-auto max-w-6xl px-4 pt-8">
+      <CategoryHero category={category} productCount={products.length} />
+
+      <section className="mx-auto max-w-6xl px-4 pt-4">
         <nav className="text-xs text-brand-muted">
           <a href="/" className="hover:text-brand-accent">Home</a>
           <span className="mx-2">/</span>
           <span className="text-brand-text">{category.name}</span>
         </nav>
-        <h1 className="mt-3 text-2xl font-bold uppercase tracking-wide text-brand-text sm:text-3xl">
-          {category.name}
-        </h1>
-        <p className="mt-2 text-sm text-brand-muted">
-          {products.length === 0
-            ? "No products listed under this trade yet — check back soon."
-            : `${products.length} product${products.length === 1 ? "" : "s"} for ${category.name.toLowerCase()}.`}
-        </p>
       </section>
 
       {products.length > 0 && <ProductRow items={products} hideHeader />}

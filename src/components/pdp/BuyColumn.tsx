@@ -5,7 +5,7 @@ import { CURRENCIES, formatPrice, type Currency } from "@/lib/fx";
 import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
 import { sparkBurst } from "@/lib/sparks";
-import type { HammerexProduct, HammerexDealBreaker } from "@/lib/supabase";
+import type { HammerexProduct } from "@/lib/supabase";
 import { THREAD_COLORS, DEFAULT_THREAD_COLOR, isFreeThreadColor, type ThreadColor } from "@/lib/threadColor";
 import { StockBadge } from "./StockBadge";
 import { SizeSelector } from "./SizeSelector";
@@ -15,9 +15,9 @@ import { DispatchCountdown } from "./DispatchCountdown";
 import { QuoteSignalBadge } from "./QuoteSignalBadge";
 import { useVariant } from "./VariantContext";
 import { VariantSelector } from "./VariantSelector";
-import { DealBreakerCard } from "./DealBreakerCard";
+import { CheckoutDealBreakers } from "@/components/checkout/CheckoutDealBreakers";
 
-export function BuyColumn({ product, dealBreakers = [] }: { product: HammerexProduct; dealBreakers?: HammerexDealBreaker[] }) {
+export function BuyColumn({ product }: { product: HammerexProduct }) {
   const variantCtx = useVariant();
   const activeVariant = variantCtx?.active ?? null;
   const variantPriceIdr = activeVariant?.price_idr ?? product.price_idr;
@@ -188,7 +188,9 @@ export function BuyColumn({ product, dealBreakers = [] }: { product: HammerexPro
 
       {variantCtx && variantCtx.variants.length > 0 && <VariantSelector currency={currency} />}
 
-      <DealBreakerCard items={dealBreakers} currency={currency} anchorProductName={product.name} />
+      {/* DealBreakerCard intentionally removed from PDPs (per user 2026-06-15).
+          The "Deal Breakers" mechanic now lives on the checkout page as a
+          curated 5-item universal add-on lot. See CheckoutDealBreakers. */}
 
       {sizes.length > 0 && (
         <SizeSelector sizes={sizes} value={size} onChange={(s) => { setSize(s); setSizeError(false); }} />
@@ -324,6 +326,21 @@ export function BuyColumn({ product, dealBreakers = [] }: { product: HammerexPro
 
       <PurchaseNotes notes={product.purchase_notes} />
 
+      <a
+        href="/terms-and-conditions#3-year-free-repair-warranty"
+        className="block rounded-xl border border-brand-accent/40 bg-brand-accent/5 p-3 text-xs text-brand-muted transition hover:border-brand-accent"
+      >
+        <div className="flex items-center gap-2 text-brand-accent">
+          <Shield />
+          <span className="font-bold uppercase tracking-widest">3-year free repair</span>
+        </div>
+        <p className="mt-1 leading-relaxed">
+          Confirmed manufacturing defects repaired free for 3 years from dispatch — you pay
+          inbound postage, we pay return. Every order recorded by CCTV at dispatch.{" "}
+          <span className="font-semibold text-brand-text">See terms →</span>
+        </p>
+      </a>
+
       <ul className="grid grid-cols-2 gap-2 text-xs text-brand-muted">
         <li className="flex items-center gap-2 rounded-lg border border-brand-line bg-brand-surface p-2">
           <Shield /> Authentic
@@ -338,6 +355,11 @@ export function BuyColumn({ product, dealBreakers = [] }: { product: HammerexPro
           <Lock /> Secure checkout
         </li>
       </ul>
+
+      {/* Deal Breakers — skipped on Pro Kit PDPs since kits are already
+          bundles. The component itself filters items that are already in
+          the cart so a buyer can't accidentally double-add. */}
+      {product.badge_label !== "PRO KIT" && <CheckoutDealBreakers />}
     </div>
   );
 }

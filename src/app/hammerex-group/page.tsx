@@ -15,7 +15,7 @@ export const metadata: Metadata = {
       "Manufacturer of innovative construction tools and accessories. Standards, innovation, daily operations and worldwide distribution.",
     url: "/hammerex-group",
     siteName: BRAND.name,
-    images: [{ url: BRAND.logo, alt: `${BRAND.name} Group` }]
+    images: [{ url: "https://ik.imagekit.io/9mrgsv2rp/Untitledewrwerwerwerwerwerwerasdasdsdasddfsdf.png", alt: `${BRAND.name} production facility` }]
   }
 };
 
@@ -39,6 +39,21 @@ export default function HammerexGroupPage() {
           year on year — while keeping the same operating principle that started it all:
           solve a real problem, build it to last, sell it at a fair price.
         </p>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-10">
+        <figure className="overflow-hidden rounded-2xl border border-brand-line bg-black">
+          <img
+            src="https://ik.imagekit.io/9mrgsv2rp/Untitledewrwerwerwerwerwerwerasdasdsdasddfsdf.png"
+            alt="Inside the Hammerex production facility — cutting, stitching and quality-inspection stations"
+            loading="lazy"
+            decoding="async"
+            className="block aspect-[16/9] w-full object-cover"
+          />
+          <figcaption className="border-t border-brand-line px-4 py-3 text-xs uppercase tracking-widest text-brand-muted">
+            Inside the Hammerex production facility — cutting, stitching and quality inspection under one roof.
+          </figcaption>
+        </figure>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-10">
@@ -89,8 +104,9 @@ export default function HammerexGroupPage() {
             plastering and carpentry to electrical, metal fabrication and joinery.
             Wholesale distributors operate in protected territories with agreed monthly
             targets, ensuring fair competition and reliable supply across the regions
-            they serve. International orders ship by sea or air on every consignment,
-            booked on the buyer&apos;s behalf at the most competitive rate available.
+            they serve. Direct retail orders ship at one flat £20 rate via EMS Air Mail
+            to UK, USA and Australia — 5–6 days transit. Other destinations are quoted
+            on WhatsApp after checkout.
           </Block>
 
           <Block title="Our aim" eyebrow="What we are building toward">

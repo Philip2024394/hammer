@@ -8,9 +8,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const now = new Date();
 
-  const [catsRes, prodsRes] = await Promise.all([
+  const [catsRes, prodsRes, guidesRes] = await Promise.all([
     supabase.from("hammerex_categories").select("slug").order("sort_order"),
-    supabase.from("hammerex_products").select("slug, id, created_at")
+    supabase.from("hammerex_products").select("slug, id, created_at"),
+    supabase.from("hammerex_guides").select("slug, updated_at").eq("published", true)
   ]);
 
   const categories: MetadataRoute.Sitemap = (catsRes.data ?? [])
@@ -30,9 +31,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9
     }));
 
+  const guides: MetadataRoute.Sitemap = (guidesRes.data ?? [])
+    .filter((g) => g.slug)
+    .map((g) => ({
+      url: `${base}/guides/${g.slug}`,
+      lastModified: g.updated_at ? new Date(g.updated_at) : now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8
+    }));
+
   return [
     { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     ...categories,
-    ...products
+    ...products,
+    ...guides
   ];
 }

@@ -4,18 +4,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { FreightSelector } from "@/components/checkout/FreightSelector";
+import { CheckoutDealBreakers } from "@/components/checkout/CheckoutDealBreakers";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
 import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
-import { adminWhatsapp, buildQuoteMessage, quoteUrl, type FreightChoice } from "@/lib/whatsapp";
+import { adminWhatsapp, buildQuoteMessage, quoteUrl } from "@/lib/whatsapp";
 import { logQuoteClick } from "@/lib/quoteSignals";
+import { MIN_ORDER_IDR, MIN_ORDER_LABEL_GBP, TIER_2_THRESHOLD_IDR, shippingForSubtotal } from "@/lib/shipping";
+import { CartProgressBar } from "@/components/cart/CartProgressBar";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
-  const [freight, setFreight] = useState<FreightChoice>("sea");
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [address, setAddress] = useState("");
@@ -30,14 +32,18 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
+  const minReached = subtotal >= MIN_ORDER_IDR;
+  const shipping = shippingForSubtotal(subtotal);
+  const orderTotal = subtotal + shipping;
+  const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const hasPaidLine = lines.some((l) => l.unitPriceIdr > 0);
-  const formValid = name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
+  const formValid = minReached && name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
 
   const href = useMemo(() => {
     if (!formValid) return "#";
-    const message = buildQuoteMessage({ lines, freight, name, country, address, whatsapp, email });
+    const message = buildQuoteMessage({ lines, name, country, address, whatsapp, email });
     return quoteUrl(message, adminWhatsapp());
-  }, [formValid, lines, freight, name, country, address, whatsapp, email]);
+  }, [formValid, lines, name, country, address, whatsapp, email]);
 
   if (!ready) return <main><Header /></main>;
 
@@ -63,19 +69,24 @@ export default function CheckoutPage() {
       <Header />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
+        <div className="mb-4">
+          <CartProgressBar subtotalIdr={subtotal} />
+        </div>
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
           <HeaderIcon icon={<Truck size={18} />} />
           <div>
-            <p className="text-sm font-semibold text-brand-text">Delivery is quoted per order.</p>
+            <p className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia.</p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              Because shipping cost depends on the destination country and the quantities in your cart, we quote each order direct at today's rates. Pick your preferred freight option below, share your details, and we confirm the delivery price on WhatsApp before you pay.
+              £30 minimum order. <span className="font-semibold text-brand-text">£28 shipping on £30–£49 orders</span>, <span className="font-semibold text-brand-text">£20 flat once you reach £50</span>. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Shipping to other countries is confirmed on WhatsApp after you submit your details below.
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-6">
-            <FreightSelector value={freight} onChange={setFreight} />
+            <FreightSelector />
+
+            <CheckoutDealBreakers />
 
             <fieldset className="flex flex-col gap-3">
               <legend className="mb-1 flex items-center gap-2 text-sm font-semibold text-brand-text">
@@ -118,16 +129,23 @@ export default function CheckoutPage() {
                 <span>Subtotal</span>
                 <span className="text-brand-text">{formatPrice(subtotal, "IDR")}</span>
               </div>
+              <div className="mt-1 flex justify-between text-brand-muted">
+                <span>
+                  Shipping{tier2Reached ? " (£20 flat)" : " (£28 — £30–£49 tier)"}
+                </span>
+                <span className="text-brand-text">{formatPrice(shipping, "IDR")}</span>
+              </div>
+              <div className="my-2 border-t border-brand-line" />
+              <div className="flex justify-between text-sm font-semibold">
+                <span className="text-brand-text">Order total</span>
+                <span className="text-brand-accent">{formatPrice(orderTotal, "IDR")}</span>
+              </div>
               {dominantCurrency !== "IDR" && (
                 <div className="mt-1 flex justify-between text-brand-muted">
                   <span>Indicative</span>
-                  <span className="text-brand-accent">{formatPrice(subtotal, dominantCurrency)}</span>
+                  <span className="text-brand-accent">{formatPrice(orderTotal, dominantCurrency)}</span>
                 </div>
               )}
-              <div className="mt-1 flex justify-between text-brand-muted">
-                <span>Delivery</span>
-                <span className="text-brand-accent">Quoted</span>
-              </div>
             </div>
 
             <a
@@ -153,7 +171,8 @@ export default function CheckoutPage() {
               </p>
             )}
             <p className="mt-2 text-xs text-brand-muted">
-              Opens WhatsApp with your details and cart pre-filled. We reply with a delivery price for your selected freight method.
+              Opens WhatsApp with your order pre-filled. £20 flat shipping applies to UK, USA
+              and Australia — other countries are confirmed on the same chat before payment.
             </p>
           </aside>
         </div>
@@ -162,9 +181,12 @@ export default function CheckoutPage() {
       <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 border-t border-brand-line bg-brand-bg/95 px-3 py-2 backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-4xl items-center gap-3">
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="text-xs text-brand-muted">{lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"} · delivery quoted</span>
+            <span className="text-xs text-brand-muted">
+              {lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}
+              {minReached ? ` · ${tier2Reached ? "£20 flat" : "£28 ship"} UK/USA/AU` : ` · £30 min`}
+            </span>
             <span className="truncate text-sm font-bold text-brand-text">
-              {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
+              {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}
             </span>
           </div>
           <a

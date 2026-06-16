@@ -9,11 +9,12 @@ export function DeliveryFooter() {
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-brand-text">International delivery</h3>
+            <h3 className="text-sm font-semibold text-brand-text">Two-tier shipping — UK, USA, Australia</h3>
             <p className="mt-1 text-xs text-brand-muted">
-              We ship Hammerex products worldwide via tracked courier. Delivery cost is quoted at
-              checkout — import duties and local taxes are not included and are paid by the buyer
-              on arrival.
+              £30 minimum order. £28 shipping on £30–£49 orders, £20 flat once you reach
+              £50. Dispatched within 3 working days via EMS Air Mail — 5–6 days transit.
+              Shipping to other countries is confirmed on WhatsApp after checkout. Import
+              duties and local taxes are not included and are paid by the buyer on arrival.
             </p>
           </div>
         </article>
@@ -36,6 +37,7 @@ export function DeliveryFooter() {
       <nav className="mt-6 flex flex-wrap items-center justify-center gap-1 text-xs font-semibold uppercase tracking-widest text-brand-muted" aria-label="Site links">
         {[
           { href: "/", label: "Home" },
+          { href: "/guides", label: "Guides" },
           { href: "/hammerex-group", label: "Hammerex Group" },
           { href: "/purchasing-tips", label: "Purchasing tips" },
           { href: "/partners", label: "Distribution partners" },

@@ -6,13 +6,13 @@ import { BRAND } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Purchasing Tips",
   description:
-    "How international freight pricing works, why small orders look expensive, and how to get the best per-item delivery cost on Hammerex orders.",
+    "Hammerex retail orders ship at £20 flat to UK, USA and Australia. Other countries are quoted on WhatsApp after checkout. Plus background on freight pricing for larger consignments.",
   alternates: { canonical: "/purchasing-tips" },
   openGraph: {
     type: "article",
     title: `Purchasing Tips | ${BRAND.name}`,
     description:
-      "Freight & delivery explained — sea vs air, the 2-7kg sweet spot, self-collection, and how to read your checkout cost.",
+      "£20 flat shipping to UK, USA, Australia. Other countries confirmed on WhatsApp. Freight education for buyers consolidating heavier consignments.",
     url: "/purchasing-tips",
     siteName: BRAND.name,
     images: [{ url: BRAND.logo, alt: `${BRAND.name} purchasing tips` }]
@@ -32,12 +32,29 @@ export default function PurchasingTipsPage() {
           Purchasing Tips
         </h1>
         <p className="mt-1 text-sm text-brand-muted">
-          Freight &amp; delivery — explained openly so your checkout cost makes sense.
+          Retail orders ship at £20 flat to UK, USA and Australia. Other countries are confirmed on WhatsApp.
         </p>
       </section>
 
       <section className="mx-auto max-w-3xl px-4 pb-10">
         <article className="flex flex-col gap-8 text-sm leading-relaxed text-brand-text">
+          <Block title="Direct retail — £20 flat to UK, USA, Australia">
+            <p className="text-brand-muted">
+              For everyday retail orders placed on this site, shipping is a flat
+              <span className="font-semibold text-brand-text"> £20 per order </span>
+              to UK, USA and Australia regardless of basket size. Dispatched within 3 working
+              days via EMS Air Mail — 5–6 days transit. Import duties and local taxes are the
+              buyer&apos;s responsibility on arrival.
+            </p>
+            <p className="mt-3 text-brand-muted">
+              Shipping to other countries is confirmed on WhatsApp after you submit the
+              checkout form — we quote the actual EMS rate to your destination before you pay.
+              The sections below explain how freight really works under the hood — useful if
+              you&apos;re consolidating a heavier consignment, using your own forwarder, or
+              quoting a wholesale order outside the flat-rate retail flow.
+            </p>
+          </Block>
+
           <Block title="Why small orders can look expensive">
             <p className="text-brand-muted">
               Freight is rarely cheap on small parcels, and the reason is simple. Every international

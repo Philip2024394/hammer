@@ -12,9 +12,9 @@ export function ShippingReturns({ warrantyYears, dispatchLeadDays }: {
         <h2 className="mb-6 text-lg font-semibold text-brand-text">Delivery & returns</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <article className="rounded-2xl border border-brand-line bg-brand-surface p-5">
-            <h3 className="text-sm font-semibold text-brand-text">Delivery — quoted per order</h3>
+            <h3 className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia</h3>
             <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-              Dispatch is estimated at 3 working days and confirmed on the WhatsApp quote based on production readiness at the moment of order. After dispatch, pick sea freight (4–6 weeks transit) or air freight (5–6 days transit worldwide — UK, USA, Australia, EU). Cost depends on your country and the items in your cart — we confirm today's rate direct on WhatsApp before you pay.
+              £30 minimum order. £28 shipping on £30–£49 orders, £20 flat once you reach £50. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Tracked end-to-end. Shipping to other countries is confirmed on WhatsApp after checkout. Import duties and local taxes are the buyer&apos;s responsibility on arrival.
             </p>
           </article>
 

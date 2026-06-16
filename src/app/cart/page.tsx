@@ -6,6 +6,8 @@ import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
+import { MIN_ORDER_IDR, MIN_ORDER_LABEL_GBP, TIER_2_THRESHOLD_IDR, shippingForSubtotal } from "@/lib/shipping";
+import { CartProgressBar } from "@/components/cart/CartProgressBar";
 
 export default function CartPage() {
   const [lines, setLines] = useState<CartLine[]>([]);
@@ -20,6 +22,10 @@ export default function CartPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
+  const minReached = subtotal >= MIN_ORDER_IDR;
+  const shipping = shippingForSubtotal(subtotal);
+  const orderTotal = subtotal + shipping;
+  const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const dominantCurrency = (lines.find((l) => l.baseCurrency && l.baseCurrency !== "IDR")?.baseCurrency ?? "IDR") as "IDR" | "USD" | "SGD" | "AUD" | "EUR" | "GBP";
 
   return (
@@ -52,7 +58,9 @@ export default function CartPage() {
                         {l.sku && <p className="text-xs font-semibold text-brand-accent">Ref: {l.sku}</p>}
                         {l.variantLabel === "WELCOME GIFT"
                           ? <p className="inline-flex items-center gap-1 rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-brand-accent">🎁 Welcome gift</p>
-                          : l.variantLabel && <p className="text-xs text-brand-muted">Option: {l.variantLabel}</p>}
+                          : l.variantLabel === "DEAL BREAKER"
+                            ? <p className="inline-flex items-center gap-1 rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-brand-accent">⚡ Deal Breaker · 15% off</p>
+                            : l.variantLabel && <p className="text-xs text-brand-muted">Option: {l.variantLabel}</p>}
                         {l.size && <p className="text-xs text-brand-muted">Size: {l.size}</p>}
                         {l.threadColor && <p className="text-xs text-brand-muted">Thread: {threadColorLabel(l.threadColor)}</p>}
                         {l.backpackStraps && <p className="text-xs text-brand-accent">+ Backpack straps add-on</p>}
@@ -108,21 +116,51 @@ export default function CartPage() {
             </ul>
 
             <aside className="h-fit rounded-2xl border border-brand-line bg-brand-surface p-5">
+              <div className="mb-4">
+                <CartProgressBar subtotalIdr={subtotal} />
+              </div>
               <h2 className="text-sm font-semibold text-brand-text">Summary</h2>
               <dl className="mt-4 space-y-2">
                 <div className="flex justify-between text-xs text-brand-muted">
                   <dt>Subtotal ({lines.reduce((s, l) => s + l.qty, 0)} items)</dt>
                   <dd className="text-brand-text">{formatPrice(subtotal, "IDR")}</dd>
                 </div>
+                <div className="flex justify-between text-xs text-brand-muted">
+                  <dt>
+                    Shipping{tier2Reached ? " (£20 flat)" : minReached ? " (£28 — £30–£49 tier)" : ""}
+                  </dt>
+                  <dd className={minReached ? "text-brand-text" : "text-brand-muted"}>
+                    {minReached ? formatPrice(shipping, "IDR") : `${MIN_ORDER_LABEL_GBP} min to unlock`}
+                  </dd>
+                </div>
+                <div className="my-1 border-t border-brand-line" />
+                <div className="flex justify-between text-sm font-semibold">
+                  <dt className="text-brand-text">Order total</dt>
+                  <dd className="text-brand-accent">{formatPrice(orderTotal, "IDR")}</dd>
+                </div>
               </dl>
               <p className="mt-3 text-xs leading-relaxed text-brand-muted">
-                Delivery is quoted per order — sea or air, your choice — once we see your destination and quantities.
+                £20 flat shipping to UK, USA and Australia via EMS Air Mail. Dispatch within
+                3 working days, 5–6 days transit. Shipping to other countries is confirmed
+                on WhatsApp after checkout.
               </p>
               <div className="my-4 border-t border-brand-line" />
-              <a
-                href="/checkout"
-                className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
-              >Proceed to checkout</a>
+              {minReached ? (
+                <a
+                  href="/checkout"
+                  className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
+                >Proceed to checkout</a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="grid h-12 w-full place-items-center rounded-full bg-brand-surface text-sm font-semibold text-brand-muted opacity-60"
+                  title={`Add more items to reach the ${MIN_ORDER_LABEL_GBP} minimum`}
+                >
+                  Add {formatPrice(Math.max(0, 600000 - subtotal), "GBP")} more to checkout
+                </button>
+              )}
               <a
                 href="/"
                 className="mt-2 grid h-11 place-items-center rounded-full border border-brand-line bg-black text-xs font-semibold text-brand-text hover:border-brand-accent"
@@ -160,13 +198,22 @@ export default function CartPage() {
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="text-xs text-brand-muted">{lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}</span>
               <span className="truncate text-sm font-bold text-brand-text">
-                {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
+                {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}
               </span>
             </div>
-            <a
-              href="/checkout"
-              className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
-            >Checkout →</a>
+            {minReached ? (
+              <a
+                href="/checkout"
+                className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
+              >Checkout →</a>
+            ) : (
+              <span
+                aria-disabled="true"
+                className="grid h-12 place-items-center rounded-full bg-brand-surface px-5 text-xs font-bold uppercase tracking-widest text-brand-muted opacity-70"
+              >
+                + {formatPrice(Math.max(0, 600000 - subtotal), "GBP")}
+              </span>
+            )}
           </div>
         </div>
       )}

@@ -25,6 +25,10 @@ html, body {
 body {
   min-height: 100vh;
   min-height: 100dvh;
+  /* Safety net: never allow horizontal scroll, however a child element is sized.
+     This is what prevents the whole page from shifting right when any nested
+     section uses w-screen or has a wider-than-viewport child. */
+  overflow-x: hidden;
 }
 
 /* Hide native scrollbars on horizontal carousels but keep scrolling */
@@ -106,12 +110,14 @@ body {
   animation: hx-ping-kf 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Ken-Burns slow zoom for the active hero slide */
+/* Ken-Burns slow zoom for the active hero slide.
+   transform-origin: center is set explicitly so the scale overshoot grows
+   equally both sides — the image can never drift left or right. */
 @keyframes hx-kenburns-kf {
-  from { transform: scale(1);     }
-  to   { transform: scale(1.06);  }
+  from { transform: scale(1);     transform-origin: center; }
+  to   { transform: scale(1.06);  transform-origin: center; }
 }
-.hx-kenburns { animation: hx-kenburns-kf 7s ease-out forwards; }
+.hx-kenburns { animation: hx-kenburns-kf 7s ease-out forwards; transform-origin: center; }
 
 /* Product card tilt lift — applied via group-hover */
 .hx-card-tilt {

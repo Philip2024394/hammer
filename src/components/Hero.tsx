@@ -28,9 +28,17 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="relative w-full">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-black sm:aspect-[16/9]">
+    // Defensive constraints (in order of priority):
+    //   max-w-full + max-w-[100vw] guarantee the section never exceeds the
+    //     viewport width — protects against any inherited width oddity.
+    //   overflow-hidden on BOTH wrappers makes sure neither the section
+    //     itself nor the aspect-ratio box can spill content sideways.
+    //   The Ken-Burns scale(1.06) animation now uses transform-origin: center
+    //     applied via inline style so any scale overshoot stays equal both
+    //     sides and the image never appears off-centre to the left.
+    <section className="relative w-full max-w-full overflow-hidden">
+      <div className="relative w-full max-w-[100vw] overflow-hidden">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-black sm:aspect-[16/9] lg:aspect-auto lg:h-[calc(100vh-96px)] lg:min-h-[560px] lg:max-h-[820px]">
           {HERO_SRCS.map((src, i) => (
             <img
               key={src}
@@ -44,7 +52,19 @@ export function Hero() {
               loading={i === 0 ? "eager" : "lazy"}
               decoding="async"
               aria-hidden={i === index ? undefined : true}
-              className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-700 ease-in-out ${
+              style={{ transformOrigin: "center center" }}
+              // IMPORTANT: object-cover (NOT contain). Source images aren't a
+              // uniform 16:9 — some are taller. object-contain would scale
+              // them down to fit the box height and centre them, leaving
+              // visible side bars on portrait-leaning images so the hero
+              // looks "narrow" on mobile. object-cover guarantees the image
+              // fills the full container width on every breakpoint, even if
+              // it has to crop a little top/bottom. Do not revert.
+              //
+              // object-center (default) is made explicit so any Ken-Burns
+              // overshoot stays equal both sides and the image never appears
+              // shifted off-screen to the left.
+              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ease-in-out ${
                 i === index ? "opacity-100 hx-kenburns" : "opacity-0"
               }`}
             />
