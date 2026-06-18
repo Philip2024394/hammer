@@ -11,7 +11,8 @@ const FALLBACK_EXTRAS = {
   base_currency: null, sizes: null, dispatch_lead_days: null,
   delivery_quote_only: null, purchase_notes: null, badge_label: null,
   subtitle: null, home_sort_order: null, thread_color_option_idr: null,
-  backpack_straps_option_idr: null, is_universal: null
+  backpack_straps_option_idr: null, is_universal: null,
+  shipping_per_unit_idr: null
 };
 
 const FALLBACK: HammerexProduct[] = [
@@ -34,8 +35,57 @@ function Check() {
   );
 }
 
-export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product" }: { items?: HammerexProduct[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category" }) {
+export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product", layout = "portrait" }: { items?: HammerexProduct[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category"; layout?: "portrait" | "landscape" }) {
   const data = (items?.length ? items : FALLBACK);
+
+  if (layout === "landscape") {
+    return (
+      <section className="mx-auto max-w-6xl px-4 pt-8">
+        {!hideHeader && <SectionHeader title={title ?? "Featured products"} viewAllHref={viewAllHref ?? "/products"} />}
+
+        <ul className="flex flex-col gap-4 sm:gap-5">
+          {data.map((p) => {
+            const productHref = p.slug ? `/product/${p.slug}` : "#";
+            const categoryHref = p.category ? `/c/${p.category.slug}` : productHref;
+            const href = linkTo === "category" ? categoryHref : productHref;
+            const ctaLabel = linkTo === "category" ? "Browse category" : "View product";
+            return (
+              <li key={p.id} className="group relative">
+                <article className="relative overflow-hidden rounded-2xl bg-brand-surface">
+                  <a href={href} className="block w-full overflow-hidden">
+                    {p.image_url && (
+                      <img
+                        src={imageUrl(p.image_url, 1280) ?? p.image_url}
+                        srcSet={`${imageUrl(p.image_url, 640) ?? p.image_url} 640w, ${imageUrl(p.image_url, 960) ?? p.image_url} 960w, ${imageUrl(p.image_url, 1280) ?? p.image_url} 1280w`}
+                        sizes="(min-width: 1024px) 1120px, 100vw"
+                        alt={p.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="block w-full h-auto"
+                      />
+                    )}
+                  </a>
+                  <div className="flex items-center justify-between gap-3 border-t border-brand-line p-3 sm:p-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-bold uppercase tracking-wide text-brand-text sm:text-base">{p.name}</div>
+                      <div className="text-base font-bold text-brand-accent sm:text-lg">{formatProductPrice(p)}</div>
+                    </div>
+                    <a
+                      href={href}
+                      className="grid h-11 grid-cols-[1fr_auto] items-center gap-2 rounded-md bg-brand-accent px-4 text-xs font-bold uppercase tracking-wider text-black transition active:scale-[0.98] hover:opacity-90 sm:text-sm"
+                    >
+                      <span>{ctaLabel}</span>
+                      <span aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8">
@@ -62,8 +112,12 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-x-4 -bottom-2 h-6 rounded-full bg-brand-accent/0 blur-2xl transition-all duration-300 group-hover:bg-brand-accent/55"
               />
-              <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-black transition-colors duration-200 group-hover:border-brand-accent">
-                <a href={href} className="relative block aspect-square w-full overflow-hidden bg-black">
+              <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-brand-surface transition-colors duration-200">
+                <a
+                  href={href}
+                  className="relative block aspect-square w-full overflow-hidden"
+                  style={{ background: "radial-gradient(circle at center, rgb(255 179 0 / 0.10) 0%, rgb(0 0 0) 72%)" }}
+                >
                   <CardActionOverlay slug={p.slug} />
                   {p.badge_label && (
                     <span

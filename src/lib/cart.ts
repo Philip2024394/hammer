@@ -17,6 +17,10 @@ export type CartLine = {
   variantId: string | null;
   variantLabel: string | null;
   backpackStraps: boolean;
+  // Optional per-unit shipping override (IDR). If set, this line contributes
+  // qty × shippingPerUnitIdr to the cart's shipping total instead of falling
+  // back to the tier-based shippingForSubtotal model.
+  shippingPerUnitIdr?: number | null;
 };
 
 function read(): CartLine[] {

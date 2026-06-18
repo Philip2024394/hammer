@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { HammerexProductMedia } from "@/lib/supabase";
 import { useVariant } from "./VariantContext";
+import { useDeal } from "./DealContext";
+import { DealSwitcher } from "./DealSwitcher";
 import { ShareButton } from "./ShareButton";
 
 const SWIPE_THRESHOLD = 50;
@@ -13,6 +15,7 @@ export function ProductGallery({ media, fallbackImage, name }: {
   name: string;
 }) {
   const variantCtx = useVariant();
+  const dealCtx = useDeal();
   const images = media.filter((m) => m.kind === "image");
   const seed = images.length
     ? images
@@ -22,7 +25,13 @@ export function ProductGallery({ media, fallbackImage, name }: {
 
   const [active, setActive] = useState(0);
   const [zoomed, setZoomed] = useState(false);
-  const current = seed[active];
+  const [aspect, setAspect] = useState<number | null>(null);
+  // When a deal is active, the visible banner swaps to the deal's image
+  // but the thumbnails strip keeps showing the original product banners.
+  // Tapping a thumbnail deselects the deal (see thumbnail onClick below).
+  const current = dealCtx?.active
+    ? { id: `deal-${dealCtx.active.id}`, product_id: "", kind: "image" as const, url: dealCtx.active.banner_url, alt: dealCtx.active.name, sort_order: 0 }
+    : seed[active];
   const dragX = useRef<number | null>(null);
 
   useEffect(() => {
@@ -31,6 +40,34 @@ export function ProductGallery({ media, fallbackImage, name }: {
     const idx = seed.findIndex((m) => m.url === url);
     if (idx >= 0 && idx !== active) setActive(idx);
   }, [variantCtx?.active?.id]);
+
+  // Pre-measure every gallery image so the container can lock to the SMALLEST
+  // aspect ratio (most-square image). Every banner then displays at full width;
+  // wider banners get small top/bottom bands instead of horizontal letterbox.
+  useEffect(() => {
+    if (seed.length === 0) return;
+    const ratios: number[] = [];
+    let pending = seed.length;
+    let cancelled = false;
+    const settle = () => {
+      pending -= 1;
+      if (pending === 0 && !cancelled && ratios.length > 0) {
+        setAspect(Math.min(...ratios));
+      }
+    };
+    seed.forEach((m) => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          ratios.push(img.naturalWidth / img.naturalHeight);
+        }
+        settle();
+      };
+      img.onerror = settle;
+      img.src = m.url;
+    });
+    return () => { cancelled = true; };
+  }, [seed.map((s) => s.id).join("|")]);
 
   useEffect(() => {
     if (!zoomed) return;
@@ -61,26 +98,11 @@ export function ProductGallery({ media, fallbackImage, name }: {
   }
 
   return (
-    <div className="flex gap-3">
-      <ol className="hidden w-20 shrink-0 flex-col gap-2 sm:flex">
-        {seed.map((m, i) => (
-          <li key={m.id}>
-            <button
-              type="button"
-              onClick={() => setActive(i)}
-              aria-label={`View image ${i + 1}`}
-              aria-current={i === active}
-              className={`block h-20 w-20 overflow-hidden rounded-lg border transition ${i === active ? "border-brand-accent" : "border-brand-line"} bg-brand-surface hover:border-brand-accent`}
-            >
-              <img src={m.url} alt={m.alt ?? ""} loading="lazy" decoding="async" width="80" height="80" className="h-full w-full object-contain p-1" />
-            </button>
-          </li>
-        ))}
-      </ol>
-
-      <div className="min-w-0 flex-1">
+    <div>
+      <div>
         <div
-          className="relative aspect-square w-full select-none touch-pan-y"
+          className="relative w-full select-none touch-pan-y"
+          style={aspect ? { aspectRatio: String(aspect) } : undefined}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
           onPointerCancel={() => { dragX.current = null; }}
@@ -89,45 +111,29 @@ export function ProductGallery({ media, fallbackImage, name }: {
             type="button"
             onClick={() => setZoomed(true)}
             aria-label="Zoom image"
-            className="absolute inset-0 overflow-hidden"
+            className="block h-full w-full overflow-hidden rounded-2xl"
+            style={{ background: "radial-gradient(circle at center, rgb(255 179 0 / 0.10) 0%, rgb(0 0 0) 72%)" }}
           >
             <img
               key={current.id}
               src={current.url}
               alt={current.alt ?? name}
-              width="800"
-              height="800"
               fetchPriority="high"
               decoding="async"
-              className="h-full w-full object-contain transition-opacity duration-200"
+              className={aspect ? "block h-full w-full object-contain transition-opacity duration-200" : "block w-full h-auto transition-opacity duration-200"}
             />
           </button>
 
-          {seed.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={prev}
-                aria-label="Previous image"
-                className="absolute left-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-brand-line bg-brand-bg/80 text-brand-text backdrop-blur transition hover:border-brand-accent hover:text-brand-accent sm:grid"
-              >‹</button>
-              <button
-                type="button"
-                onClick={next}
-                aria-label="Next image"
-                className="absolute right-2 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-brand-line bg-brand-bg/80 text-brand-text backdrop-blur transition hover:border-brand-accent hover:text-brand-accent sm:grid"
-              >›</button>
-
-              <div className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-1.5 sm:hidden">
-                {seed.map((_, i) => (
-                  <span
-                    key={i}
-                    aria-hidden="true"
-                    className={`h-1.5 rounded-full transition-all ${i === active ? "w-6 bg-brand-accent" : "w-1.5 bg-brand-line"}`}
-                  />
-                ))}
-              </div>
-            </>
+          {seed.length > 1 && !dealCtx?.active && (
+            <div className="absolute inset-x-3 bottom-3 z-10 flex items-center gap-1.5">
+              {seed.map((_, i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  className={`h-1 flex-1 rounded-full transition-all ${i === active ? "bg-brand-accent" : "bg-white/30"}`}
+                />
+              ))}
+            </div>
           )}
 
           <div className="absolute right-3 top-3 z-10">
@@ -135,20 +141,32 @@ export function ProductGallery({ media, fallbackImage, name }: {
           </div>
         </div>
 
-        <ol className="scrollbar-none mt-3 flex gap-2 overflow-x-auto sm:hidden">
-          {seed.map((m, i) => (
-            <li key={m.id}>
-              <button
-                type="button"
-                onClick={() => setActive(i)}
-                aria-label={`View image ${i + 1}`}
-                className={`h-16 w-16 overflow-hidden rounded-md border transition ${i === active ? "border-brand-accent" : "border-brand-line"} bg-brand-surface`}
-              >
-                <img src={m.url} alt={m.alt ?? ""} loading="lazy" decoding="async" width="64" height="64" className="h-full w-full object-contain p-1" />
-              </button>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          {seed.length > 1 ? (
+            <ol className="scrollbar-none flex justify-start gap-2 overflow-x-auto">
+              {seed.map((m, i) => {
+                const isActiveThumb = !dealCtx?.active && i === active;
+                return (
+                  <li key={m.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActive(i);
+                        if (dealCtx?.active) dealCtx.setActiveId(null);
+                      }}
+                      aria-label={`View image ${i + 1}`}
+                      aria-current={isActiveThumb}
+                      className={`block h-16 w-16 overflow-hidden rounded-md border transition ${isActiveThumb ? "border-brand-accent" : "border-brand-line"} bg-brand-surface hover:border-brand-accent sm:h-20 sm:w-20 sm:rounded-lg`}
+                    >
+                      <img src={m.url} alt={m.alt ?? ""} loading="lazy" decoding="async" width="80" height="80" className="h-full w-full object-contain p-1" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : <span />}
+          <DealSwitcher />
+        </div>
       </div>
 
       {zoomed && (

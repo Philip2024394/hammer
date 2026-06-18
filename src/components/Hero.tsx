@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { imageUrl } from "@/lib/imageUrl";
 
 const HERO_SRCS = [
-  "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/5e90c14e2eeae2ca.png",
-  "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/60c25cb2b78f9c91.png",
-  "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/eeb015bd361f3c57.png",
-  "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/22b848b905a646c1.png",
-  "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/fba957555d43988e.png?updatedAt=1781202487005"
+  "https://ik.imagekit.io/9mrgsv2rp/Untitledasdasdasdsdaasdqweqweasdasddsfsdfuuiui.png"
 ];
 
 const ROTATE_MS = 5500;
@@ -28,17 +24,13 @@ export function Hero() {
   }, []);
 
   return (
-    // Defensive constraints (in order of priority):
-    //   max-w-full + max-w-[100vw] guarantee the section never exceeds the
-    //     viewport width — protects against any inherited width oddity.
-    //   overflow-hidden on BOTH wrappers makes sure neither the section
-    //     itself nor the aspect-ratio box can spill content sideways.
-    //   The Ken-Burns scale(1.06) animation now uses transform-origin: center
-    //     applied via inline style so any scale overshoot stays equal both
-    //     sides and the image never appears off-centre to the left.
-    <section className="relative w-full max-w-full overflow-hidden">
-      <div className="relative w-full max-w-[100vw] overflow-hidden">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-black sm:aspect-[16/9] lg:aspect-auto lg:h-[calc(100vh-96px)] lg:min-h-[560px] lg:max-h-[820px]">
+    // Banner sits inside the standard max-w-6xl container with px-4 gutters
+    // so it visually aligns with every other section below it. Constant
+    // aspect-[16/9] on every breakpoint keeps the source banner uncropped
+    // top-to-bottom and side-to-side.
+    <section className="mx-auto max-w-6xl px-4 pt-4">
+      <div className="relative w-full overflow-hidden">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black">
           {HERO_SRCS.map((src, i) => (
             <img
               key={src}
@@ -70,20 +62,22 @@ export function Hero() {
             />
           ))}
 
-          <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-1.5 sm:bottom-4 sm:left-4">
-            {HERO_SRCS.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setIndex(i)}
-                aria-label={`Show banner ${i + 1}`}
-                aria-current={i === index ? "true" : undefined}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-8 bg-brand-accent" : "w-4 bg-white/40 hover:bg-white/70"
-                }`}
-              />
-            ))}
-          </div>
+          {HERO_SRCS.length > 1 && (
+            <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-1.5 sm:bottom-4 sm:left-4">
+              {HERO_SRCS.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-label={`Show banner ${i + 1}`}
+                  aria-current={i === index ? "true" : undefined}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === index ? "w-8 bg-brand-accent" : "w-4 bg-white/40 hover:bg-white/70"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -19,8 +19,7 @@ export function FreightSelector() {
         </div>
         <h3 className="mt-2 text-sm font-semibold text-brand-text">Two-tier shipping</h3>
         <ul className="mt-2 flex flex-col gap-1 text-xs text-brand-muted">
-          <li>· £30 minimum order</li>
-          <li>· £28 shipping on £30–£49 carts</li>
+          <li>· £28 shipping under £50</li>
           <li>· £20 flat shipping once you reach £50</li>
           <li>· Dispatch in 3 working days, 5–6 days transit</li>
           <li>· Tracked end-to-end · other countries quoted on WhatsApp</li>

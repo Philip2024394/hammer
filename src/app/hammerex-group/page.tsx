@@ -12,10 +12,10 @@ export const metadata: Metadata = {
     type: "article",
     title: `Hammerex Group | ${BRAND.name}`,
     description:
-      "Manufacturer of innovative construction tools and accessories. Standards, innovation, daily operations and worldwide distribution.",
+      "Manufacturer of innovative construction tools and accessories from our Yogyakarta factory. Standards, innovation, daily operations and the retail-across-Asia distribution model.",
     url: "/hammerex-group",
     siteName: BRAND.name,
-    images: [{ url: "https://ik.imagekit.io/9mrgsv2rp/Untitledewrwerwerwerwerwerwerasdasdsdasddfsdf.png", alt: `${BRAND.name} production facility` }]
+    images: [{ url: "https://ik.imagekit.io/9mrgsv2rp/Untitledewrwerwerwerwerwerwerasdasdsdasddfsdf.png", alt: `${BRAND.name} factory in Yogyakarta, Indonesia` }]
   }
 };
 
@@ -45,13 +45,13 @@ export default function HammerexGroupPage() {
         <figure className="overflow-hidden rounded-2xl border border-brand-line bg-black">
           <img
             src="https://ik.imagekit.io/9mrgsv2rp/Untitledewrwerwerwerwerwerwerasdasdsdasddfsdf.png"
-            alt="Inside the Hammerex production facility — cutting, stitching and quality-inspection stations"
+            alt="Inside the Hammerex factory in Yogyakarta, Indonesia — cutting, stitching and quality-inspection stations"
             loading="lazy"
             decoding="async"
             className="block aspect-[16/9] w-full object-cover"
           />
           <figcaption className="border-t border-brand-line px-4 py-3 text-xs uppercase tracking-widest text-brand-muted">
-            Inside the Hammerex production facility — cutting, stitching and quality inspection under one roof.
+            Inside the Hammerex factory in Yogyakarta, Indonesia — cutting, stitching and quality inspection under one roof.
           </figcaption>
         </figure>
       </section>
@@ -89,24 +89,25 @@ export default function HammerexGroupPage() {
           </Block>
 
           <Block title="Daily operations" eyebrow="What our weeks look like">
-            Manufacturing runs five days a week from our production facility. Quality
-            inspection happens on every batch before stock leaves the building. Dispatch
-            goes direct — there is no middleman warehouse in between us and the
-            customer. The customer service team is reachable on WhatsApp during working
-            hours for queries on orders, freight, partnership applications or product
-            advice, and most enquiries are responded to within one working day.
+            Manufacturing runs five days a week from our Yogyakarta factory. Cutting,
+            sewing, riveting, quality inspection and pack-out all happen under one
+            roof. Every batch is inspected before stock leaves the building, and
+            dispatch goes direct via EMS Air Mail — no middleman warehouse, no
+            reseller stage between us and the customer. The team is reachable on
+            WhatsApp during working hours for queries on orders, freight, partnership
+            applications or product advice, and most enquiries are responded to
+            within one working day.
           </Block>
 
-          <Block title="World market" eyebrow="Distribution across continents">
-            Hammerex products reach buyers across the UK, USA, Australia, Ireland, France,
-            Germany, the Netherlands, Spain, Turkey, Hong Kong and beyond. Retail partners
-            stock product across more than thirty trade categories — from scaffolding,
-            plastering and carpentry to electrical, metal fabrication and joinery.
-            Wholesale distributors operate in protected territories with agreed monthly
-            targets, ensuring fair competition and reliable supply across the regions
-            they serve. Direct retail orders ship at one flat £20 rate via EMS Air Mail
-            to UK, USA and Australia — 5–6 days transit. Other destinations are quoted
-            on WhatsApp after checkout.
+          <Block title="Where Hammerex sells today" eyebrow="Retail across Asia · direct to UK, USA, Australia">
+            Hammerex products are stocked through retail outlets across Asia and shipped
+            direct to tradesmen in the UK, USA and Australia from our Yogyakarta factory.
+            Our retail range covers more than thirty trade categories — from scaffolding,
+            plastering and carpentry to electrical, metal fabrication and joinery. We are
+            actively building out international wholesale partnerships in protected
+            territories. Direct retail orders to UK, USA and Australia ship via EMS Air
+            Mail (£28 on £30–£49 carts · £20 flat once you reach £50, 5–6 days transit).
+            Other destinations are quoted on WhatsApp after checkout.
           </Block>
 
           <Block title="Our aim" eyebrow="What we are building toward">
@@ -131,7 +132,7 @@ export default function HammerexGroupPage() {
         <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Stat number="15" label="Years on the market" />
           <Stat number="30+" label="Trade categories served" />
-          <Stat number="10" label="Countries with active distribution" />
+          <Stat number="Asia" label="Retail outlets across the region" />
         </div>
       </section>
 

@@ -43,21 +43,8 @@ export function ShareButton({ title }: { title?: string }) {
     }
   };
 
-  const onOpen = async (e: React.MouseEvent) => {
+  const onOpen = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      try {
-        await (navigator as Navigator & { share: (d: ShareData) => Promise<void> }).share({
-          title: shareTitle,
-          url: shareUrl,
-          text: shareTitle
-        });
-        return;
-      } catch (err: any) {
-        if (err?.name !== "AbortError") setOpen(true);
-        return;
-      }
-    }
     setOpen(true);
   };
 
@@ -67,7 +54,7 @@ export function ShareButton({ title }: { title?: string }) {
         type="button"
         onClick={onOpen}
         aria-label="Share this product"
-        className="grid h-11 w-11 place-items-center rounded-full border border-brand-line bg-black/70 text-brand-text backdrop-blur transition hover:border-brand-accent hover:text-brand-accent active:scale-95"
+        className="grid h-11 w-11 place-items-center rounded-full bg-brand-accent text-black shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition hover:opacity-90 active:scale-95"
       >
         <ShareIcon />
       </button>

@@ -14,7 +14,7 @@ export function ShippingReturns({ warrantyYears, dispatchLeadDays }: {
           <article className="rounded-2xl border border-brand-line bg-brand-surface p-5">
             <h3 className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia</h3>
             <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-              £30 minimum order. £28 shipping on £30–£49 orders, £20 flat once you reach £50. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Tracked end-to-end. Shipping to other countries is confirmed on WhatsApp after checkout. Import duties and local taxes are the buyer&apos;s responsibility on arrival.
+              £28 shipping under £50, £20 flat once you reach £50. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Tracked end-to-end. Shipping to other countries is confirmed on WhatsApp after checkout. Import duties and local taxes are the buyer&apos;s responsibility on arrival.
             </p>
           </article>
 

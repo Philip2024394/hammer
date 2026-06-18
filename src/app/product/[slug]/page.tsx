@@ -6,7 +6,6 @@ import { ProductGallery } from "@/components/pdp/ProductGallery";
 import { BuyColumn } from "@/components/pdp/BuyColumn";
 import { KeyFeatures } from "@/components/pdp/KeyFeatures";
 import { InTheBox } from "@/components/pdp/InTheBox";
-import { SpecsTable } from "@/components/pdp/SpecsTable";
 import { ShippingReturns } from "@/components/pdp/ShippingReturns";
 import { StickyBuyBar } from "@/components/pdp/StickyBuyBar";
 import { SectionAnchors } from "@/components/pdp/SectionAnchors";
@@ -27,9 +26,11 @@ import {
   type HammerexDealBreaker,
   type HammerexPairWith,
   type HammerexReview,
-  type HammerexQuestion
+  type HammerexQuestion,
+  type HammerexProductDeal
 } from "@/lib/supabase";
 import { VariantProvider } from "@/components/pdp/VariantContext";
+import { DealProvider } from "@/components/pdp/DealContext";
 import { RecordRecentView } from "@/components/RecordRecentView";
 import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
@@ -45,11 +46,12 @@ async function loadProduct(slug: string) {
   const product = productRes.data as HammerexProduct | null;
   if (!product) return null;
 
-  const [mediaRes, specsRes, boxRes, variantsRes, dealsRes, reviewsRes, qRes, pairsRes, bundleRes] = await Promise.all([
+  const [mediaRes, specsRes, boxRes, variantsRes, productDealsRes, dealsRes, reviewsRes, qRes, pairsRes, bundleRes] = await Promise.all([
     supabase.from("hammerex_product_media").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_product_specs").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_what_in_box").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_product_variants").select("*").eq("product_id", product.id).order("sort_order"),
+    supabase.from("hammerex_product_deals").select("*").eq("product_id", product.id).order("sort_order"),
     supabase.from("hammerex_deal_breakers")
       .select("*, item:hammerex_products!hammerex_deal_breakers_item_product_id_fkey(*, variants:hammerex_product_variants(*))")
       .eq("anchor_product_id", product.id)
@@ -112,6 +114,7 @@ async function loadProduct(slug: string) {
     specs: (specsRes.data ?? []) as HammerexProductSpec[],
     box: (boxRes.data ?? []) as HammerexWhatInBox[],
     variants: (variantsRes.data ?? []) as HammerexProductVariant[],
+    productDeals: (productDealsRes.data ?? []) as HammerexProductDeal[],
     dealBreakers,
     reviews: (reviewsRes.data ?? []) as HammerexReview[],
     questions,
@@ -161,17 +164,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const data = await loadProduct(slug);
   if (!data) notFound();
 
-  const { product, media, specs, box, variants, dealBreakers, reviews, questions, pairs, bundle } = data;
+  const { product, media, specs, box, variants, productDeals, dealBreakers, reviews, questions, pairs, bundle } = data;
   const stickyImage = media.find((m) => m.kind === "image")?.url ?? product.image_url;
 
   const categoryRes = product.category_id
     ? await supabase
         .from("hammerex_categories")
-        .select("id, slug, name, image_url, sort_order")
+        .select("id, slug, name, image_url, card_image_url, card_show_label, sort_order")
         .eq("id", product.category_id)
         .maybeSingle()
     : null;
   const category = categoryRes?.data ?? null;
+
+  const allCategoriesRes = await supabase
+    .from("hammerex_categories")
+    .select("slug, name")
+    .order("name");
+  const allCategories = (allCategoriesRes.data ?? []) as { slug: string; name: string }[];
 
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: "/" },
@@ -211,15 +220,22 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </nav>
 
       <VariantProvider variants={variants}>
-        <section className="mx-auto max-w-6xl px-4 pt-6">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <ProductGallery media={media} fallbackImage={product.image_url} name={product.name} />
-            <div id="pdp-buy-sentinel">
-              <BuyColumn product={product} />
+        <DealProvider deals={productDeals} unitPriceIdr={product.price_idr} productName={product.name}>
+          <section className="mx-auto max-w-6xl px-4 pt-6">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <ProductGallery media={media} fallbackImage={product.image_url} name={product.name} />
+              <div id="pdp-buy-sentinel">
+                <BuyColumn
+                  product={product}
+                  currentCategory={category ? { slug: category.slug, name: category.name } : null}
+                  allCategories={allCategories}
+                  specs={specs}
+                />
+              </div>
             </div>
-          </div>
-        </section>
-        <StickyBuyBar product={product} image={stickyImage} />
+          </section>
+          <StickyBuyBar product={product} image={stickyImage} />
+        </DealProvider>
       </VariantProvider>
 
       <div className="mx-auto max-w-6xl px-4 pt-8">
@@ -227,10 +243,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </div>
 
       <KeyFeatures features={product.features} />
-      <InTheBox items={box} />
+      <InTheBox items={box} fallbackImage={product.image_url} />
       <BundleBlock bundle={bundle} />
       <PairsWith pairs={pairs} />
-      <SpecsTable specs={specs} />
       <ReviewsBlock
         productId={product.id}
         productName={product.name}

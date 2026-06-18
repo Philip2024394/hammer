@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
+import { BrandStatementStrip } from "@/components/BrandStatementStrip";
 import { HomePageNotice } from "@/components/HomePageNotice";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { ToolTypesGrid } from "@/components/ToolTypesGrid";
@@ -24,6 +25,7 @@ export default function HomePage() {
     <main>
       <Header />
       <Hero />
+      <BrandStatementStrip />
       <HomePageNotice />
       <Suspense fallback={<div aria-hidden="true" className="h-64" />}>
         <HomeContent />
@@ -51,7 +53,7 @@ async function loadCategories(): Promise<HammerexCategory[]> {
   try {
     const cats = await supabase
       .from("hammerex_categories")
-      .select("id, slug, name, image_url, sort_order, is_tool_type")
+      .select("id, slug, name, image_url, card_image_url, card_show_label, sort_order, is_tool_type")
       .order("sort_order");
     return (cats.data ?? []) as HammerexCategory[];
   } catch {

@@ -1,47 +1,76 @@
-// "Built by the trade" trust block — short founder/factory story for the
-// home page. The copy here is intentionally generic until the user provides
-// the real story; swap the paragraph and replace the photo URL with a
-// genuine workshop / founder photo when ready.
-//
-// Update points:
-//   - the paragraph text below
-//   - the photo (currently the Hammerex logo as a clean placeholder)
-//   - the optional metric chips at the bottom (orders shipped, etc.) once
-//     there's honest data to display
+// Origin-story block on the home page. Frames Yogyakarta as a strength,
+// not a footnote — named factory city, designed-by-us positioning, and a
+// real workshop photo as the visual lead.
+
 export function BuiltByTheTradeBlock() {
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8">
       <div className="grid grid-cols-1 gap-6 rounded-3xl border border-brand-line bg-brand-surface p-6 sm:grid-cols-[1fr_1fr] sm:p-10">
         <div className="flex flex-col justify-center gap-3">
           <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
-            Built by the trade
+            Designed by us · Made by us · Shipped direct
           </p>
           <h2 className="text-2xl font-bold text-brand-text sm:text-3xl">
-            Made in the workshop. Tested on site.
+            Yogyakarta, Indonesia — the Hammerex factory.
           </h2>
           <p className="text-sm leading-relaxed text-brand-muted">
-            Hammerex is a small manufacturing team designing tool gear we use
-            ourselves. Every belt holder, bag and trowel ships out of our own
-            workshop after being reviewed and stitched by hand. We deal direct
-            with customers on WhatsApp because tradespeople deserve a real
-            human at the other end of the order, not a ticket queue.
+            Every Hammerex trowel holder, tool bag, leather belt and electrician&apos;s
+            pouch is designed in-house and stitched in our own Yogyakarta workshop.
+            Cutting, sewing, riveting, QC and pack-out all happen under one roof.
+            No outsourced assembly. No reseller markup. Direct from the team that
+            built it to the tradesman who&apos;ll use it.
           </p>
-          <p className="text-xs text-brand-muted">
-            <span className="font-semibold text-brand-text">Note for the team:</span>{" "}
-            replace this paragraph with the real founder bio + a workshop
-            photo when ready.
-          </p>
+          <ul className="mt-2 grid grid-cols-1 gap-1.5 text-xs leading-relaxed text-brand-muted sm:grid-cols-2">
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-brand-accent">✓</span>
+              <span>
+                <span className="font-semibold text-brand-text">In-house design.</span>{" "}
+                Tools built around real site problems.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-brand-accent">✓</span>
+              <span>
+                <span className="font-semibold text-brand-text">CCTV-recorded QC.</span>{" "}
+                Every unit inspected before pack.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-brand-accent">✓</span>
+              <span>
+                <span className="font-semibold text-brand-text">Direct shipment.</span>{" "}
+                EMS Air Mail Jakarta → your door.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-brand-accent">✓</span>
+              <span>
+                <span className="font-semibold text-brand-text">3-year repair warranty.</span>{" "}
+                We re-stitch, re-rivet, replace.
+              </span>
+            </li>
+          </ul>
+          <a
+            href="/hammerex-group"
+            className="mt-2 inline-flex w-fit items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-accent transition hover:opacity-80"
+          >
+            Read the Hammerex story →
+          </a>
         </div>
 
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-black">
+        <figure className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-black">
           <img
-            src="https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/85e5e067cf0cb299.png"
-            alt="Hammerex"
-            className="absolute inset-0 h-full w-full object-contain p-8"
+            src="https://ik.imagekit.io/9mrgsv2rp/Untitledewrwerwerwerwerwerwerasdasdsdasddfsdf.png?updatedAt=1781539251070"
+            alt="Inside the Hammerex factory in Yogyakarta, Indonesia — cutting, stitching and QC stations under one roof"
             loading="lazy"
             decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
           />
-        </div>
+          <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pb-3 pt-10 text-xs uppercase tracking-widest text-white">
+            <span className="font-semibold">Hammerex Factory</span>
+            <span className="text-brand-accent">Yogyakarta · Indonesia</span>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );

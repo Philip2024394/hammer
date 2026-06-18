@@ -12,8 +12,8 @@ export function CategoryHero({ category, productCount }: { category: HammerexCat
   const hasImage = Boolean(category.image_url);
 
   return (
-    <section className="relative w-full overflow-hidden bg-black">
-      <div className="relative aspect-[4/3] w-full sm:aspect-[16/6]">
+    <section className="mx-auto max-w-6xl px-4 pt-4">
+      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black sm:aspect-[16/6]">
         {hasImage && category.image_url && (
           <>
             <img

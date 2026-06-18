@@ -11,7 +11,7 @@ import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
 import { adminWhatsapp, buildQuoteMessage, quoteUrl } from "@/lib/whatsapp";
 import { logQuoteClick } from "@/lib/quoteSignals";
-import { MIN_ORDER_IDR, MIN_ORDER_LABEL_GBP, TIER_2_THRESHOLD_IDR, shippingForSubtotal } from "@/lib/shipping";
+import { TIER_2_THRESHOLD_IDR, shippingForCart } from "@/lib/shipping";
 import { CartProgressBar } from "@/components/cart/CartProgressBar";
 
 export default function CheckoutPage() {
@@ -32,12 +32,11 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
-  const minReached = subtotal >= MIN_ORDER_IDR;
-  const shipping = shippingForSubtotal(subtotal);
+  const shipping = shippingForCart(lines);
   const orderTotal = subtotal + shipping;
   const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const hasPaidLine = lines.some((l) => l.unitPriceIdr > 0);
-  const formValid = minReached && name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
+  const formValid = name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
 
   const href = useMemo(() => {
     if (!formValid) return "#";
@@ -77,7 +76,7 @@ export default function CheckoutPage() {
           <div>
             <p className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia.</p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              £30 minimum order. <span className="font-semibold text-brand-text">£28 shipping on £30–£49 orders</span>, <span className="font-semibold text-brand-text">£20 flat once you reach £50</span>. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Shipping to other countries is confirmed on WhatsApp after you submit your details below.
+<span className="font-semibold text-brand-text">£28 shipping under £50</span>, <span className="font-semibold text-brand-text">£20 flat once you reach £50</span>. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Shipping to other countries is confirmed on WhatsApp after you submit your details below.
             </p>
           </div>
         </div>
@@ -183,7 +182,7 @@ export default function CheckoutPage() {
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-xs text-brand-muted">
               {lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}
-              {minReached ? ` · ${tier2Reached ? "£20 flat" : "£28 ship"} UK/USA/AU` : ` · £30 min`}
+              {` · ${tier2Reached ? "£20 flat" : "£28 ship"} UK/USA/AU`}
             </span>
             <span className="truncate text-sm font-bold text-brand-text">
               {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}

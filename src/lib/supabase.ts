@@ -12,6 +12,8 @@ export type HammerexCategory = {
   slug: string;
   name: string;
   image_url: string | null;
+  card_image_url: string | null;
+  card_show_label: boolean;
   sort_order: number;
   is_tool_type?: boolean | null;
 };
@@ -54,6 +56,7 @@ export type HammerexProduct = {
   thread_color_option_idr: number | null;
   backpack_straps_option_idr: number | null;
   is_universal: boolean | null;
+  shipping_per_unit_idr: number | null;
   faq: { q: string; a: string }[] | null;
 };
 
@@ -161,6 +164,19 @@ export type HammerexWhatInBox = {
   qty: number;
   image_url: string | null;
   sort_order: number;
+};
+
+export type HammerexProductDeal = {
+  id: string;
+  product_id: string;
+  sort_order: number;
+  qty: number;
+  label: string;
+  banner_url: string;
+  name: string;
+  price_idr: number;
+  description: string | null;
+  icon_emoji: string | null;
 };
 
 export type HammerexShippingZone = {

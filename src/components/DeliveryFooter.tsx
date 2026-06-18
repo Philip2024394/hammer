@@ -11,8 +11,8 @@ export function DeliveryFooter() {
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-brand-text">Two-tier shipping — UK, USA, Australia</h3>
             <p className="mt-1 text-xs text-brand-muted">
-              £30 minimum order. £28 shipping on £30–£49 orders, £20 flat once you reach
-              £50. Dispatched within 3 working days via EMS Air Mail — 5–6 days transit.
+              £28 shipping under £50, £20 flat once you reach £50.
+              Dispatched within 3 working days via EMS Air Mail — 5–6 days transit.
               Shipping to other countries is confirmed on WhatsApp after checkout. Import
               duties and local taxes are not included and are paid by the buyer on arrival.
             </p>
@@ -64,7 +64,23 @@ export function DeliveryFooter() {
         </a>
       </div>
 
-      <p className="mt-3 text-center text-xs text-brand-muted">
+      <div className="mx-auto mt-6 max-w-3xl rounded-2xl border border-brand-line bg-brand-surface px-5 py-4">
+        <h4 className="text-center text-xs font-bold uppercase tracking-widest text-brand-accent">
+          Intellectual property notice
+        </h4>
+        <p className="mt-2 text-center text-xs leading-relaxed text-brand-muted">
+          The Hammerex product line — including designs, dimensions, tooling, branding
+          and manufacturing methods used across our Europe, USA and Asia operations — is
+          the intellectual property of Hammerex Products and is protected by applicable
+          design rights, design patents, trademarks and trade-dress laws. Unauthorised
+          manufacture, reproduction, distribution or resale of any Hammerex product
+          without the prior written permission of Hammerex Products will be pursued
+          through injunctive relief, damages and licensing fees in every jurisdiction in
+          which it occurs.
+        </p>
+      </div>
+
+      <p className="mt-4 text-center text-xs text-brand-muted">
         © {new Date().getFullYear()} Hammerex Products. All rights reserved.
       </p>
     </section>

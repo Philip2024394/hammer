@@ -8,9 +8,10 @@ export function DistributionPartnersSection() {
               Distribution Partners
             </h2>
             <p className="mt-2 text-xs leading-relaxed text-brand-muted sm:mt-3 sm:text-sm">
-              Hammerex partners with retailers and wholesale distributors worldwide.
-              Transparent pricing, protected territories and fair monthly targets — designed
-              around real demand in your market.
+              Hammerex stocks retail outlets across Asia and is actively building
+              international wholesale partnerships. Transparent pricing, protected
+              territories and fair monthly targets — designed around real demand in your
+              market.
             </p>
           </div>
           <div className="mt-4 flex flex-col gap-2">

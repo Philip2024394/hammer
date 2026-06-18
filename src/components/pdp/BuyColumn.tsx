@@ -1,26 +1,47 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { CURRENCIES, formatPrice, type Currency } from "@/lib/fx";
+import { CURRENCIES, CURRENCY_FLAGS, formatPrice, type Currency } from "@/lib/fx";
 import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
 import { sparkBurst } from "@/lib/sparks";
-import type { HammerexProduct } from "@/lib/supabase";
+import type { HammerexProduct, HammerexProductSpec } from "@/lib/supabase";
 import { THREAD_COLORS, DEFAULT_THREAD_COLOR, isFreeThreadColor, type ThreadColor } from "@/lib/threadColor";
 import { StockBadge } from "./StockBadge";
 import { SizeSelector } from "./SizeSelector";
 import { PurchaseNotes } from "./PurchaseNotes";
-import { DeliveryQuoteBanner } from "./DeliveryQuoteBanner";
 import { DispatchCountdown } from "./DispatchCountdown";
 import { QuoteSignalBadge } from "./QuoteSignalBadge";
 import { useVariant } from "./VariantContext";
+import { useDeal, dealDiscountPct } from "./DealContext";
 import { VariantSelector } from "./VariantSelector";
-import { CheckoutDealBreakers } from "@/components/checkout/CheckoutDealBreakers";
+import { RelatedUpsell } from "./RelatedUpsell";
 
-export function BuyColumn({ product }: { product: HammerexProduct }) {
+type CategoryLite = { slug: string; name: string };
+
+export function BuyColumn({
+  product,
+  currentCategory,
+  allCategories,
+  specs
+}: {
+  product: HammerexProduct;
+  currentCategory?: CategoryLite | null;
+  allCategories?: CategoryLite[];
+  specs?: HammerexProductSpec[];
+}) {
+  const [overviewView, setOverviewView] = useState<"description" | "specs">("description");
   const variantCtx = useVariant();
+  const dealCtx = useDeal();
   const activeVariant = variantCtx?.active ?? null;
-  const variantPriceIdr = activeVariant?.price_idr ?? product.price_idr;
+  const activeDeal = dealCtx?.active ?? null;
+  const dealPct = activeDeal ? dealDiscountPct(activeDeal, product.price_idr) : 0;
+  const displayName = activeDeal?.name ?? product.name;
+  const displayOverview = activeDeal?.description
+    ?? (activeDeal
+      ? `${activeDeal.qty}× ${product.name}${dealPct > 0 ? ` — save ${dealPct}% on the bag price` : ""}. Shipping is calculated at checkout and is not discounted.`
+      : product.overview);
+  const variantPriceIdr = activeDeal?.price_idr ?? activeVariant?.price_idr ?? product.price_idr;
   const variantSku = activeVariant?.sku ?? product.sku;
   const variantImage = activeVariant?.image_url ?? product.image_url;
   const variantStock = activeVariant?.stock_count ?? product.stock_count;
@@ -82,7 +103,8 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
       threadColor,
       variantId: activeVariant?.id ?? null,
       variantLabel: activeVariant?.label ?? null,
-      backpackStraps
+      backpackStraps,
+      shippingPerUnitIdr: product.shipping_per_unit_idr ?? null
     });
     sparkBurst(addButtonRef.current);
     setAdded(true);
@@ -96,7 +118,7 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
         <StockBadge count={variantStock} productId={product.id} isAccessory={product.is_accessory ?? false} />
       </div>
 
-      <h1 className="text-2xl font-bold leading-tight text-brand-text sm:text-3xl">{product.name}</h1>
+      <h1 className="text-2xl font-bold leading-tight text-brand-text sm:text-3xl">{displayName}</h1>
 
       {variantSku && (
         <span className="inline-flex w-fit items-center gap-2 rounded-full border border-brand-accent/40 bg-brand-accent/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-accent">
@@ -104,7 +126,7 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
         </span>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
           {[0, 1, 2, 3, 4].map((i) => (
             <svg key={i} width="16" height="16" viewBox="0 0 24 24" className="text-brand-accent" fill={i < 4 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -115,9 +137,49 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
             {product.rating_count ? `${product.rating_avg?.toFixed(1)} · ${product.rating_count} reviews` : "Be the first to review"}
           </span>
         </div>
+        {specs && specs.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setOverviewView((v) => (v === "description" ? "specs" : "description"))}
+            aria-pressed={overviewView === "specs"}
+            className={`grid h-9 place-items-center rounded-full px-4 text-[11px] font-bold uppercase tracking-widest transition active:scale-95 ${
+              overviewView === "specs"
+                ? "bg-brand-accent text-black shadow-[0_2px_8px_rgba(255,179,0,0.4)]"
+                : "border-2 border-brand-accent bg-transparent text-brand-accent hover:bg-brand-accent/10"
+            }`}
+          >
+            {overviewView === "description" ? "Specs" : "Description"}
+          </button>
+        )}
       </div>
 
-      {product.overview && <p className="text-sm leading-relaxed text-brand-muted">{product.overview}</p>}
+      {overviewView === "description" && displayOverview && (
+        <p className="text-sm leading-relaxed text-brand-muted">{displayOverview}</p>
+      )}
+      {overviewView === "specs" && specs && specs.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
+          {Object.entries(
+            specs.reduce<Record<string, HammerexProductSpec[]>>((acc, s) => {
+              (acc[s.group_name] ||= []).push(s);
+              return acc;
+            }, {})
+          ).map(([group, rows], i) => (
+            <div key={group} className={i > 0 ? "border-t border-brand-line" : ""}>
+              <h3 className="border-b border-brand-line bg-black/30 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-brand-accent">
+                {group}
+              </h3>
+              <dl className="divide-y divide-brand-line">
+                {rows.map((r) => (
+                  <div key={r.id} className="grid grid-cols-2 gap-3 px-4 py-2">
+                    <dt className="text-[11px] uppercase tracking-wider text-brand-muted">{r.label}</dt>
+                    <dd className="text-xs font-medium text-brand-text">{r.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-brand-line bg-brand-surface px-4 py-3 text-xs text-brand-muted">
         <span className="inline-flex items-center gap-2 text-brand-accent">
@@ -145,11 +207,20 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
         <div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-brand-text">{formatPrice(unitPrice, currency)}</span>
-            {product.compare_at_idr && product.compare_at_idr > unitPrice && (
-              <span className="text-sm text-brand-muted line-through">{formatPrice(product.compare_at_idr, currency)}</span>
-            )}
-            {savedPct > 0 && (
-              <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{savedPct}%</span>
+            {activeDeal && dealPct > 0 ? (
+              <>
+                <span className="text-sm text-brand-muted line-through">{formatPrice(product.price_idr * activeDeal.qty, currency)}</span>
+                <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{dealPct}%</span>
+              </>
+            ) : (
+              <>
+                {product.compare_at_idr && product.compare_at_idr > unitPrice && (
+                  <span className="text-sm text-brand-muted line-through">{formatPrice(product.compare_at_idr, currency)}</span>
+                )}
+                {savedPct > 0 && (
+                  <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{savedPct}%</span>
+                )}
+              </>
             )}
           </div>
           {qty > 1 && (
@@ -181,7 +252,7 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
             aria-label="Currency"
             className="h-11 rounded-md border border-brand-line bg-brand-surface px-2 text-xs text-brand-text focus:border-brand-accent focus:outline-none"
           >
-            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {CURRENCIES.map((c) => <option key={c} value={c}>{CURRENCY_FLAGS[c]} {c}</option>)}
           </select>
         </div>
       </div>
@@ -275,32 +346,12 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
         </div>
       )}
 
-      {tiers.length > 0 && (
-        <div className="rounded-xl border border-brand-line bg-black/40 p-3">
-          <div className="text-xs uppercase tracking-widest text-brand-muted">Buy more, save more</div>
-          <ul className="mt-2 grid grid-cols-3 gap-2">
-            {[{ min: 1, pct: 0 }, ...tiers].map((t) => {
-              const active = qty >= t.min;
-              return (
-                <li
-                  key={t.min}
-                  onClick={() => setQty(t.min)}
-                  className={`cursor-pointer rounded-lg border p-2 text-center ${
-                    active ? "border-brand-accent bg-brand-accent/10" : "border-brand-line bg-brand-surface"
-                  }`}
-                >
-                  <div className="text-xs font-semibold text-brand-text">{t.min}+ unit{t.min === 1 ? "" : "s"}</div>
-                  <div className="text-xs text-brand-muted">{t.pct === 0 ? "Standard" : `−${t.pct}% each`}</div>
-                </li>
-              );
-            })}
-          </ul>
-          {nextT && (
-            <p className="mt-2 text-xs text-brand-accent">
-              Add {nextT.min - qty} more and pay only {formatPrice(effectivePricePerUnit(product.price_idr, tiers, nextT.min), currency)} each.
-            </p>
-          )}
-        </div>
+      {allCategories && allCategories.length > 0 && (
+        <RelatedUpsell
+          currentProductId={product.id}
+          currentCategory={currentCategory ?? null}
+          categories={allCategories}
+        />
       )}
 
       <div className="flex items-center gap-3">
@@ -321,8 +372,6 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
       >
         View cart & checkout
       </a>
-
-      <DeliveryQuoteBanner />
 
       <PurchaseNotes notes={product.purchase_notes} />
 
@@ -356,10 +405,6 @@ export function BuyColumn({ product }: { product: HammerexProduct }) {
         </li>
       </ul>
 
-      {/* Deal Breakers — skipped on Pro Kit PDPs since kits are already
-          bundles. The component itself filters items that are already in
-          the cart so a buyer can't accidentally double-add. */}
-      {product.badge_label !== "PRO KIT" && <CheckoutDealBreakers />}
     </div>
   );
 }

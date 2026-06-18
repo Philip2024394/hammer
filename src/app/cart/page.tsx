@@ -6,7 +6,7 @@ import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
-import { MIN_ORDER_IDR, MIN_ORDER_LABEL_GBP, TIER_2_THRESHOLD_IDR, shippingForSubtotal } from "@/lib/shipping";
+import { TIER_2_THRESHOLD_IDR, shippingForCart } from "@/lib/shipping";
 import { CartProgressBar } from "@/components/cart/CartProgressBar";
 
 export default function CartPage() {
@@ -22,8 +22,7 @@ export default function CartPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
-  const minReached = subtotal >= MIN_ORDER_IDR;
-  const shipping = shippingForSubtotal(subtotal);
+  const shipping = shippingForCart(lines);
   const orderTotal = subtotal + shipping;
   const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const dominantCurrency = (lines.find((l) => l.baseCurrency && l.baseCurrency !== "IDR")?.baseCurrency ?? "IDR") as "IDR" | "USD" | "SGD" | "AUD" | "EUR" | "GBP";
@@ -33,7 +32,20 @@ export default function CartPage() {
       <WelcomeExitIntent />
       <Header />
       <section className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold text-brand-text">Your cart</h1>
+        <h1 className="mb-3 text-2xl font-bold text-brand-text">Your cart</h1>
+
+        <div
+          className="hammerex-marquee-mask relative mb-6 overflow-hidden rounded-full border border-brand-accent/40 bg-brand-accent/5 py-2"
+          aria-label="Air freight shipping offer"
+        >
+          <span
+            className="hammerex-marquee-track px-4 text-xs font-semibold uppercase tracking-wider text-brand-accent"
+            style={{ animationDuration: "60s" }}
+          >
+            ✈ Air freight shipments: add £50 or more to unlock flat-rate £20 shipping — the fastest, most efficient way to get your products.&nbsp;&nbsp;·&nbsp;&nbsp;
+            ✈ Air freight shipments: add £50 or more to unlock flat-rate £20 shipping — the fastest, most efficient way to get your products.&nbsp;&nbsp;·&nbsp;&nbsp;
+          </span>
+        </div>
 
         {!ready ? null : lines.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-brand-line bg-brand-surface p-12 text-center">
@@ -127,10 +139,10 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-xs text-brand-muted">
                   <dt>
-                    Shipping{tier2Reached ? " (£20 flat)" : minReached ? " (£28 — £30–£49 tier)" : ""}
+                    Shipping{tier2Reached ? " (£20 flat)" : " (£28)"}
                   </dt>
-                  <dd className={minReached ? "text-brand-text" : "text-brand-muted"}>
-                    {minReached ? formatPrice(shipping, "IDR") : `${MIN_ORDER_LABEL_GBP} min to unlock`}
+                  <dd className="text-brand-text">
+                    {formatPrice(shipping, "IDR")}
                   </dd>
                 </div>
                 <div className="my-1 border-t border-brand-line" />
@@ -145,22 +157,10 @@ export default function CartPage() {
                 on WhatsApp after checkout.
               </p>
               <div className="my-4 border-t border-brand-line" />
-              {minReached ? (
-                <a
-                  href="/checkout"
-                  className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
-                >Proceed to checkout</a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="grid h-12 w-full place-items-center rounded-full bg-brand-surface text-sm font-semibold text-brand-muted opacity-60"
-                  title={`Add more items to reach the ${MIN_ORDER_LABEL_GBP} minimum`}
-                >
-                  Add {formatPrice(Math.max(0, 600000 - subtotal), "GBP")} more to checkout
-                </button>
-              )}
+              <a
+                href="/checkout"
+                className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
+              >Proceed to checkout</a>
               <a
                 href="/"
                 className="mt-2 grid h-11 place-items-center rounded-full border border-brand-line bg-black text-xs font-semibold text-brand-text hover:border-brand-accent"
@@ -201,19 +201,10 @@ export default function CartPage() {
                 {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}
               </span>
             </div>
-            {minReached ? (
-              <a
-                href="/checkout"
-                className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
-              >Checkout →</a>
-            ) : (
-              <span
-                aria-disabled="true"
-                className="grid h-12 place-items-center rounded-full bg-brand-surface px-5 text-xs font-bold uppercase tracking-widest text-brand-muted opacity-70"
-              >
-                + {formatPrice(Math.max(0, 600000 - subtotal), "GBP")}
-              </span>
-            )}
+            <a
+              href="/checkout"
+              className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
+            >Checkout →</a>
           </div>
         </div>
       )}

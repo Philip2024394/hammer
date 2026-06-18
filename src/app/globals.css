@@ -153,6 +153,30 @@ body {
 }
 .hx-cutoff-urgent { animation: hx-cutoff-pulse-kf 1.4s ease-in-out infinite; }
 
+/* Multi-purchase / deal-switcher chase. Each button gets the same 6s
+   keyframe; staggered animation-delay (set inline per index) makes the
+   yellow square travel slowly across the row of buttons. Used only when
+   no deal is currently selected — the active button overrides the
+   animation with its solid yellow class. */
+@keyframes hx-deal-chase-kf {
+  0%, 33%, 100% {
+    background-color: rgb(var(--brand-surface));
+    color: rgb(var(--brand-text));
+    border-color: rgb(var(--brand-line));
+    box-shadow: none;
+  }
+  12%, 22% {
+    background-color: rgb(var(--brand-accent));
+    color: rgb(0 0 0);
+    border-color: rgb(var(--brand-accent));
+    box-shadow: 0 2px 14px rgb(var(--brand-accent) / 0.55);
+  }
+}
+.hx-deal-chase { animation: hx-deal-chase-kf 6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hx-deal-chase { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hx-kenburns,
   .hx-card-tilt,

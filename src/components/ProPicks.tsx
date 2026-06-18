@@ -8,7 +8,7 @@ import { ProductRow } from "./ProductRow";
 // To change the picks: update the slugs list below OR update which
 // hammerex_products rows have badge_label = 'PRO KIT'.
 const PRO_PICK_SLUGS = [
-  "plasterer-pro-kit",
+  "plastering-pro-bag",
   "drywall-pro-kit",
   "scaffolders-setup-kit"
 ];
@@ -28,5 +28,5 @@ export async function ProPicks() {
   }
   const products = PRO_PICK_SLUGS.map((s) => lookup.get(s)).filter((p): p is HammerexProduct => Boolean(p));
   if (products.length === 0) return null;
-  return <ProductRow items={products} title="Pro Picks" viewAllHref="/products" />;
+  return <ProductRow items={products} title="Pro Picks" viewAllHref="/products" layout="landscape" />;
 }

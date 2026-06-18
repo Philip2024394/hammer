@@ -1,13 +1,13 @@
 import type { HammerexCategory } from "@/lib/supabase";
 import { SectionHeader } from "./SectionHeader";
-import { CategoryIcon } from "./CategoryIcon";
+import { CategoryCard } from "./CategoryCard";
 
 const TRADE_SLUGS = [
-  "plastering", "drywall", "tiling", "concrete", "rendering", "venetian-plastering",
+  "plastering", "drywall", "tiling", "concrete", "venetian-plastering",
   "carpentry", "bricklaying", "painting-decorating", "plumbing", "electrical",
-  "roofing", "flooring", "glazing", "landscaping", "steel-fixing", "scaffolding",
-  "demolition", "hvac", "lifting", "metal-fabrication", "joinery", "stone-masonry",
-  "tailoring", "barber", "farming"
+  "glazing", "landscaping", "steel-fixing", "scaffolding",
+  "demolition", "metal-fabrication", "joinery", "stone-masonry",
+  "tailoring", "barber", "first-aid"
 ];
 
 export function CategoryGrid({ items }: { items: HammerexCategory[] }) {
@@ -34,23 +34,7 @@ export function CategoryGrid({ items }: { items: HammerexCategory[] }) {
 
       <ul className="grid grid-cols-3 gap-2 sm:gap-4">
         {trades.map((c) => (
-          <li key={c.slug} className="group relative">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-4 -bottom-2 h-6 rounded-full bg-brand-accent/0 blur-2xl transition-all duration-300 group-hover:bg-brand-accent/55"
-            />
-            <a
-              href={`/c/${c.slug}`}
-              className="relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border border-brand-line bg-brand-surface p-4 transition-colors duration-200 group-hover:border-brand-accent sm:gap-3 sm:p-6"
-            >
-              <span className="text-brand-accent">
-                <CategoryIcon slug={c.slug} />
-              </span>
-              <span className="line-clamp-2 text-center text-xs font-bold uppercase tracking-wider text-brand-text sm:text-sm">
-                {c.name}
-              </span>
-            </a>
-          </li>
+          <CategoryCard key={c.slug} category={c} />
         ))}
       </ul>
     </section>
