@@ -12,7 +12,7 @@ const FALLBACK_EXTRAS = {
   delivery_quote_only: null, purchase_notes: null, badge_label: null,
   subtitle: null, home_sort_order: null, thread_color_option_idr: null,
   backpack_straps_option_idr: null, is_universal: null,
-  shipping_per_unit_idr: null
+  shipping_per_unit_idr: null, faq: null
 };
 
 const FALLBACK: HammerexProduct[] = [

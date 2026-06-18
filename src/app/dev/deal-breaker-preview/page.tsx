@@ -40,6 +40,8 @@ function mockProduct(over: Partial<HammerexProduct>): HammerexProduct {
     thread_color_option_idr: null,
     backpack_straps_option_idr: null,
     is_universal: null,
+    shipping_per_unit_idr: null,
+    faq: null,
     ...over
   };
 }
@@ -51,6 +53,7 @@ const items: HammerexDealBreaker[] = [
     item_product_id: "",
     deal_price_idr: 100000,
     sort_order: 0,
+    variants: [],
     item: mockProduct({
       name: "Hammerex Tool Lanyard 1.5m",
       sku: "HX-LNYRD-001",
@@ -65,6 +68,7 @@ const items: HammerexDealBreaker[] = [
     item_product_id: "",
     deal_price_idr: 80000,
     sort_order: 1,
+    variants: [],
     item: mockProduct({
       name: "Heavy Duty Glove Clip",
       sku: "HX-GCLIP-001",
@@ -79,6 +83,7 @@ const items: HammerexDealBreaker[] = [
     item_product_id: "",
     deal_price_idr: 160000,
     sort_order: 2,
+    variants: [],
     item: mockProduct({
       name: "Scaffolders Gloves (Pair)",
       sku: "HX-SGLV-001",
@@ -93,6 +98,7 @@ const items: HammerexDealBreaker[] = [
     item_product_id: "",
     deal_price_idr: 440000,
     sort_order: 3,
+    variants: [],
     item: mockProduct({
       name: "Hammerex Heavy Duty Tool Bag",
       sku: "HX-TBAG-001",
@@ -121,7 +127,7 @@ export default function DealBreakerPreview() {
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-muted">
             Buy column (simulated)
           </h2>
-          <DealBreakerCard items={items} currency="IDR" />
+          <DealBreakerCard items={items} currency="IDR" anchorProductName="Mock Anchor Product" />
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="h-10 rounded-full bg-brand-accent/30 text-center text-xs leading-10 text-brand-text">
               Size selector (placeholder)

@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { CURRENCIES, CURRENCY_FLAGS, formatPrice, type Currency } from "@/lib/fx";
-import { effectivePricePerUnit, nextTier } from "@/lib/pricing";
+import { effectivePricePerUnit } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
 import { sparkBurst } from "@/lib/sparks";
 import type { HammerexProduct, HammerexProductSpec } from "@/lib/supabase";
@@ -71,7 +71,6 @@ export function BuyColumn({
   const customThreadDispatchDelay = threadOptionEnabled && threadCharged ? 2 : 0;
   const dispatchDays = baseDispatchDays + customThreadDispatchDelay;
   const lineTotal = unitPrice * qty;
-  const nextT = useMemo(() => nextTier(tiers, qty), [tiers, qty]);
   const savedPct = product.compare_at_idr && product.compare_at_idr > variantPriceIdr
     ? Math.round(((product.compare_at_idr - variantPriceIdr) / product.compare_at_idr) * 100)
     : 0;
