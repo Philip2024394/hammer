@@ -67,7 +67,9 @@ export function WriteReviewForm({
       "",
       title.trim() ? `TITLE: ${title.trim()}` : null,
       body.trim() ? "REVIEW:" : null,
-      body.trim() || null
+      body.trim() || null,
+      "",
+      "PHOTOS: please attach any photos of the product on site or in use directly to this WhatsApp chat after sending — they get added to your review."
     ];
     return quoteUrl(lines.filter(Boolean).join("\n"), adminWhatsapp());
   }, [valid, productName, productSku, name, country, whatsapp,

@@ -238,36 +238,60 @@ export default function TermsPage() {
             </p>
           </Block>
 
-          <Block title="3-Year free repair warranty">
+          <section id="warranty-and-repair" className="flex flex-col gap-4">
+          <Block title="1-Year full warranty">
             <p>
-              In addition to your statutory rights, Hammerex offers a{" "}
-              <span className="font-semibold text-brand-text">three-year free-repair warranty</span>{" "}
+              In addition to your statutory rights under the UK Consumer Rights Act 2015,
+              Hammerex offers a{" "}
+              <span className="font-semibold text-brand-text">12-month full warranty</span>{" "}
               against confirmed manufacturing defects on every product we sell. The warranty
               runs from the date of dispatch and is non-transferable.
             </p>
-            <p className="mt-3 font-semibold text-brand-text">How the warranty works</p>
+            <p className="mt-3 font-semibold text-brand-text">How year-1 cover works</p>
             <ul className="mt-2 flex flex-col gap-1 text-brand-muted">
               <li className="flex gap-2"><span className="text-brand-accent">·</span>Contact Hammerex on WhatsApp with your order reference, photographs of the issue and a short description of the fault.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>We check the CCTV dispatch record for your order and confirm whether the fault is consistent with a manufacturing defect.</li>
-              <li className="flex gap-2"><span className="text-brand-accent">·</span>If the claim is accepted, we issue a repair reference and a return address. <span className="font-semibold text-brand-text">You pay to send the item back to us</span> using the carrier of your choice (we recommend a tracked service).</li>
-              <li className="flex gap-2"><span className="text-brand-accent">·</span>We repair the item at no charge for parts or labour and ship it back to you with <span className="font-semibold text-brand-text">return postage paid by Hammerex</span>.</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>If the claim is accepted, we issue a repair reference and a return address. <span className="font-semibold text-brand-text">Hammerex covers postage in both directions</span> using a tracked carrier of our choice.</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>We repair the item at no charge for parts or labour and ship it back to you with <span className="font-semibold text-brand-text">return postage paid by Hammerex</span>. Where a repair is not economically possible, we may offer a replacement of the same or comparable specification at our discretion.</li>
             </ul>
             <p className="mt-3 text-brand-muted">
               Typical repair turnaround is 7 to 14 working days from receipt of the item at our
-              workshop, subject to the nature of the repair and parts availability. Where a
-              repair is not economically possible, Hammerex may at its discretion offer a
-              replacement of the same or comparable specification.
+              workshop, subject to the nature of the repair and parts availability.
+            </p>
+          </Block>
+
+          <Block title="Years 2–3 — workshop repair service">
+            <p>
+              Industrial-grade materials are built to take site abuse, but on a working tool
+              bag in daily use, certain consumables eventually wear: zippers, stitching,
+              fasteners, clings and rivets. Hammerex offers an extended workshop repair
+              service for{" "}
+              <span className="font-semibold text-brand-text">years 2 and 3 from dispatch</span>{" "}
+              to keep your product working.
+            </p>
+            <p className="mt-3 font-semibold text-brand-text">How year-2 and year-3 cover works</p>
+            <ul className="mt-2 flex flex-col gap-1 text-brand-muted">
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>Contact Hammerex on WhatsApp with photographs and a short description of the issue.</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>If the repair falls within scope, we issue a repair reference and a return address. <span className="font-semibold text-brand-text">The customer covers postage in both directions</span> using a carrier of their choice (we recommend a tracked service).</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>Hammerex covers <span className="font-semibold text-brand-text">parts and labour at no extra charge</span> for smaller repairs (zippers, stitching, fasteners, clings, rivets and similar consumables).</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>Where the work needed is substantial (full re-line, frame replacement, etc.) we will quote in advance and only proceed with your written approval.</li>
+            </ul>
+            <p className="mt-3 text-brand-muted">
+              The year-2/3 repair service is a goodwill offering on top of your statutory rights
+              and is not a manufacturer warranty. It does not extend the year-1 full-cover
+              warranty period and does not apply to damage caused by misuse, accident,
+              modification or third-party repair (see the next section).
             </p>
           </Block>
 
           <Block title="What the warranty does NOT cover">
             <p className="text-brand-muted">
-              The three-year repair warranty covers manufacturing defects — that is, faults
-              traceable to the materials, assembly or workmanship of the product. It does not
-              cover:
+              The 12-month full warranty covers manufacturing defects — that is, faults
+              traceable to the materials, assembly or workmanship of the product. The years
+              2–3 repair service covers consumable wear within reason. Neither covers:
             </p>
             <ul className="mt-3 flex flex-col gap-1 text-brand-muted">
-              <li className="flex gap-2"><span className="text-brand-accent">·</span>Normal wear and tear from regular use (faded leather, scuffed corners, stretched stitching from sustained heavy loading).</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>Cosmetic wear from regular use (faded leather, scuffed corners, surface fading). Functional wear on consumables (zippers, stitching, fasteners, clings, rivets) is covered by the year-2/3 workshop repair service above.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>Damage caused by accident, drop, impact or contact with sharp tools (cuts, punctures, slashes).</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>Damage caused by misuse, including loading the product beyond its stated capacity, exposure to corrosive substances, or use outside the application the product is designed for.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>Damage caused by modification, repair or alteration carried out by anyone other than Hammerex or a Hammerex-authorised repairer.</li>
@@ -283,12 +307,20 @@ export default function TermsPage() {
               recycled at our discretion.
             </p>
           </Block>
+          </section>
 
           <Block title="Refunds and returns">
-            Refunds are processed once the product has been returned to Hammerex and inspected.
-            On confirmation of receipt and condition, the agreed refund is issued via the original
-            payment route. The buyer is responsible for return shipping costs unless the return is
-            the result of a confirmed manufacturing defect.
+            Hammerex operates a <span className="font-semibold text-brand-text">72-hour return
+            window from receipt of the order</span>. To return an item that you are unhappy
+            with, send it back to Hammerex unused, in its original packaging, with your invoice
+            and the reason for return enclosed. Once we receive and inspect the item, the
+            agreed refund is issued via the original payment route, covering the
+            <span className="font-semibold text-brand-text"> full product price</span>. The
+            delivery charge is <span className="font-semibold text-brand-text">not refunded</span>
+            — shipping is fulfilled by an independent courier and that service has already been
+            provided. The buyer is responsible for return shipping costs unless the return is
+            the result of a confirmed manufacturing defect within the 12-month warranty period,
+            in which case Hammerex covers postage in both directions (see warranty section above).
           </Block>
 
           <Block title="Talk to us first">

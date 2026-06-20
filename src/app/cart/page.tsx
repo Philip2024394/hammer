@@ -59,7 +59,7 @@ export default function CartPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
             <ul className="flex flex-col gap-3">
               {lines.map((l) => (
-                <li key={`${l.productId}::${l.size ?? ""}::${l.threadColor ?? ""}::${l.variantId ?? ""}::${l.backpackStraps ? "bp1" : "bp0"}`} className="flex gap-4 rounded-2xl border border-brand-line bg-brand-surface p-4">
+                <li key={`${l.productId}::${l.size ?? ""}::${l.threadColor ?? ""}::${l.variantId ?? ""}::${l.backpackStraps ? "bp1" : "bp0"}::${l.beltUpgrade ?? ""}`} className="flex gap-4 rounded-2xl border border-brand-line bg-brand-surface p-4">
                   <a href={`/product/${l.slug}`} className="block h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-black">
                     {l.image && <img src={l.image} alt={l.name} loading="lazy" decoding="async" width="96" height="96" className="h-full w-full object-contain" />}
                   </a>
@@ -74,12 +74,16 @@ export default function CartPage() {
                             ? <p className="inline-flex items-center gap-1 rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-brand-accent">⚡ Deal Breaker · 15% off</p>
                             : l.variantLabel && <p className="text-xs text-brand-muted">Option: {l.variantLabel}</p>}
                         {l.size && <p className="text-xs text-brand-muted">Size: {l.size}</p>}
+                        {l.beltSize && <p className="text-xs text-brand-muted">Belt: {l.beltSize}</p>}
                         {l.threadColor && <p className="text-xs text-brand-muted">Thread: {threadColorLabel(l.threadColor)}</p>}
                         {l.backpackStraps && <p className="text-xs text-brand-accent">+ Backpack straps add-on</p>}
+                        {l.customBrandName && <p className="text-xs text-brand-accent">Branded: &quot;{l.customBrandName}&quot;</p>}
+                        {l.repairCover && <p className="text-xs text-brand-accent">+ Hammerex Pro Trade Cover</p>}
+                        {l.beltUpgrade && <p className="text-xs text-brand-accent">Belt upgrade: {l.beltUpgrade}</p>}
                       </div>
                       <button
                         type="button"
-                        onClick={() => cart.remove(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps)}
+                        onClick={() => cart.remove(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps, l.beltSize ?? null, l.customBrandName ?? null, l.repairCover ?? false, l.beltUpgrade ?? null)}
                         aria-label="Remove from cart"
                         className="grid h-11 w-11 place-items-center rounded-full text-brand-muted transition hover:bg-black/40 hover:text-brand-accent active:scale-95"
                       >
@@ -95,14 +99,14 @@ export default function CartPage() {
                       <div className="flex h-11 items-center rounded-full border border-brand-line bg-black">
                         <button
                           type="button"
-                          onClick={() => cart.setQty(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps, l.qty - 1)}
+                          onClick={() => cart.setQty(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps, l.qty - 1, l.beltSize ?? null, l.customBrandName ?? null, l.repairCover ?? false, l.beltUpgrade ?? null)}
                           aria-label="Decrease quantity"
                           className="grid h-11 w-11 place-items-center text-brand-text hover:text-brand-accent"
                         >−</button>
                         <span className="w-7 text-center text-xs font-semibold text-brand-text">{l.qty}</span>
                         <button
                           type="button"
-                          onClick={() => cart.setQty(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps, l.qty + 1)}
+                          onClick={() => cart.setQty(l.productId, l.size, l.threadColor, l.variantId, l.backpackStraps, l.qty + 1, l.beltSize ?? null, l.customBrandName ?? null, l.repairCover ?? false, l.beltUpgrade ?? null)}
                           aria-label="Increase quantity"
                           className="grid h-11 w-11 place-items-center text-brand-text hover:text-brand-accent"
                         >+</button>

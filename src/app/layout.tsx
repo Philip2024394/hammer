@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BRAND, siteUrl, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { CompareDock } from "@/components/CompareDock";
 import { TradeTipFooter } from "@/components/TradeTipFooter";
 import { WelcomePopup } from "@/components/WelcomePopup";
+import { GeoBridge } from "@/components/GeoBridge";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -78,10 +78,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
         />
         {children}
+        <GeoBridge />
         <TradeTipFooter />
         <CompareDock />
         <WelcomePopup />
-        <MobileBottomNav />
       </body>
     </html>
   );

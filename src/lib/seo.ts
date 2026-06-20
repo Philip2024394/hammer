@@ -35,6 +35,11 @@ export function organizationJsonLd() {
     url: siteUrl(),
     logo: BRAND.logo,
     description: BRAND.description,
+    // Social-profile cross-links — Google uses sameAs for the Knowledge
+    // Graph card and entity disambiguation.
+    sameAs: [
+      "https://www.instagram.com/hammerexproductsdirect/"
+    ],
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -45,6 +50,37 @@ export function organizationJsonLd() {
       }
     ]
   };
+}
+
+// Strip markdown so the overview field doesn't bleed `**bold**`, `### heading`,
+// list bullets, links and code fences into <meta description> / OG / Twitter
+// previews. Conservative: collapse to plain text + single spaces.
+export function stripMarkdown(input: string | null | undefined): string {
+  if (!input) return "";
+  return input
+    .replace(/```[\s\S]*?```/g, " ")            // fenced code blocks
+    .replace(/`([^`]+)`/g, "$1")                // inline code
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")      // images
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")    // links → keep text
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")        // # headings
+    .replace(/\*\*([^*]+)\*\*/g, "$1")          // **bold**
+    .replace(/(^|\s)\*([^*\s][^*]*)\*/g, "$1$2") // *italic*
+    .replace(/_([^_]+)_/g, "$1")                // _italic_
+    .replace(/^\s*[-*+]\s+/gm, "")              // - bullets
+    .replace(/^\s*\d+\.\s+/gm, "")              // 1. ordered list
+    .replace(/^\s*>\s?/gm, "")                  // > blockquotes
+    .replace(/\r?\n+/g, " ")                    // newlines → space
+    .replace(/\s{2,}/g, " ")                    // collapse whitespace
+    .trim();
+}
+
+// Clamp a description to a safe length for SERP / OG previews. Google
+// truncates around 155–160; OG/Twitter handle longer but readability wins.
+export function clampDescription(input: string, max = 160): string {
+  if (input.length <= max) return input;
+  const slice = input.slice(0, max);
+  const lastSpace = slice.lastIndexOf(" ");
+  return (lastSpace > 80 ? slice.slice(0, lastSpace) : slice).trim() + "…";
 }
 
 export function websiteJsonLd() {
@@ -74,6 +110,28 @@ export function breadcrumbJsonLd(trail: { name: string; url: string }[]) {
   };
 }
 
+// Indicative FX → GBP for JSON-LD when product.base_currency is GBP. We keep
+// the canonical IDR price in the DB but advertise the price in the buyer-
+// expected currency so Google Shopping doesn't flag a mismatch.
+const IDR_PER_GBP = 23827;
+const IDR_PER_USD = 17753;
+const IDR_PER_EUR = 20619;
+const IDR_PER_AUD = 12578;
+const IDR_PER_SGD = 13866;
+
+function priceForJsonLd(product: HammerexProduct): { priceCurrency: string; price: string } {
+  const cur = (product.base_currency ?? "IDR").toUpperCase();
+  const divisor =
+    cur === "GBP" ? IDR_PER_GBP :
+    cur === "USD" ? IDR_PER_USD :
+    cur === "EUR" ? IDR_PER_EUR :
+    cur === "AUD" ? IDR_PER_AUD :
+    cur === "SGD" ? IDR_PER_SGD :
+    1;
+  const price = (product.price_idr / divisor).toFixed(cur === "IDR" ? 0 : 2);
+  return { priceCurrency: cur, price };
+}
+
 export function productJsonLd(product: HammerexProduct, category?: HammerexCategory | null) {
   const availability =
     product.stock_count === null || product.stock_count === undefined || product.stock_count > 0
@@ -81,13 +139,20 @@ export function productJsonLd(product: HammerexProduct, category?: HammerexCateg
       : "https://schema.org/OutOfStock";
 
   const image = product.image_url ?? BRAND.logo;
-  const description = product.subtitle ?? product.overview ?? product.description ?? BRAND.description;
+  const description = clampDescription(
+    stripMarkdown(product.subtitle ?? product.overview ?? product.description ?? BRAND.description)
+  );
+
+  // priceValidUntil: required by Google Merchant Center on every Offer.
+  // Default to 1 year from today; we'd rather re-emit fresh than fail audit.
+  const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    .toISOString().slice(0, 10);
 
   const offers = {
     "@type": "Offer",
     url: absolute(`/product/${product.slug ?? product.id}`),
-    priceCurrency: "IDR",
-    price: product.price_idr,
+    ...priceForJsonLd(product),
+    priceValidUntil: validUntil,
     availability,
     itemCondition: "https://schema.org/NewCondition",
     seller: { "@type": "Organization", name: BRAND.name }

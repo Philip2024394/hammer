@@ -7,7 +7,7 @@ import { absolute, articleJsonLd, breadcrumbJsonLd, BRAND, faqJsonLd } from "@/l
 import { renderMarkdown } from "@/lib/mdRender";
 import { formatPrice } from "@/lib/fx";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 async function loadGuide(slug: string) {
   const guideRes = await supabase

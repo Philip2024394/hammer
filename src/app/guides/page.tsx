@@ -4,7 +4,7 @@ import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { supabase, type HammerexGuide } from "@/lib/supabase";
 import { BRAND } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Guides — Hammerex",

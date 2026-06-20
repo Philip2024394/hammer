@@ -12,7 +12,7 @@ export function DealSwitcher() {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-accent">
+      <span className="text-xs font-bold uppercase tracking-widest text-brand-accent">
         Multi Purchase
       </span>
       <div className="flex flex-wrap items-start gap-2">
@@ -35,7 +35,7 @@ export function DealSwitcher() {
             1
           </button>
           {/* invisible spacer keeps the row aligned with deal buttons that have a "−X%" badge */}
-          <span className="text-[10px] font-bold uppercase tracking-wider opacity-0">−</span>
+          <span className="text-xs font-bold uppercase tracking-wider opacity-0">−</span>
         </div>
 
         {ctx.deals.map((d, i) => {
@@ -64,7 +64,7 @@ export function DealSwitcher() {
                 {d.qty}
               </button>
               {pct > 0 && (
-                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-accent">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-accent">
                   −{pct}%
                 </span>
               )}

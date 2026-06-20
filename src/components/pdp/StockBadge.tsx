@@ -12,7 +12,7 @@ export function StockBadge({
   }
 
   const seedId = productId ?? "";
-  const [min, max] = isAccessory ? [70, 380] : [50, 300];
+  const [min, max] = isAccessory ? [380, 450] : [165, 280];
   const display = derive(seedId, min, max);
 
   return <span className="text-brand-muted">In stock: {display}</span>;

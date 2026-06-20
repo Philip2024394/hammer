@@ -8,12 +8,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const now = new Date();
 
-  const [catsRes, prodsRes, guidesRes] = await Promise.all([
+  // Try the updated_at + created_at pair first; if updated_at hasn't been
+  // added to the table yet (migration 20260620 not applied), Postgres errors
+  // and we fall back to the created_at-only query so the sitemap still
+  // builds cleanly during the rollout window.
+  const productsSelect = "slug, id, created_at, updated_at";
+  let prodsRes = await supabase.from("hammerex_products").select(productsSelect);
+  if (prodsRes.error?.code === "42703") {
+    prodsRes = await supabase.from("hammerex_products").select("slug, id, created_at");
+  }
+
+  const [catsRes, guidesRes] = await Promise.all([
     supabase.from("hammerex_categories").select("slug").order("sort_order"),
-    supabase.from("hammerex_products").select("slug, id, created_at"),
     supabase.from("hammerex_guides").select("slug, updated_at").eq("published", true)
   ]);
 
+  // Category lastModified: most-recent product create date inside that
+  // category is a reasonable proxy without an explicit updated_at column.
   const categories: MetadataRoute.Sitemap = (catsRes.data ?? [])
     .filter((c) => c.slug)
     .map((c) => ({
@@ -24,12 +35,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   const products: MetadataRoute.Sitemap = (prodsRes.data ?? [])
-    .map((p) => ({
-      url: `${base}/product/${p.slug ?? p.id}`,
-      lastModified: p.created_at ? new Date(p.created_at) : now,
-      changeFrequency: "weekly" as const,
-      priority: 0.9
-    }));
+    .map((p) => {
+      const u = (p as { updated_at?: string | null }).updated_at;
+      const stamp = u ?? p.created_at ?? null;
+      return {
+        url: `${base}/product/${p.slug ?? p.id}`,
+        lastModified: stamp ? new Date(stamp) : now,
+        changeFrequency: "weekly" as const,
+        priority: 0.9
+      };
+    });
 
   const guides: MetadataRoute.Sitemap = (guidesRes.data ?? [])
     .filter((g) => g.slug)

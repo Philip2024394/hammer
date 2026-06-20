@@ -8,31 +8,36 @@ export function ProductFAQ({ faq }: { faq: { q: string; a: string }[] | null }) 
   if (!faq || faq.length === 0) return null;
 
   return (
-    <section id="faq" className="border-t border-brand-line py-10">
+    <section id="faq" className="border-t border-brand-line py-6">
       <div className="mx-auto max-w-6xl px-4">
-        <h2 className="mb-2 text-lg font-semibold text-brand-text">Frequently asked</h2>
-        <p className="mb-6 text-xs text-brand-muted">
-          The questions buyers ask before ordering — answered honestly.
-        </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {faq.map((f, i) => (
-            <details
-              key={i}
-              className="group rounded-2xl border border-brand-line bg-brand-surface p-4 open:bg-brand-bg"
-            >
-              <summary className="flex cursor-pointer list-none items-start justify-between gap-3 text-sm font-semibold text-brand-text">
-                <span>{f.q}</span>
-                <span
-                  aria-hidden="true"
-                  className="mt-0.5 inline-block shrink-0 rounded-full bg-brand-accent/15 px-2 text-xs font-bold text-brand-accent transition group-open:rotate-45"
-                >
-                  +
-                </span>
-              </summary>
-              <p className="mt-3 text-xs leading-relaxed text-brand-muted">{f.a}</p>
-            </details>
-          ))}
-        </div>
+        <details className="group">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3">
+            <h2 className="text-lg font-semibold text-brand-text">Frequently asked</h2>
+            <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-accent text-black transition group-open:rotate-180">▾</span>
+          </summary>
+          <p className="mb-4 text-xs text-brand-muted">
+            The questions buyers ask before ordering — answered honestly.
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {faq.map((f, i) => (
+              <details
+                key={i}
+                className="group/q rounded-2xl border border-brand-line bg-brand-surface p-4 open:bg-brand-bg"
+              >
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-3 text-sm font-semibold text-brand-text">
+                  <span>{f.q}</span>
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 inline-block shrink-0 rounded-full bg-brand-accent/15 px-2 text-xs font-bold text-brand-accent transition group-open/q:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 text-xs leading-relaxed text-brand-muted">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </details>
       </div>
     </section>
   );

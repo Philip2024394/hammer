@@ -39,7 +39,7 @@ export function VariantSelector({ currency }: { currency: Currency }) {
                   </span>
                 )}
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-xs font-semibold text-brand-text">{v.label}</span>
+                  <span className="text-xs font-semibold leading-tight text-brand-text">{v.label}</span>
                   <span className="text-xs text-brand-muted">
                     {formatPrice(v.price_idr, currency)}
                   </span>

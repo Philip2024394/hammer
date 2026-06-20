@@ -40,6 +40,14 @@ body {
   from { transform: translateX(100%); }
   to   { transform: translateX(-100%); }
 }
+/* Variant of the marquee with a hold at the off-screen-left position so
+   the text visually pauses for a beat before the next cycle starts.
+   Used by ProductTicker; HomePageNotice keeps the plain seamless loop. */
+@keyframes hammerex-marquee-gap {
+  0%   { transform: translateX(100%); }
+  96%  { transform: translateX(-100%); }
+  100% { transform: translateX(-100%); }
+}
 .hammerex-marquee-track {
   display: inline-block;
   white-space: nowrap;
@@ -56,8 +64,38 @@ body {
   .hx-pulse,
   .hx-fade-in-up,
   .hx-shimmer,
-  .hx-pop { animation: none !important; }
+  .hx-pop,
+  .hx-flash-red,
+  .hx-rim-flash { animation: none !important; }
 }
+
+/* Pulsing yellow rim — used on the selected lanyard swatch so the active
+   choice grabs the eye even when the buyer has scrolled past. Loops
+   indefinitely; disabled for prefers-reduced-motion users above. */
+@keyframes hx-rim-flash-kf {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgb(var(--brand-accent) / 0.65), 0 0 0 2px rgb(var(--brand-accent));
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgb(var(--brand-accent) / 0), 0 0 0 2px rgb(var(--brand-accent));
+  }
+}
+.hx-rim-flash { animation: hx-rim-flash-kf 1.4s ease-out infinite; }
+
+/* Red flash on the first size pill when the buyer forgot to pick a size */
+@keyframes hx-flash-red-kf {
+  0%, 100% {
+    border-color: rgb(248 113 113);
+    background-color: rgb(248 113 113 / 0.25);
+    color: rgb(254 202 202);
+  }
+  50% {
+    border-color: rgb(248 113 113 / 0.4);
+    background-color: rgb(248 113 113 / 0.05);
+    color: rgb(248 113 113);
+  }
+}
+.hx-flash-red { animation: hx-flash-red-kf 700ms ease-in-out infinite; }
 
 /* Yellow ring pulse on primary tap (use on Add to cart / WhatsApp CTAs) */
 @keyframes hx-pulse-kf {

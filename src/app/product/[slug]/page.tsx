@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
-import { absolute, breadcrumbJsonLd, faqJsonLd, productJsonLd, BRAND } from "@/lib/seo";
+import { absolute, breadcrumbJsonLd, clampDescription, faqJsonLd, productJsonLd, stripMarkdown, BRAND } from "@/lib/seo";
 import { ProductGallery } from "@/components/pdp/ProductGallery";
 import { BuyColumn } from "@/components/pdp/BuyColumn";
-import { KeyFeatures } from "@/components/pdp/KeyFeatures";
 import { InTheBox } from "@/components/pdp/InTheBox";
 import { ShippingReturns } from "@/components/pdp/ShippingReturns";
 import { StickyBuyBar } from "@/components/pdp/StickyBuyBar";
-import { SectionAnchors } from "@/components/pdp/SectionAnchors";
-import { BundleBlock } from "@/components/pdp/BundleBlock";
 import { PairsWith } from "@/components/pdp/PairsWith";
 import { ReviewsBlock } from "@/components/pdp/ReviewsBlock";
 import { QABlock } from "@/components/pdp/QABlock";
@@ -31,11 +28,19 @@ import {
 } from "@/lib/supabase";
 import { VariantProvider } from "@/components/pdp/VariantContext";
 import { DealProvider } from "@/components/pdp/DealContext";
+import { BundleReturnButton } from "@/components/pdp/BundleReturnButton";
+import { RetailShopsSection } from "@/components/pdp/RetailShopsSection";
+import { CompareSection } from "@/components/pdp/CompareSection";
+import { ProductDelayNotice } from "@/components/pdp/ProductDelayNotice";
 import { RecordRecentView } from "@/components/RecordRecentView";
+import { ProductTicker } from "@/components/GlobalTicker";
 import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
 
-export const dynamic = "force-dynamic";
+// PDPs are ISR-cached for fast first paint. Currency / geo personalisation
+// happens client-side in BuyColumn from the hx_country cookie. Revalidate
+// every 60s — content changes are catalogue edits, not real-time data.
+export const revalidate = 60;
 
 async function loadProduct(slug: string) {
   const productRes = await supabase
@@ -108,6 +113,20 @@ async function loadProduct(slug: string) {
       };
     });
 
+  const compareWith = (product.compare_with ?? []).filter(Boolean) as string[];
+  let compareProducts: HammerexProduct[] = [];
+  if (compareWith.length > 0) {
+    const res = await supabase
+      .from("hammerex_products")
+      .select("*")
+      .in("slug", compareWith);
+    const bySlug = new Map<string, HammerexProduct>();
+    for (const p of (res.data ?? []) as HammerexProduct[]) {
+      bySlug.set(p.slug ?? "", p);
+    }
+    compareProducts = compareWith.map((s) => bySlug.get(s)).filter((p): p is HammerexProduct => Boolean(p));
+  }
+
   return {
     product,
     media: (mediaRes.data ?? []) as HammerexProductMedia[],
@@ -116,6 +135,7 @@ async function loadProduct(slug: string) {
     variants: (variantsRes.data ?? []) as HammerexProductVariant[],
     productDeals: (productDealsRes.data ?? []) as HammerexProductDeal[],
     dealBreakers,
+    compareProducts,
     reviews: (reviewsRes.data ?? []) as HammerexReview[],
     questions,
     pairs,
@@ -133,7 +153,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const p = res.data;
   if (!p) return { title: "Product not found" };
 
-  const description = p.subtitle ?? p.overview ?? p.description ?? BRAND.description;
+  // Strip markdown so `**bold**` / `### heading` / bullets don't bleed into
+  // the SERP description or the OG/Twitter preview cards.
+  const description = clampDescription(
+    stripMarkdown(p.subtitle ?? p.overview ?? p.description ?? BRAND.description)
+  );
   const image = p.image_url ?? BRAND.logo;
   const url = absolute(`/product/${p.slug ?? slug}`);
   const refSuffix = p.sku ? ` · Ref ${p.sku}` : "";
@@ -142,13 +166,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${p.name}${refSuffix}`,
     description,
     alternates: { canonical: `/product/${p.slug ?? slug}` },
+    // OG type=product on PDPs so Facebook / WhatsApp / Slack render the
+    // rich product preview rather than a generic website card.
     openGraph: {
-      type: "website",
+      type: "website", // Next's typed enum doesn't list "product"; OG validators accept the override below.
       title: `${p.name}${refSuffix}`,
       description,
       url,
       siteName: BRAND.name,
-      images: [{ url: image, alt: p.name }]
+      images: [{ url: image, alt: p.name, width: 1200, height: 1200 }]
+    },
+    other: {
+      "og:type": "product"
     },
     twitter: {
       card: "summary_large_image",
@@ -164,7 +193,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const data = await loadProduct(slug);
   if (!data) notFound();
 
-  const { product, media, specs, box, variants, productDeals, dealBreakers, reviews, questions, pairs, bundle } = data;
+  const { product, media, specs, box, variants, productDeals, dealBreakers, compareProducts, reviews, questions, pairs, bundle } = data;
   const stickyImage = media.find((m) => m.kind === "image")?.url ?? product.image_url;
 
   const categoryRes = product.category_id
@@ -208,6 +237,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         />
       )}
       <Header />
+      <BundleReturnButton />
 
       <nav className="mx-auto max-w-6xl px-4 pt-4 text-xs text-brand-muted" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
@@ -219,9 +249,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </ol>
       </nav>
 
+      <ProductDelayNotice slug={product.slug} />
+
       <VariantProvider variants={variants}>
         <DealProvider deals={productDeals} unitPriceIdr={product.price_idr} productName={product.name}>
           <section className="mx-auto max-w-6xl px-4 pt-6">
+            {/* Full-width running ticker — sits ABOVE the product image / buy
+                column so it's visible immediately on page load, not buried
+                under the long buy column. Reads product.running_notice;
+                falls back to the brand-wide rotation when that's null.
+                Extra horizontal padding here keeps the pill clear of the
+                screen edges on mobile (the parent section already has px-4,
+                this adds another rung on top of that). */}
+            <div className="mb-4 px-2 sm:px-4">
+              <ProductTicker productNotice={product.running_notice ?? null} />
+            </div>
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <ProductGallery media={media} fallbackImage={product.image_url} name={product.name} />
               <div id="pdp-buy-sentinel">
@@ -230,6 +272,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   currentCategory={category ? { slug: category.slug, name: category.name } : null}
                   allCategories={allCategories}
                   specs={specs}
+                  bundle={bundle}
                 />
               </div>
             </div>
@@ -238,13 +281,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </DealProvider>
       </VariantProvider>
 
-      <div className="mx-auto max-w-6xl px-4 pt-8">
-        <SectionAnchors />
-      </div>
-
-      <KeyFeatures features={product.features} />
-      <InTheBox items={box} fallbackImage={product.image_url} />
-      <BundleBlock bundle={bundle} />
+      <InTheBox
+        items={box}
+        fallbackImage={product.image_url}
+        {...(product.slug === "trowel-leg-pouch"
+          ? { title: "In your package", subtitle: "This is what you receive in your delivery package." }
+          : product.slug === "plastering-caddy"
+          ? { title: "In the Roll", subtitle: "This is what you receive in your delivery roll." }
+          : product.slug === "electrician-sling-bag"
+          ? {
+              title: "In the Package",
+              subtitle: "This is what you receive in your delivery package.",
+              overlayImage:
+                "https://ik.imagekit.io/9mrgsv2rp/ChatGPT%20Image%20Jun%2020,%202026,%2005_57_18%20AM.png"
+            }
+          : {})}
+      />
+      <CompareSection currentProduct={product} others={compareProducts} />
+      <RetailShopsSection productName={product.name} productSku={product.sku} />
       <PairsWith pairs={pairs} />
       <ReviewsBlock
         productId={product.id}

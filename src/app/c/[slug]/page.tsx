@@ -8,7 +8,8 @@ import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
 import { absolute, breadcrumbJsonLd, collectionJsonLd, BRAND } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+// Category listing is ISR — bumps every 60s for catalogue edits.
+export const revalidate = 60;
 
 async function loadCategory(slug: string) {
   const catRes = await supabase

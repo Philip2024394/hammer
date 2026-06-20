@@ -12,7 +12,8 @@ import { DistributionPartnersSection } from "@/components/DistributionPartnersSe
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { supabase, type HammerexCategory } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
+// Home is ISR — categories rarely change and the hero is static.
+export const revalidate = 60;
 
 // Home page is intentionally SYNC at the top level. The Hero + the
 // production-notice marquee render immediately on first paint without

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { HammerexReview } from "@/lib/supabase";
 import { WriteReviewForm } from "./WriteReviewForm";
 
@@ -9,7 +9,11 @@ const PILLAR_KEYS = PILLARS_DEFAULT.map((p) => p.toLowerCase());
 const PAGE_SIZE = 10;
 
 type SortMode = "newest" | "highest" | "lowest";
-type FilterMode = "all" | "verified" | "5" | "4" | "3" | "2" | "1";
+type FilterMode = "all" | "verified" | "photos" | "5" | "4" | "3" | "2" | "1";
+
+function hasPhotos(r: HammerexReview): boolean {
+  return Array.isArray(r.photos) && r.photos.length > 0;
+}
 
 function avg(reviews: HammerexReview[], key?: string): number {
   if (!reviews.length) return 0;
@@ -73,10 +77,25 @@ export function ReviewsBlock({
   const [shown, setShown] = useState(PAGE_SIZE);
   const [sort, setSort] = useState<SortMode>("newest");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+
+  // Esc-to-close + body scroll lock while the lightbox is open.
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setZoom(null); };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [zoom]);
 
   const filtered = useMemo(() => {
     let out = [...reviews];
     if (filter === "verified") out = out.filter((r) => r.verified_purchase);
+    else if (filter === "photos") out = out.filter(hasPhotos);
     else if (filter !== "all") {
       const n = Number(filter);
       out = out.filter((r) => r.rating === n);
@@ -86,6 +105,28 @@ export function ReviewsBlock({
     else if (sort === "lowest") out.sort((a, b) => a.rating - b.rating);
     return out;
   }, [reviews, sort, filter]);
+
+  // Aggregate every photo across every review, newest first. Capped at 12
+  // for the strip — the dedicated "Photos" filter shows the rest.
+  const allPhotos = useMemo(() => {
+    const out: { src: string; reviewer: string }[] = [];
+    const sorted = [...reviews].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    for (const r of sorted) {
+      if (!hasPhotos(r)) continue;
+      for (const src of r.photos as string[]) {
+        out.push({ src, reviewer: r.reviewer_name });
+        if (out.length >= 12) return out;
+      }
+    }
+    return out;
+  }, [reviews]);
+
+  const photosTotal = reviews.reduce(
+    (n, r) => n + (Array.isArray(r.photos) ? r.photos.length : 0),
+    0
+  );
 
   const displayed = filtered.slice(0, shown);
   const remaining = Math.max(0, filtered.length - displayed.length);
@@ -156,11 +197,44 @@ export function ReviewsBlock({
               </div>
             )}
 
+            {allPhotos.length > 0 && (
+              <div className="mb-5">
+                <div className="mb-2 flex items-end justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+                    Photos from buyers · {photosTotal}
+                  </h3>
+                  {photosTotal > allPhotos.length && (
+                    <button
+                      type="button"
+                      onClick={() => { setFilter("photos"); setShown(PAGE_SIZE); }}
+                      className="text-xs font-semibold text-brand-text hover:text-brand-accent"
+                    >See all photo reviews →</button>
+                  )}
+                </div>
+                <ul className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
+                  {allPhotos.map((p, i) => (
+                    <li key={`${p.src}-${i}`} className="shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setZoom({ src: p.src, alt: `Buyer photo by ${p.reviewer}` })}
+                        aria-label={`Enlarge buyer photo by ${p.reviewer}`}
+                        className="block h-24 w-24 overflow-hidden rounded-xl border border-brand-line bg-black transition hover:border-brand-accent"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.src} alt={`Buyer photo by ${p.reviewer}`} loading="lazy" className="h-full w-full object-cover" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {reviews.length > 0 && (
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 {([
                   { v: "all", label: "All" },
                   { v: "verified", label: "Verified" },
+                  ...(photosTotal > 0 ? [{ v: "photos" as const, label: `With photos (${photosTotal})` }] : []),
                   { v: "5", label: "5★" },
                   { v: "4", label: "4★" },
                   { v: "3", label: "3★" },
@@ -221,6 +295,23 @@ export function ReviewsBlock({
                         <span className="text-xs text-brand-muted">{r.reviewer_name}</span>
                       </div>
                       {r.body && <p className="mt-2 text-xs leading-relaxed text-brand-muted">{r.body}</p>}
+                      {hasPhotos(r) && (
+                        <ul className="mt-3 flex flex-wrap gap-2">
+                          {(r.photos as string[]).map((src, i) => (
+                            <li key={`${r.id}-photo-${i}`}>
+                              <button
+                                type="button"
+                                onClick={() => setZoom({ src, alt: `Photo from ${r.reviewer_name}'s review` })}
+                                aria-label={`Enlarge photo from ${r.reviewer_name}'s review`}
+                                className="block h-20 w-20 overflow-hidden rounded-lg border border-brand-line bg-black transition hover:border-brand-accent"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       {typeof r.helpful_count === "number" && r.helpful_count > 0 && (
                         <div className="mt-3 inline-flex items-center gap-1.5 text-xs text-brand-muted">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -247,6 +338,31 @@ export function ReviewsBlock({
           </div>
         </div>
       </div>
+
+      {zoom && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={zoom.alt}
+          onClick={() => setZoom(null)}
+          className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={zoom.src}
+            alt={zoom.alt}
+            onClick={(e) => e.stopPropagation()}
+            className="block max-h-[88vh] max-w-full rounded-xl object-contain"
+            style={{ touchAction: "pinch-zoom" }}
+          />
+          <button
+            type="button"
+            onClick={() => setZoom(null)}
+            aria-label="Close"
+            className="fixed right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-brand-accent text-black shadow-[0_2px_10px_rgba(255,179,0,0.4)] transition active:scale-95 hover:opacity-90"
+          >×</button>
+        </div>
+      )}
     </section>
   );
 }

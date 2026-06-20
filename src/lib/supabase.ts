@@ -57,7 +57,13 @@ export type HammerexProduct = {
   backpack_straps_option_idr: number | null;
   is_universal: boolean | null;
   shipping_per_unit_idr: number | null;
+  hide_from_upsell?: boolean;
+  upsell_image_url?: string | null;
+  compare_with?: string[] | null;
   faq: { q: string; a: string }[] | null;
+  // Per-product marquee shown under the hero image on the PDP. Falls back
+  // to the brand-wide rotation when null.
+  running_notice?: string | null;
 };
 
 export type HammerexGuide = {

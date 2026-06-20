@@ -6,10 +6,14 @@ export function WarrantyTimeline({ warrantyYears }: { warrantyYears: number }) {
     { n: "04", t: "Need service? Submit a claim", d: "Pre-paid return label. Repair or replace within 5 business days of receipt." }
   ];
   return (
-    <section id="warranty" className="border-t border-brand-line py-10">
+    <section id="warranty" className="border-t border-brand-line py-6">
       <div className="mx-auto max-w-6xl px-4">
-        <h2 className="mb-6 text-lg font-semibold text-brand-text">{warrantyYears}-year warranty journey</h2>
-        <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <details className="group">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3">
+            <h2 className="text-lg font-semibold text-brand-text">{warrantyYears}-year warranty journey</h2>
+            <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-accent text-black transition group-open:rotate-180">▾</span>
+          </summary>
+          <ol className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s, i) => (
             <li key={s.n} className="relative rounded-2xl border border-brand-line bg-brand-surface p-5">
               <div className="flex items-center gap-3">
@@ -22,7 +26,8 @@ export function WarrantyTimeline({ warrantyYears }: { warrantyYears: number }) {
               )}
             </li>
           ))}
-        </ol>
+          </ol>
+        </details>
       </div>
     </section>
   );

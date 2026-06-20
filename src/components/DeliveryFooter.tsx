@@ -9,12 +9,12 @@ export function DeliveryFooter() {
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-brand-text">Two-tier shipping — UK, USA, Australia</h3>
+            <h3 className="text-sm font-semibold text-brand-text">International shipping — quoted per order</h3>
             <p className="mt-1 text-xs text-brand-muted">
-              £28 shipping under £50, £20 flat once you reach £50.
-              Dispatched within 3 working days via EMS Air Mail — 5–6 days transit.
-              Shipping to other countries is confirmed on WhatsApp after checkout. Import
-              duties and local taxes are not included and are paid by the buyer on arrival.
+              Dispatched within 3 working days via EMS Air Mail — typical 5–6 days
+              transit. Shipping cost is confirmed on WhatsApp after checkout based on
+              destination, weight and freight method (air or sea). Import duties and
+              local taxes are not included and are paid by the buyer on arrival.
             </p>
           </div>
         </article>
@@ -28,7 +28,9 @@ export function DeliveryFooter() {
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-brand-text">Pay in your currency</h3>
             <p className="mt-1 text-xs text-brand-muted">
-              Checkout in IDR, USD, SGD, AUD or EUR. Live FX, no hidden conversion markup.
+              Settle in GBP, IDR, USD, SGD, AUD or EUR through Hammerex multi-currency
+              accounts — at the lowest transaction fees, with live FX and no hidden
+              conversion markup.
             </p>
           </div>
         </article>

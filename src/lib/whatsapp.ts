@@ -26,8 +26,12 @@ export function buildQuoteMessage(input: QuoteInput): string {
     ? input.lines.map((l) => {
         const variant = l.variantLabel && l.variantLabel !== "WELCOME GIFT" && l.variantLabel !== "DEAL BREAKER" ? ` — ${l.variantLabel}` : "";
         const size = l.size ? ` (${l.size})` : "";
+        const belt = l.beltSize ? ` — Belt: ${l.beltSize}` : "";
         const thread = l.threadColor ? ` — Thread: ${threadColorLabel(l.threadColor)}` : "";
         const straps = l.backpackStraps ? " — + Backpack straps add-on" : "";
+        const branding = l.customBrandName ? ` — Branded: "${l.customBrandName}" (artwork to follow on WhatsApp)` : "";
+        const cover = l.repairCover ? " — + Hammerex Pro Trade Cover" : "";
+        const beltUp = l.beltUpgrade ? ` — Belt upgrade: ${l.beltUpgrade}` : "";
         const ref = l.sku ? ` [Ref ${l.sku}]` : "";
         const isGift = l.variantLabel === "WELCOME GIFT";
         const isDealBreaker = l.variantLabel === "DEAL BREAKER";
@@ -37,7 +41,7 @@ export function buildQuoteMessage(input: QuoteInput): string {
             ? formatPrice(l.unitPriceIdr, l.baseCurrency as any)
             : formatPrice(l.unitPriceIdr, "IDR");
         const suffix = isGift ? "" : isDealBreaker ? " each ⚡ Deal Breaker · 15% off" : " each";
-        return `• ${l.qty}× ${l.name}${variant}${size}${thread}${straps}${ref} — ${price}${suffix}`;
+        return `• ${l.qty}× ${l.name}${variant}${size}${belt}${thread}${straps}${branding}${cover}${beltUp}${ref} — ${price}${suffix}`;
       }).join("\n")
     : "(empty cart)";
 

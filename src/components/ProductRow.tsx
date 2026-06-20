@@ -2,6 +2,7 @@ import type { HammerexProduct } from "@/lib/supabase";
 import { SectionHeader } from "./SectionHeader";
 import { CardActionOverlay } from "./CardActionOverlay";
 import { imageUrl } from "@/lib/imageUrl";
+import { formatPrice, type Currency } from "@/lib/fx";
 
 const FALLBACK_EXTRAS = {
   slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
@@ -19,12 +20,13 @@ const FALLBACK: HammerexProduct[] = [
   { id: "p1", category_id: null, name: "Cordless Drill", description: "20V brushless with 2 batteries.", price_idr: 1_850_000, image_url: "https://images.unsplash.com/photo-1581147036324-c47a03a81d48?auto=format&fit=crop&w=600&q=70", is_featured: true, ...FALLBACK_EXTRAS, slug: "cordless-drill-20v" }
 ];
 
-const fmtIdr = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
-const fmtGbp = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 });
-
+// Grid card prices are the **product price only** — shipping is NEVER added
+// here. Some products ship free UK / +£10 air freight, others are quoted on
+// WhatsApp for sea-freight; that nuance belongs on the PDP, not the grid.
+// Uses the live FX from fx.ts so the displayed amount matches the PDP.
 function formatProductPrice(p: HammerexProduct): string {
-  if (p.base_currency === "GBP") return fmtGbp.format(p.price_idr / 20000);
-  return fmtIdr.format(p.price_idr);
+  const cur = (p.base_currency as Currency | null) ?? "IDR";
+  return formatPrice(p.price_idr, cur);
 }
 
 function Check() {
@@ -115,7 +117,7 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
               <article className="relative flex h-full flex-col overflow-hidden rounded-2xl bg-brand-surface transition-colors duration-200">
                 <a
                   href={href}
-                  className="relative block aspect-square w-full overflow-hidden"
+                  className="relative block aspect-[4/3] w-full overflow-hidden"
                   style={{ background: "radial-gradient(circle at center, rgb(255 179 0 / 0.10) 0%, rgb(0 0 0) 72%)" }}
                 >
                   <CardActionOverlay slug={p.slug} />
@@ -136,16 +138,18 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
                       loading="lazy"
                       decoding="async"
                       // Product cards must show the WHOLE product — no crop.
-                      // Uniform aspect-square container + object-contain on
-                      // every breakpoint so every photo is fully visible AND
-                      // every grid row has perfectly even card heights. The
-                      // black background makes any letterbox area look
-                      // intentional on the brand surface.
+                      // Container is aspect-[4/3] landscape to fit the wide
+                      // banner-style hero images we generate (≈ 16:10 / 2:1)
+                      // without the heavy black bands above and below they
+                      // used to get in an aspect-square frame. object-contain
+                      // is kept so square photos still render fully visible
+                      // with minor side-letterbox (much less prominent than
+                      // top/bottom bars).
                       //
-                      // Different policy from the Hero on purpose: Hero uses
-                      // object-cover (full-bleed banner, crop is fine).
-                      // Product cards must NEVER crop — the product would
-                      // get its edges sliced off and look broken.
+                      // Different policy from the site Hero on purpose: the
+                      // Hero uses object-cover (full-bleed banner, crop is
+                      // fine). Product cards must NEVER crop — the product
+                      // would get its edges sliced off and look broken.
                       className="block h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   )}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { imageUrl } from "@/lib/imageUrl";
 
 const HERO_SRCS = [
-  "https://ik.imagekit.io/9mrgsv2rp/Untitledasdasdasdsdaasdqweqweasdasddsfsdfuuiui.png"
+  "https://ik.imagekit.io/9mrgsv2rp/ChatGPT%20Image%20Jun%2019,%202026,%2009_05_41%20AM.png"
 ];
 
 const ROTATE_MS = 5500;
@@ -25,12 +25,12 @@ export function Hero() {
 
   return (
     // Banner sits inside the standard max-w-6xl container with px-4 gutters
-    // so it visually aligns with every other section below it. Constant
-    // aspect-[16/9] on every breakpoint keeps the source banner uncropped
-    // top-to-bottom and side-to-side.
+    // so it visually aligns with every other section below it. aspect-[2/1]
+    // matches the source banner's native 1600×800 dimensions so object-cover
+    // doesn't crop anything off the sides.
     <section className="mx-auto max-w-6xl px-4 pt-4">
       <div className="relative w-full overflow-hidden">
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black">
+        <div className="relative aspect-[2/1] w-full overflow-hidden rounded-2xl bg-black">
           {HERO_SRCS.map((src, i) => (
             <img
               key={src}
@@ -39,7 +39,7 @@ export function Hero() {
               sizes="100vw"
               alt={i === 0 ? "Hammerex — built for everyday utility" : ""}
               width="1600"
-              height="900"
+              height="800"
               fetchPriority={i === 0 ? "high" : "low"}
               loading={i === 0 ? "eager" : "lazy"}
               decoding="async"
