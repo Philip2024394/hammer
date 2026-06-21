@@ -54,7 +54,7 @@ export function StickyBuyBar({ product, image }: { product: HammerexProduct; ima
         {displayImage && (
           <img
             src={displayImage}
-            alt=""
+            alt={product.name}
             width="40"
             height="40"
             loading="lazy"

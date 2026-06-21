@@ -41,7 +41,8 @@ function Check() {
 // the productHref + categoryHref computation. Used on the home Pro Picks
 // row so the Scaffolders Setup Kit card routes to the tabbed scaffolding
 // shop (so buyers land on a belt picker, not the single-product PDP).
-type ProductRowItem = HammerexProduct & { customHref?: string };
+// `customCtaLabel` overrides the default CTA copy on the same row.
+type ProductRowItem = HammerexProduct & { customHref?: string; customCtaLabel?: string };
 
 export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product", layout = "portrait" }: { items?: ProductRowItem[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category"; layout?: "portrait" | "landscape" }) {
   const data: ProductRowItem[] = (items?.length ? items : FALLBACK);
@@ -57,11 +58,12 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
             const categoryHref = p.category ? `/c/${p.category.slug}` : productHref;
             const baseHref = linkTo === "category" ? categoryHref : productHref;
             const href = p.customHref ?? baseHref;
-            const ctaLabel = p.customHref
-              ? "Browse belts"
-              : linkTo === "category"
-                ? "Browse category"
-                : "View product";
+            const ctaLabel = p.customCtaLabel
+              ?? (p.customHref
+                ? "Browse belts"
+                : linkTo === "category"
+                  ? "Browse category"
+                  : "View product");
             return (
               <li key={p.id} className="group relative">
                 <article className="relative overflow-hidden rounded-2xl bg-brand-surface">

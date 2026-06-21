@@ -158,7 +158,7 @@ export function ProductGallery({ media, fallbackImage, name }: {
                       aria-current={isActiveThumb}
                       className={`block h-16 w-16 overflow-hidden rounded-md border transition ${isActiveThumb ? "border-brand-accent" : "border-brand-line"} bg-brand-surface hover:border-brand-accent sm:h-20 sm:w-20 sm:rounded-lg`}
                     >
-                      <img src={m.url} alt={m.alt ?? ""} loading="lazy" decoding="async" width="80" height="80" className="h-full w-full object-contain p-1" />
+                      <img src={m.url} alt={m.alt ?? `${name} — image ${i + 1}`} loading="lazy" decoding="async" width="80" height="80" className="h-full w-full object-contain p-1" />
                     </button>
                   </li>
                 );

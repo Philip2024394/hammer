@@ -17,13 +17,34 @@ export function absolute(path: string): string {
 export const BRAND = {
   name: "Hammerex",
   legalName: "Hammerex Products",
-  tagline: "International tools & construction supplier",
+  tagline: "Construction tools, tool belts & tool bags — direct from the maker",
   description:
-    "Hammerex supplies tools, PPE and construction goods worldwide. Flat £20 shipping to UK, USA and Australia via EMS Air Mail. 4–5 working days dispatch · ~5–7 days air freight transit · sea freight ~3–4 weeks (varies by country). Other countries confirmed on WhatsApp.",
+    "Hammerex supplies construction tools, hand tools, tool belts, tool bags and trade PPE direct from our Yogyakarta workshop — the hardware-store-direct alternative to building merchants. 4–5 working day dispatch worldwide · flat £20 EMS Air Mail to UK, USA, Australia · other countries quoted on WhatsApp.",
+  // Short-form descriptor for OG/Twitter where punchy beats complete.
+  descriptionShort:
+    "Construction tools, tool belts & tool bags direct from the Hammerex workshop — hardware-store-direct prices, worldwide shipping.",
   logo: "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/85e5e067cf0cb299.png",
   whatsapp: process.env.NEXT_PUBLIC_HAMMEREX_WHATSAPP ?? "+6281392000050",
   locale: "en_US"
 };
+
+// Site-wide keyword set kept in one place so titles, meta descriptions, JSON-LD
+// keywords and the home FAQ all stay aligned with the queries we're targeting.
+export const SEO_KEYWORDS = [
+  "construction tools",
+  "tool belts",
+  "tool bags",
+  "hand tools",
+  "hardware store",
+  "building merchants",
+  "trade tools",
+  "trade products",
+  "new tools",
+  "scaffolding tools",
+  "plastering tools",
+  "drywall tools",
+  "electrician tools"
+];
 
 export function organizationJsonLd() {
   const digits = BRAND.whatsapp.replace(/\D/g, "");
@@ -184,13 +205,69 @@ export function productJsonLd(product: HammerexProduct, category?: HammerexCateg
   };
 }
 
+// Per-slug SEO title overrides for category pages. Bare category names ("Belts",
+// "Trowels") don't carry the construction-industry keywords buyers actually
+// type into Google ("tool belts uk", "construction tools direct"); the override
+// folds those in while keeping the H1 readable.
+export const CATEGORY_SEO_TITLES: Record<string, string> = {
+  belts: "Work Belts & Tool Belts — Leather Trade Belts Direct",
+  "belt-holders": "Belt Holders & Tool Belt Pouches — Modular Trade Storage",
+  "tool-bags-backpacks": "Tool Bags & Tool Backpacks for Tradesmen — Direct from the Workshop",
+  trowels: "Plastering & Bricklaying Trowels — Trade-Grade Hand Tools",
+  "trowel-holders": "Trowel Holders & Belt Sets — Plastering Tool Belt Kits",
+  "tape-holders": "Measure Tape Holders — Tool Belt Tape Pouches",
+  "knives-cutters": "Trade Knives & Cutters — Site Hand Tools",
+  "hammer-holders": "Hammer Holders & Hammer Loops — Tool Belt Accessories",
+  "hawk-holders": "Hawk Holders — Plastering Tool Belt Add-ons",
+  "drill-holders": "Drill Holders — Cordless Drill Tool Belt Pouches",
+  "phone-laptop-cases": "Site Phone & Tablet Cases — Heavy-Duty Trade Pouches",
+  "gloves-ppe": "Trade Gloves & PPE — Site Safety Hand Protection",
+  "aprons-workwear": "Trade Aprons & Workwear — Builder & Tradesman Aprons",
+  "lunch-hydration": "Site Lunch Bags & Hydration — Trade Lunchbox & Bottle Holders",
+  "drywall-accessories": "Drywall Accessories — Plasterboard Hand Tools & Holders",
+  "sleeves-wallets": "Trade Tool Wallets & Sleeves — Pouch Inserts",
+  lanyards: "Trade Lanyards — Tool Tethers & Drop Prevention",
+  scaffolding: "Scaffolding Tool Belts & Site Kits — Scaffolder Setup",
+  plastering: "Plastering Tools & Tool Belts — Hand Tools for Plasterers",
+  drywall: "Drywall Tools — Plasterboard Hand Tools & Belts",
+  carpentry: "Carpentry Tools — Hand Tools & Tool Belts for Carpenters",
+  tiling: "Tiling Tools & Trowels — Hand Tools for Tilers",
+  bricklaying: "Bricklaying Tools & Brick Trowels — Hand Tools for Bricklayers",
+  electrical: "Electrician Tool Belts & Pouches — Electrical Hand Tools",
+  plumbing: "Plumbing Tool Belts & Pouches — Hand Tools for Plumbers",
+  "painting-decorating": "Painter & Decorator Tool Belts — Hand Tools & Pouches",
+  glazing: "Glazing Hand Tools & Tool Belts — Glazier Trade Gear",
+  landscaping: "Landscaping Tools & Tool Belts — Hand Tools for Landscapers",
+  "steel-fixing": "Steel Fixing Tools — Rebar Belts & Trade Hand Tools",
+  demolition: "Demolition Hand Tools & Site Belts — Trade-Grade",
+  "metal-fabrication": "Metal Fabrication Hand Tools & Tool Belts",
+  joinery: "Joinery Hand Tools & Tool Belts — Trade Workshop Gear",
+  "stone-masonry": "Stone Masonry Hand Tools & Belts — Mason Trade Gear",
+  tailoring: "Tailoring Hand Tools — Trade Workshop Gear",
+  barber: "Barber Hand Tools & Belt Pouches — Trade Belt Gear",
+  "first-aid": "Site First Aid Pouches — Construction Trade Safety"
+};
+
+export function categoryTitle(slug: string, fallbackName: string): string {
+  return CATEGORY_SEO_TITLES[slug] ?? `${fallbackName} — Trade-Grade Hand Tools & Tool Belts`;
+}
+
+export function categoryDescription(category: HammerexCategory): string {
+  const keyword = CATEGORY_SEO_TITLES[category.slug]?.split(" — ")[0] ?? category.name;
+  return clampDescription(
+    `${keyword} direct from the Hammerex workshop — the maker-direct alternative to building merchants and hardware stores. Trade-grade, stitched and riveted in Yogyakarta, shipped worldwide with flat £20 EMS Air Mail to UK, USA and Australia.`
+  );
+}
+
 export function collectionJsonLd(category: HammerexCategory, products: HammerexProduct[]) {
+  const seoTitle = CATEGORY_SEO_TITLES[category.slug] ?? `${category.name} — ${BRAND.name}`;
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `${category.name} — ${BRAND.name}`,
+    name: seoTitle,
     url: absolute(`/c/${category.slug}`),
-    description: `${category.name} products supplied by ${BRAND.name} — flat £20 shipping to UK, USA, Australia (others quoted on WhatsApp).`,
+    description: categoryDescription(category),
+    keywords: [category.name.toLowerCase(), ...SEO_KEYWORDS].join(", "),
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: products.length,
@@ -199,6 +276,22 @@ export function collectionJsonLd(category: HammerexCategory, products: HammerexP
         position: i + 1,
         url: absolute(`/product/${p.slug ?? p.id}`),
         name: p.name
+      }))
+    },
+    // OfferCatalog tells Google "this page lists products for sale" — improves
+    // category-page eligibility for Shopping carousels and merchant listings.
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: category.name,
+      itemListElement: products.slice(0, 30).map((p) => ({
+        "@type": "Offer",
+        url: absolute(`/product/${p.slug ?? p.id}`),
+        itemOffered: { "@type": "Product", name: p.name, sku: p.sku ?? p.id },
+        ...priceForJsonLd(p),
+        availability:
+          p.stock_count === null || p.stock_count === undefined || p.stock_count > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock"
       }))
     }
   };

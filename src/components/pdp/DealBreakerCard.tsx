@@ -137,7 +137,7 @@ export function DealBreakerCard({
                         aria-label={`View ${d.item.name} details`}
                         className="group relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-brand-line bg-brand-surface"
                       >
-                        <img src={d.item.image_url} alt="" className="h-full w-full object-contain p-1" />
+                        <img src={d.item.image_url} alt={d.item.name} className="h-full w-full object-contain p-1" />
                         <span className="absolute inset-0 grid place-items-center bg-black/55 opacity-0 transition-opacity group-hover:opacity-100">
                           <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-accent text-black">
                             <EyeIcon />

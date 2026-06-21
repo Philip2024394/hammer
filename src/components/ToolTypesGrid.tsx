@@ -6,6 +6,7 @@ const TOOL_TYPE_SLUGS = [
   "tape-holders",
   "knives-cutters",
   "hammer-holders",
+  "belts",
   "belt-holders",
   "trowels",
   "trowel-holders",

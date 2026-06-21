@@ -306,7 +306,7 @@ export function ReviewsBlock({
                                 className="block h-20 w-20 overflow-hidden rounded-lg border border-brand-line bg-black transition hover:border-brand-accent"
                               >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                <img src={src} alt={`Customer review photo by ${r.reviewer_name}`} loading="lazy" className="h-full w-full object-cover" />
                               </button>
                             </li>
                           ))}

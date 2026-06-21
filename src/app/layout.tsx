@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { BRAND, siteUrl, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { BRAND, SEO_KEYWORDS, siteUrl, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { CompareDock } from "@/components/CompareDock";
 import { TradeTipFooter } from "@/components/TradeTipFooter";
 import { WelcomePopup } from "@/components/WelcomePopup";
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
   creator: BRAND.name,
   publisher: BRAND.name,
   category: "Construction & Tools",
+  keywords: SEO_KEYWORDS,
   alternates: {
     canonical: "/",
     types: {

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { supabase } from "@/lib/supabase";
 import { siteUrl } from "@/lib/seo";
+import { SEO_LANDING_SLUGS } from "@/lib/seoLandings";
 
 export const revalidate = 3600;
 
@@ -55,9 +56,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8
     }));
 
+  // SEO alias landing pages — /tool-belts, /tool-bags, /construction-tools etc.
+  // These earn keyword traffic that the bare /c/[slug] category pages don't.
+  const landings: MetadataRoute.Sitemap = SEO_LANDING_SLUGS.map((s) => ({
+    url: `${base}/${s}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.9
+  }));
+
   return [
     { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    ...landings,
     ...categories,
     ...products,
     ...guides

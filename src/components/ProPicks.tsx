@@ -10,8 +10,15 @@ import { ProductRow } from "./ProductRow";
 const PRO_PICK_SLUGS = [
   "plastering-pro-bag",
   "drywall-pro-kit",
-  "scaffolders-setup-kit"
+  "scaffolders-setup-kit",
+  "electrician-pro-pouch"
 ];
+
+// Electrician banner anchored to the Electrician Pro Pouch product. The card
+// shows a category-style banner image and routes to the /c/electrical grid
+// instead of the single-product PDP (the buyer should see the full range).
+const ELECTRICIAN_PICK_BANNER =
+  "https://ik.imagekit.io/9mrgsv2rp/ChatGPT%20Image%20Jun%2022,%202026,%2003_25_34%20AM.png?updatedAt=1782073557369";
 
 export async function ProPicks() {
   const [prodRes, catRes] = await Promise.all([
@@ -37,6 +44,19 @@ export async function ProPicks() {
     .map((p) =>
       p.slug === "scaffolders-setup-kit"
         ? { ...p, customHref: "/c/scaffolding" }
+        : p
+    )
+    // Electrician pick acts as a category teaser: override the card image
+    // with the dedicated banner and route to the /c/electrical grid so the
+    // buyer sees the full electrician range, not the anchor product PDP.
+    .map((p) =>
+      p.slug === "electrician-pro-pouch"
+        ? {
+            ...p,
+            image_url: ELECTRICIAN_PICK_BANNER,
+            customHref: "/c/electrical",
+            customCtaLabel: "Browse electrical"
+          }
         : p
     );
   if (products.length === 0) return null;

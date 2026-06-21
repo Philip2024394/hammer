@@ -202,6 +202,7 @@ const MAP: Record<string, () => ReactNode> = {
   "tape-holders": TapeReel,
   "knives-cutters": Knife,
   "hammer-holders": HammerHead,
+  "belts": Belt,
   "belt-holders": Belt,
   "phone-laptop-cases": Phone,
   "gloves-ppe": Glove,

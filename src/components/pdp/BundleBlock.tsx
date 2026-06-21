@@ -126,7 +126,7 @@ export function BundleBlock({
                     }`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-full w-full object-contain p-0.5" loading="lazy" />
+                    <img src={src} alt={`${bundle.title || "Hammerex bundle"} — included product`} className="h-full w-full object-contain p-0.5" loading="lazy" />
                   </span>
                 ))}
                 {productImages.length > 4 && (
@@ -148,7 +148,7 @@ export function BundleBlock({
                 <img
                   key={productImages[thumbIdx]}
                   src={productImages[thumbIdx]}
-                  alt=""
+                  alt={`${bundle.title || "Hammerex bundle"} — included product`}
                   loading="lazy"
                   className="h-full w-full object-contain p-0.5 transition-opacity duration-500"
                 />

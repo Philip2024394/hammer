@@ -6,7 +6,7 @@ import { CategoryHero } from "@/components/CategoryHero";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
-import { absolute, breadcrumbJsonLd, collectionJsonLd, BRAND } from "@/lib/seo";
+import { absolute, breadcrumbJsonLd, categoryDescription, categoryTitle, collectionJsonLd, BRAND, SEO_KEYWORDS } from "@/lib/seo";
 
 // Category listing is ISR — bumps every 60s for catalogue edits.
 export const revalidate = 60;
@@ -110,26 +110,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const cat = res.data;
   if (!cat) return { title: "Category not found" };
 
-  const title = `${cat.name}`;
-  const description = `${cat.name} tools and supplies from ${BRAND.name}. Flat £20 shipping to UK, USA and Australia via EMS Air Mail (others quoted on WhatsApp).`;
+  const seoTitle = categoryTitle(cat.slug ?? slug, cat.name);
+  const description = categoryDescription({ ...cat } as HammerexCategory);
   const image = cat.image_url ?? BRAND.logo;
   const url = absolute(`/c/${cat.slug ?? slug}`);
 
   return {
-    title,
+    title: seoTitle,
     description,
+    keywords: [cat.name.toLowerCase(), ...SEO_KEYWORDS],
     alternates: { canonical: `/c/${cat.slug ?? slug}` },
     openGraph: {
       type: "website",
-      title: `${title} | ${BRAND.name}`,
+      title: `${seoTitle} | ${BRAND.name}`,
       description,
       url,
       siteName: BRAND.name,
-      images: [{ url: image, alt: `${cat.name} — ${BRAND.name}` }]
+      images: [{ url: image, alt: `${seoTitle} | ${BRAND.name}` }]
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | ${BRAND.name}`,
+      title: `${seoTitle} | ${BRAND.name}`,
       description,
       images: [image]
     }

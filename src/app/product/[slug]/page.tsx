@@ -130,6 +130,24 @@ async function loadProduct(slug: string) {
     compareProducts = compareWith.map((s) => bySlug.get(s)).filter((p): p is HammerexProduct => Boolean(p));
   }
 
+  // Belt add-on picker: shown on Electrician Single/Double Pouch Belt Slide
+  // PDPs. The two belt SKUs are loaded server-side so they hydrate the
+  // accordion immediately (no flash). Empty array on every other PDP.
+  const BELT_ADDON_HOST_SKUS = new Set(["HX-ESP-001", "HX-EDP-001"]);
+  const BELT_ADDON_SKUS = ["HX-LB2-001", "HX-FCB-001"];
+  let beltAddOns: HammerexProduct[] = [];
+  if (product.sku && BELT_ADDON_HOST_SKUS.has(product.sku)) {
+    const res = await supabase
+      .from("hammerex_products")
+      .select("*")
+      .in("sku", BELT_ADDON_SKUS);
+    const bySku = new Map<string, HammerexProduct>();
+    for (const p of (res.data ?? []) as HammerexProduct[]) {
+      if (p.sku) bySku.set(p.sku, p);
+    }
+    beltAddOns = BELT_ADDON_SKUS.map((s) => bySku.get(s)).filter((p): p is HammerexProduct => Boolean(p));
+  }
+
   return {
     product,
     media: (mediaRes.data ?? []) as HammerexProductMedia[],
@@ -142,7 +160,8 @@ async function loadProduct(slug: string) {
     reviews: (reviewsRes.data ?? []) as HammerexReview[],
     questions,
     pairs,
-    bundle
+    bundle,
+    beltAddOns
   };
 }
 
@@ -196,7 +215,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const data = await loadProduct(slug);
   if (!data) notFound();
 
-  const { product, media, specs, box, variants, productDeals, dealBreakers, compareProducts, reviews, questions, pairs, bundle } = data;
+  const { product, media, specs, box, variants, productDeals, dealBreakers, compareProducts, reviews, questions, pairs, bundle, beltAddOns } = data;
   const stickyImage = media.find((m) => m.kind === "image")?.url ?? product.image_url;
 
   const categoryRes = product.category_id
@@ -281,6 +300,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   allCategories={allCategories}
                   specs={specs}
                   bundle={bundle}
+                  beltAddOns={beltAddOns}
                 />
               </div>
             </div>

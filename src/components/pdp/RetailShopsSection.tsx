@@ -19,7 +19,7 @@ export function RetailShopsSection({ productName, productSku }: { productName: s
           <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-8 sm:text-left">
             <img
               src="https://ik.imagekit.io/9mrgsv2rp/Untitledsdasdsdadsasd.png"
-              alt=""
+              alt="Hammerex retail shop and reseller partner programme — wholesale tools and tool belts for builders' merchants"
               loading="lazy"
               decoding="async"
               className="h-40 w-40 shrink-0 object-contain sm:h-[250px] sm:w-[250px]"

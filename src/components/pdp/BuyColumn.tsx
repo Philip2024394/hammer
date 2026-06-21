@@ -21,6 +21,7 @@ import { BeltUpgradeSection } from "./BeltUpgradeSection";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { threadColorsFor } from "@/lib/threadColor";
 import { BundleBlock } from "./BundleBlock";
+import { BeltAddOnSection } from "./BeltAddOnSection";
 import type { HammerexBundle } from "@/lib/supabase";
 import { localeHintFor, countryToCurrency, HX_COUNTRY_COOKIE, type CountryLocaleHint } from "@/lib/geo";
 import { PurchaseNotes } from "./PurchaseNotes";
@@ -43,7 +44,8 @@ export function BuyColumn({
   specs,
   preferredCurrency,
   localeHint,
-  bundle
+  bundle,
+  beltAddOns
 }: {
   product: HammerexProduct;
   currentCategory?: CategoryLite | null;
@@ -54,6 +56,10 @@ export function BuyColumn({
   // Optional bundle data — when present, the Bundle and Save accordion is
   // rendered inline in the BuyColumn (right under the upsell stack).
   bundle?: HammerexBundle | null;
+  // Optional belt add-on products — when set, an "Add a belt" picker is
+  // shown above the bundle accordion. Each ticked belt is pushed into the
+  // cart as its own line when the buyer hits Add to cart.
+  beltAddOns?: HammerexProduct[] | null;
 }) {
   const [overviewView, setOverviewView] = useState<"description" | "specs" | "features">("description");
   const variantCtx = useVariant();
@@ -135,6 +141,9 @@ export function BuyColumn({
 
   const beltUpgradeConfig = beltUpgradeFor(product.slug);
   const [beltUpgrade, setBeltUpgrade] = useState<BeltUpgradeOptionId | null>(null);
+  // IDs of belt add-ons the buyer has ticked. Each ticked product is pushed
+  // into the cart as its own line when Add to cart fires.
+  const [selectedBeltAddOnIds, setSelectedBeltAddOnIds] = useState<Set<string>>(() => new Set());
   const beltUpgradeDelta = beltUpgradePrice(beltUpgradeConfig, beltUpgrade);
 
   const beltConfig = beltSizingFor(product.slug);
@@ -248,6 +257,35 @@ export function BuyColumn({
       repairCover: repairCoverActive,
       beltUpgrade: beltUpgradeLabel(beltUpgradeConfig, beltUpgrade)
     });
+    // Belt add-ons (electrician pouch slides): each ticked belt is a fully
+    // separate cart line — its own productId, own SKU, own per-unit
+    // shipping — so it doesn't merge with the host pouch line and the
+    // composite cart key stays correct.
+    if (beltAddOns && selectedBeltAddOnIds.size > 0) {
+      for (const belt of beltAddOns) {
+        if (!selectedBeltAddOnIds.has(belt.id)) continue;
+        cart.add({
+          productId: belt.id,
+          slug: belt.slug ?? belt.id,
+          name: belt.name,
+          sku: belt.sku ?? null,
+          image: belt.image_url ?? null,
+          unitPriceIdr: belt.price_idr,
+          qty: 1,
+          size: null,
+          baseCurrency: belt.base_currency ?? "IDR",
+          threadColor: null,
+          variantId: null,
+          variantLabel: null,
+          backpackStraps: false,
+          shippingPerUnitIdr: belt.shipping_per_unit_idr ?? null,
+          beltSize: null,
+          customBrandName: null,
+          repairCover: false,
+          beltUpgrade: null
+        });
+      }
+    }
     sparkBurst(addButtonRef.current);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -511,6 +549,22 @@ export function BuyColumn({
             currency={currency}
           />
         </CollapsibleSection>
+      )}
+
+      {beltAddOns && beltAddOns.length > 0 && (
+        <BeltAddOnSection
+          options={beltAddOns}
+          selected={selectedBeltAddOnIds}
+          onToggle={(id, next) =>
+            setSelectedBeltAddOnIds((prev) => {
+              const nextSet = new Set(prev);
+              if (next) nextSet.add(id);
+              else nextSet.delete(id);
+              return nextSet;
+            })
+          }
+          currency={currency}
+        />
       )}
 
       {bundle?.items.length ? (
