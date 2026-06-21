@@ -19,7 +19,9 @@ const TABLES = [
   { table: 'hammerex_product_media',    col: 'url' },
   { table: 'hammerex_product_variants', col: 'image_url' },
   { table: 'hammerex_categories',       col: 'image_url' },
-  { table: 'hammerex_what_in_box',      col: 'image_url' }
+  { table: 'hammerex_categories',       col: 'card_image_url' },
+  { table: 'hammerex_what_in_box',      col: 'image_url' },
+  { table: 'hammerex_product_deals',    col: 'banner_url' }
 ];
 
 // 1. Collect every distinct ImageKit URL across all tables on the new project.
@@ -71,8 +73,18 @@ for (const url of all) {
   if (map[url]) continue;
   const key = makeKey(url);
   try {
+    // Force ImageKit to serve the absolute uploaded master (PNG, full
+    // resolution) instead of an auto-optimized JPEG variant. Without
+    // `?tr=orig-true`, ImageKit's auto-format/auto-size negotiation can
+    // hand back a smaller derivative — and that lower-res copy is what
+    // ends up frozen in Supabase Storage.
     const cleaned = cleanUrl(url);
-    const res = await fetch(cleaned);
+    const fetchTarget = (() => {
+      const u = new URL(cleaned);
+      u.searchParams.set('tr', 'orig-true');
+      return u.toString();
+    })();
+    const res = await fetch(fetchTarget);
     if (!res.ok) throw new Error(`fetch ${res.status} ${res.statusText}`);
     const buf = new Uint8Array(await res.arrayBuffer());
     const contentType = res.headers.get('content-type') || 'image/png';

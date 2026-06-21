@@ -9,6 +9,11 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 // `selectedLabel` (optional) renders a one-line "selected" badge in the
 // closed header so the buyer can see their current pick at a glance without
 // expanding.
+//
+// Height animation uses the CSS-grid `1fr ↔ 0fr` trick rather than a
+// JS-measured max-height. That avoids any chance of a stale measurement
+// pinning the body to zero height (which was happening intermittently in
+// Strict-Mode dev with ResizeObserver).
 export function CollapsibleSection({
   title,
   selectedLabel,
@@ -29,41 +34,17 @@ export function CollapsibleSection({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  // Auto-close after a selection is made. We deliberately skip the first
-  // render so the slider doesn't slam shut on mount; only react to actual
-  // user-driven changes from here on out.
-  const isFirstSelectionRender = useRef(true);
+
+  // Auto-close on selection change. Compare against the initial value
+  // captured in a ref (rather than a "first render" flag), so Strict-Mode's
+  // double-effect mount can't accidentally trigger a setOpen(false) on
+  // initial mount.
+  const lastSelectionRef = useRef(closeOnSelection);
   useEffect(() => {
-    if (isFirstSelectionRender.current) {
-      isFirstSelectionRender.current = false;
-      return;
-    }
+    if (lastSelectionRef.current === closeOnSelection) return;
+    lastSelectionRef.current = closeOnSelection;
     setOpen(false);
   }, [closeOnSelection]);
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const [maxHeight, setMaxHeight] = useState<number>(0);
-
-  // Measure the body height each time it opens so the slide-down transition
-  // has a real target value. Also re-measures on window resize and on
-  // child-content changes via ResizeObserver so dynamic content (e.g. the
-  // company-name input revealing) doesn't get clipped.
-  useEffect(() => {
-    if (!open || !bodyRef.current) {
-      setMaxHeight(0);
-      return;
-    }
-    const measure = () => {
-      if (bodyRef.current) setMaxHeight(bodyRef.current.scrollHeight);
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    const ro = new ResizeObserver(measure);
-    ro.observe(bodyRef.current);
-    return () => {
-      window.removeEventListener("resize", measure);
-      ro.disconnect();
-    };
-  }, [open]);
 
   const safeId = title.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
   const headerId = `collapsible-${safeId}-header`;
@@ -105,17 +86,19 @@ export function CollapsibleSection({
         id={bodyId}
         role="region"
         aria-labelledby={headerId}
-        style={{ maxHeight }}
-        className="overflow-hidden bg-brand-surface transition-[max-height] duration-300 ease-out"
+        className="grid bg-brand-surface transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
-        <div ref={bodyRef} className="p-4">
-          {/* "Optional" tag — bold red, sits as the first piece of text in
-              every collapsible body so the buyer instantly understands the
-              section is an opt-in upgrade, not a required choice. */}
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-red-400">
-            Optional
-          </p>
-          {children}
+        <div className="overflow-hidden">
+          <div className="p-4">
+            {/* "Optional" tag — bold red, sits as the first piece of text in
+                every collapsible body so the buyer instantly understands the
+                section is an opt-in upgrade, not a required choice. */}
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-red-400">
+              Optional
+            </p>
+            {children}
+          </div>
         </div>
       </div>
     </div>

@@ -26,7 +26,19 @@ export async function ProPicks() {
   for (const p of (prodRes.data ?? []) as HammerexProduct[]) {
     lookup.set(p.slug ?? "", { ...p, category: p.category_id ? cats.get(p.category_id) ?? null : null });
   }
-  const products = PRO_PICK_SLUGS.map((s) => lookup.get(s)).filter((p): p is HammerexProduct => Boolean(p));
+  const products = PRO_PICK_SLUGS
+    .map((s) => lookup.get(s))
+    .filter((p): p is HammerexProduct => Boolean(p))
+    // The scaffolders pick is a kit that exists in multiple belt-body
+    // variants now (Lanyard Safety, Fast Clip, 4" Support, Padded System,
+    // plus the included ForgeX / RESOLVE / Heavy Duty Set). Route this
+    // card to the tabbed scaffolding shop so the buyer lands on a belt
+    // picker rather than the single-product PDP.
+    .map((p) =>
+      p.slug === "scaffolders-setup-kit"
+        ? { ...p, customHref: "/c/scaffolding" }
+        : p
+    );
   if (products.length === 0) return null;
   return <ProductRow items={products} title="Pro Picks" viewAllHref="/products" layout="landscape" />;
 }

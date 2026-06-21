@@ -3,6 +3,9 @@ import { Header } from "@/components/Header";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { ProductRow } from "@/components/ProductRow";
 import { supabase, type HammerexProduct, type HammerexCategory } from "@/lib/supabase";
+import { logSearchQuery } from "@/lib/track";
+import { cookies, headers } from "next/headers";
+import { HX_COUNTRY_COOKIE } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +53,18 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const { q } = await searchParams;
   const query = (q ?? "").trim();
   const products = query ? await searchProducts(query) : [];
+
+  if (query) {
+    const c = await cookies();
+    const h = await headers();
+    const country =
+      c.get(HX_COUNTRY_COOKIE)?.value?.toUpperCase() ||
+      h.get("x-vercel-ip-country")?.toUpperCase() ||
+      h.get("cf-ipcountry")?.toUpperCase() ||
+      null;
+    await logSearchQuery({ q: query, results_count: products.length, country });
+  }
+
   const cats = await loadCategoriesById();
   const items = products.map((p) => ({
     ...p,

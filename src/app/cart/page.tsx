@@ -8,11 +8,14 @@ import { threadColorLabel } from "@/lib/threadColor";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
 import { TIER_2_THRESHOLD_IDR, shippingForCart } from "@/lib/shipping";
 import { CartProgressBar } from "@/components/cart/CartProgressBar";
+import { TrackPageEvent } from "@/components/TrackPageEvent";
 
 export default function CartPage() {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [payNowLoading, setPayNowLoading] = useState(false);
+  const [payNowError, setPayNowError] = useState<string | null>(null);
 
   useEffect(() => {
     const sync = () => setLines(cart.read());
@@ -27,10 +30,57 @@ export default function CartPage() {
   const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const dominantCurrency = (lines.find((l) => l.baseCurrency && l.baseCurrency !== "IDR")?.baseCurrency ?? "IDR") as "IDR" | "USD" | "SGD" | "AUD" | "EUR" | "GBP";
 
+  // Stripe Checkout is restricted to free-UK-delivery products. Every paid
+  // line must carry shippingPerUnitIdr === 0; any tier-shipped or quote-only
+  // line forces the cart back to the WhatsApp flow.
+  const stripeFlagOn = process.env.NEXT_PUBLIC_STRIPE_ENABLED === "true";
+  const paidLines = lines.filter((l) => l.unitPriceIdr > 0);
+  const allPaidLinesAreFreeDelivery =
+    paidLines.length > 0 && paidLines.every((l) => l.shippingPerUnitIdr === 0);
+  const giftLinesEligible = lines
+    .filter((l) => l.unitPriceIdr === 0)
+    .every((l) => l.shippingPerUnitIdr === 0);
+  const stripeEligible = stripeFlagOn && allPaidLinesAreFreeDelivery && giftLinesEligible;
+
+  async function payNow() {
+    if (payNowLoading) return;
+    setPayNowError(null);
+    setPayNowLoading(true);
+    try {
+      const res = await fetch("/api/checkout/stripe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lines: lines.map((l) => ({
+            productId: l.productId,
+            qty: l.qty,
+            size: l.size,
+            variantLabel: l.variantLabel,
+            beltSize: l.beltSize ?? null,
+            threadColor: l.threadColor,
+            customBrandName: l.customBrandName ?? null,
+            repairCover: l.repairCover ?? false,
+            beltUpgrade: l.beltUpgrade ?? null,
+            backpackStraps: l.backpackStraps
+          }))
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.url) {
+        throw new Error(json.error || "Checkout failed — please try again.");
+      }
+      window.location.href = json.url;
+    } catch (err) {
+      setPayNowError((err as Error).message);
+      setPayNowLoading(false);
+    }
+  }
+
   return (
     <main className="pb-[calc(72px+56px+env(safe-area-inset-bottom))] lg:pb-0">
       <WelcomeExitIntent />
       <Header />
+      <TrackPageEvent eventType="cart_view" />
       <section className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="mb-3 text-2xl font-bold text-brand-text">Your cart</h1>
 
@@ -156,15 +206,41 @@ export default function CartPage() {
                 </div>
               </dl>
               <p className="mt-3 text-xs leading-relaxed text-brand-muted">
-                £20 flat shipping to UK, USA and Australia via EMS Air Mail. Dispatch within
-                3 working days, 5–6 days transit. Shipping to other countries is confirmed
+                £20 flat shipping to UK, USA and Australia via EMS Air Mail. Dispatch in
+                4–5 working days, ~5–7 days air freight transit. Sea freight ~3–4 weeks (varies country to country). Shipping to other countries is confirmed
                 on WhatsApp after checkout.
               </p>
               <div className="my-4 border-t border-brand-line" />
-              <a
-                href="/checkout"
-                className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
-              >Proceed to checkout</a>
+              {stripeEligible ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={payNow}
+                    disabled={payNowLoading}
+                    className="grid h-12 w-full place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black transition hover:opacity-90 disabled:opacity-60"
+                  >
+                    {payNowLoading ? "Opening secure checkout…" : "Pay now with card →"}
+                  </button>
+                  <p className="mt-2 text-xs leading-relaxed text-brand-muted">
+                    Free UK delivery · Card authorised today, captured on dispatch ·
+                    Secured by Stripe.
+                  </p>
+                  {payNowError && (
+                    <p className="mt-2 rounded-xl border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-300">
+                      {payNowError}
+                    </p>
+                  )}
+                  <a
+                    href="/checkout"
+                    className="mt-3 grid h-11 place-items-center rounded-full border border-brand-line bg-black text-xs font-semibold text-brand-muted hover:border-brand-accent hover:text-brand-text"
+                  >Or quote on WhatsApp instead</a>
+                </>
+              ) : (
+                <a
+                  href="/checkout"
+                  className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
+                >Proceed to checkout</a>
+              )}
               <a
                 href="/"
                 className="mt-2 grid h-11 place-items-center rounded-full border border-brand-line bg-black text-xs font-semibold text-brand-text hover:border-brand-accent"
@@ -205,10 +281,19 @@ export default function CartPage() {
                 {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}
               </span>
             </div>
-            <a
-              href="/checkout"
-              className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
-            >Checkout →</a>
+            {stripeEligible ? (
+              <button
+                type="button"
+                onClick={payNow}
+                disabled={payNowLoading}
+                className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90 disabled:opacity-60"
+              >{payNowLoading ? "Opening…" : "Pay now →"}</button>
+            ) : (
+              <a
+                href="/checkout"
+                className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
+              >Checkout →</a>
+            )}
           </div>
         </div>
       )}

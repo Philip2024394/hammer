@@ -42,9 +42,10 @@ export default function PurchasingTipsPage() {
             <p className="text-brand-muted">
               For everyday retail orders placed on this site, shipping is a flat
               <span className="font-semibold text-brand-text"> £20 per order </span>
-              to UK, USA and Australia regardless of basket size. Dispatched within 3 working
-              days via EMS Air Mail — 5–6 days transit. Import duties and local taxes are the
-              buyer&apos;s responsibility on arrival.
+              to UK, USA and Australia regardless of basket size. Dispatched in 4–5 working
+              days. Carrier-estimated air freight transit ~5–7 days via EMS Air Mail; sea freight
+              (most countries) ~3–4 weeks and varies country to country. Import duties and local
+              taxes are the buyer&apos;s responsibility on arrival.
             </p>
             <p className="mt-3 text-brand-muted">
               Shipping to other countries is confirmed on WhatsApp after you submit the
@@ -84,25 +85,26 @@ export default function PurchasingTipsPage() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-brand-line bg-brand-surface p-5">
                 <h3 className="text-sm font-semibold text-brand-text">Air freight</h3>
-                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-brand-accent">5–6 days transit · worldwide</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-brand-accent">~5–7 days transit · worldwide</p>
                 <p className="mt-3 text-xs leading-relaxed text-brand-muted">
                   The choice most customers make for site-ready orders and urgent jobs. Pricing is by
                   weight with the 2 kg / 7 kg sweet-spot dynamic above, so combining items meaningfully
                   reduces the per-item cost.
                 </p>
                 <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-                  Dispatch is estimated at 3 working days and confirmed on the WhatsApp quote based on
+                  Dispatch is 4–5 working days and confirmed on the WhatsApp quote based on
                   production readiness at the moment of order.
                 </p>
               </div>
               <div className="rounded-2xl border border-brand-line bg-brand-surface p-5">
                 <h3 className="text-sm font-semibold text-brand-text">Sea freight</h3>
-                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-brand-accent">30–60 days · sometimes 21</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-brand-accent">~3–4 weeks · varies by country</p>
                 <p className="mt-3 text-xs leading-relaxed text-brand-muted">
-                  Significantly cheaper per kilogram, especially on larger or heavier orders. We have
-                  seen consignments land in as little as 21 days depending on destination and shipping
-                  calendars. The wait can feel long on day one, but the order is always one day closer
-                  than yesterday — and the cost saving on arrival is meaningful.
+                  Significantly cheaper per kilogram, especially on larger or heavier orders. Typical
+                  transit is around 3–4 weeks for most destinations, though exact timing varies country
+                  to country depending on shipping calendars and the route. The wait can feel long on
+                  day one, but the order is always one day closer than yesterday — and the cost saving
+                  on arrival is meaningful.
                 </p>
               </div>
             </div>

@@ -13,6 +13,7 @@ import { adminWhatsapp, buildQuoteMessage, quoteUrl } from "@/lib/whatsapp";
 import { logQuoteClick } from "@/lib/quoteSignals";
 import { TIER_2_THRESHOLD_IDR, shippingForCart } from "@/lib/shipping";
 import { CartProgressBar } from "@/components/cart/CartProgressBar";
+import { TrackPageEvent } from "@/components/TrackPageEvent";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function CheckoutPage() {
   return (
     <main className="pb-[calc(72px+56px+env(safe-area-inset-bottom))] lg:pb-0">
       <Header />
+      <TrackPageEvent eventType="checkout_view" />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
         <div className="mb-4">
@@ -76,7 +78,7 @@ export default function CheckoutPage() {
           <div>
             <p className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia.</p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-<span className="font-semibold text-brand-text">£28 shipping under £50</span>, <span className="font-semibold text-brand-text">£20 flat once you reach £50</span>. Dispatched within 3 working days via EMS Air Mail, 5–6 days transit. Shipping to other countries is confirmed on WhatsApp after you submit your details below.
+<span className="font-semibold text-brand-text">£28 shipping under £50</span>, <span className="font-semibold text-brand-text">£20 flat once you reach £50</span>. Dispatched in <span className="font-semibold text-brand-text">4–5 working days</span>. Carrier-estimated air freight transit <span className="font-semibold text-brand-text">~5–7 days</span>. Sea freight (most countries) ~3–4 weeks and varies country to country. Shipping to other countries is confirmed on WhatsApp after you submit your details below.
             </p>
           </div>
         </div>

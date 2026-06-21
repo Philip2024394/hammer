@@ -106,7 +106,7 @@ export default function HammerexGroupPage() {
             plastering and carpentry to electrical, metal fabrication and joinery. We are
             actively building out international wholesale partnerships in protected
             territories. Direct retail orders to UK, USA and Australia ship via EMS Air
-            Mail (£28 on £30–£49 carts · £20 flat once you reach £50, 5–6 days transit).
+            Mail (£28 on £30–£49 carts · £20 flat once you reach £50 · 4–5 working days dispatch · ~5–7 days air freight transit · sea freight ~3–4 weeks, varies by country).
             Other destinations are quoted on WhatsApp after checkout.
           </Block>
 

@@ -120,12 +120,14 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
 
         {guide.hero_image_url && (
           <figure className="mt-6 overflow-hidden rounded-2xl border border-brand-line bg-black">
+            {/* Natural aspect, full height — no forced 16:9 crop so portrait
+                or square artwork shows in full, not letterboxed. */}
             <img
               src={guide.hero_image_url}
               alt={guide.title}
               loading="lazy"
               decoding="async"
-              className="block aspect-[16/9] w-full object-cover"
+              className="block h-auto w-full"
             />
           </figure>
         )}

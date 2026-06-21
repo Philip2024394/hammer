@@ -31,7 +31,8 @@ export const FREE_THREAD_COLORS: ThreadColor[] = ["black"];
 // is shown. Slug-keyed for the same reasons as beltSizes — promote to a
 // schema column when 2-3 more products need bespoke palettes.
 export const THREAD_COLORS_BY_SLUG: Record<string, ThreadColor[]> = {
-  "scaffolders-setup-kit": ["black", "yellow", "brown", "red", "white"]
+  "scaffolders-setup-kit": ["black", "yellow", "brown", "red", "white"],
+  "forgex-7-station-scaffolders-belt": ["black", "yellow", "brown", "red", "white"]
 };
 
 export function threadColorsFor(slug: string | null | undefined): typeof THREAD_COLORS {

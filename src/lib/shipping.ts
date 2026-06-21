@@ -55,8 +55,9 @@ export function shippingForCart(lines: CartLineForShipping[]): number {
 
 export const FLAT_SHIPPING_DESCRIPTION =
   "£28 shipping under £50, £20 flat once you reach £50. " +
-  "Dispatched via EMS Air Mail — 3 working-day dispatch, 5–6 days transit to UK, " +
-  "USA and Australia. Shipping to other countries is confirmed on WhatsApp after checkout.";
+  "Dispatched in 4–5 working days. Carrier-estimated air freight transit ~5–7 days to UK, " +
+  "USA and Australia. Sea freight is approximately 3–4 weeks for most countries (varies country to country). " +
+  "Shipping to other countries is confirmed on WhatsApp after checkout.";
 
 // UK air-freight tariff (6-day delivery). Real per-parcel courier rates
 // quoted from Indonesia → UK in IDR. Each product is assigned ONE tier

@@ -19,7 +19,7 @@ export const BRAND = {
   legalName: "Hammerex Products",
   tagline: "International tools & construction supplier",
   description:
-    "Hammerex supplies tools, PPE and construction goods worldwide. Flat £20 shipping to UK, USA and Australia via EMS Air Mail — 5–6 days transit. Other countries confirmed on WhatsApp.",
+    "Hammerex supplies tools, PPE and construction goods worldwide. Flat £20 shipping to UK, USA and Australia via EMS Air Mail. 4–5 working days dispatch · ~5–7 days air freight transit · sea freight ~3–4 weeks (varies by country). Other countries confirmed on WhatsApp.",
   logo: "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/85e5e067cf0cb299.png",
   whatsapp: process.env.NEXT_PUBLIC_HAMMEREX_WHATSAPP ?? "+6281392000050",
   locale: "en_US"

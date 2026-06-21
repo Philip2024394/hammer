@@ -31,6 +31,8 @@ import { useDeal, dealDiscountPct } from "./DealContext";
 import { VariantSelector } from "./VariantSelector";
 import { RelatedUpsell } from "./RelatedUpsell";
 import { PdpRunningBasket } from "./PdpRunningBasket";
+import { StripePayNowButton } from "./StripePayNowButton";
+import { YouTubeChannelButton } from "./YouTubeChannelButton";
 
 type CategoryLite = { slug: string; name: string };
 
@@ -295,15 +297,18 @@ export function BuyColumn({
         )}
       </div>
 
-      <div className="flex items-center gap-1">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <svg key={i} width="16" height="16" viewBox="0 0 24 24" className="text-brand-accent" fill={i < 4 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
-          </svg>
-        ))}
-        <span className="ml-1 text-xs text-brand-muted">
-          {product.rating_count ? `${product.rating_avg?.toFixed(1)} · ${product.rating_count} reviews` : "Be the first to review"}
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <svg key={i} width="16" height="16" viewBox="0 0 24 24" className="text-brand-accent" fill={i < 4 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+            </svg>
+          ))}
+          <span className="ml-1 text-xs text-brand-muted">
+            {product.rating_count ? `${product.rating_avg?.toFixed(1)} · ${product.rating_count} reviews` : "Be the first to review"}
+          </span>
+        </div>
+        <YouTubeChannelButton />
       </div>
 
       <div role="tablist" aria-label="Product information" className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-brand-line pt-2">
@@ -623,7 +628,7 @@ export function BuyColumn({
           return (
             <p className="px-1 text-xs leading-relaxed text-brand-text">
               <span className="font-bold uppercase tracking-widest text-brand-accent">Free shipping to UK</span>
-              <span className="text-brand-muted"> — delivered free via EMS · 5–6 days transit.</span>
+              <span className="text-brand-muted"> — delivered free via EMS · 4–5 working days dispatch · ~5–7 days air freight.</span>
             </p>
           );
         }
@@ -636,7 +641,7 @@ export function BuyColumn({
                   Shipping to {effectiveLocale.countryName || effectiveLocale.country}
                 </span>
                 <span className="text-xs text-brand-text">
-                  <span className="font-semibold">+{formatPrice(238270, currency)} air freight via EMS</span> · free for UK · 5–6 days transit
+                  <span className="font-semibold">+{formatPrice(238270, currency)} air freight via EMS</span> · free for UK · 4–5 day dispatch · ~5–7 days air freight
                 </span>
               </div>
             </div>
@@ -650,7 +655,7 @@ export function BuyColumn({
                 Shipping to {effectiveLocale.countryName || effectiveLocale.country}
               </span>
               <span className="text-xs text-brand-muted">
-                Shipped via EMS · air freight, 5–6 days transit · price confirmed on WhatsApp at checkout
+                Shipped via EMS · 4–5 day dispatch · ~5–7 days air freight (sea ~3–4 weeks) · price confirmed on WhatsApp at checkout
               </span>
             </div>
           </div>
@@ -794,6 +799,14 @@ export function BuyColumn({
           {needsDealConfirm ? "Confirm option above" : "Buy now →"}
         </button>
       </div>
+
+      {/* Stripe Pay-now CTA — feature-flagged off by default. Only renders
+          when NEXT_PUBLIC_STRIPE_ENABLED=true AND the product ships free
+          to the UK. The button reads cart at click time, hits the
+          /api/checkout/stripe route, then redirects to Stripe-hosted
+          checkout. Capture is manual on the server side so the dispatch
+          buffer is preserved. */}
+      <StripePayNowButton productHasFreeUkDelivery={product.shipping_per_unit_idr === 0} />
 
       <div className="flex flex-col items-center gap-1.5 rounded-xl border border-brand-line bg-brand-surface/60 p-2">
         <span className="text-xs font-bold uppercase tracking-widest text-brand-muted">

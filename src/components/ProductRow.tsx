@@ -37,8 +37,14 @@ function Check() {
   );
 }
 
-export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product", layout = "portrait" }: { items?: HammerexProduct[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category"; layout?: "portrait" | "landscape" }) {
-  const data = (items?.length ? items : FALLBACK);
+// Items may carry a `customHref` overlay — if set, that URL overrides both
+// the productHref + categoryHref computation. Used on the home Pro Picks
+// row so the Scaffolders Setup Kit card routes to the tabbed scaffolding
+// shop (so buyers land on a belt picker, not the single-product PDP).
+type ProductRowItem = HammerexProduct & { customHref?: string };
+
+export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product", layout = "portrait" }: { items?: ProductRowItem[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category"; layout?: "portrait" | "landscape" }) {
+  const data: ProductRowItem[] = (items?.length ? items : FALLBACK);
 
   if (layout === "landscape") {
     return (
@@ -49,8 +55,13 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
           {data.map((p) => {
             const productHref = p.slug ? `/product/${p.slug}` : "#";
             const categoryHref = p.category ? `/c/${p.category.slug}` : productHref;
-            const href = linkTo === "category" ? categoryHref : productHref;
-            const ctaLabel = linkTo === "category" ? "Browse category" : "View product";
+            const baseHref = linkTo === "category" ? categoryHref : productHref;
+            const href = p.customHref ?? baseHref;
+            const ctaLabel = p.customHref
+              ? "Browse belts"
+              : linkTo === "category"
+                ? "Browse category"
+                : "View product";
             return (
               <li key={p.id} className="group relative">
                 <article className="relative overflow-hidden rounded-2xl bg-brand-surface">
@@ -98,8 +109,13 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
           const features = (p.features ?? []).slice(0, 4);
           const productHref = p.slug ? `/product/${p.slug}` : "#";
           const categoryHref = p.category ? `/c/${p.category.slug}` : productHref;
-          const href = linkTo === "category" ? categoryHref : productHref;
-          const ctaLabel = linkTo === "category" ? "Browse category" : "View product";
+          const baseHref = linkTo === "category" ? categoryHref : productHref;
+          const href = p.customHref ?? baseHref;
+          const ctaLabel = p.customHref
+            ? "Browse belts"
+            : linkTo === "category"
+              ? "Browse category"
+              : "View product";
           const stock = p.stock_count;
           const stockTone = stock == null
             ? null

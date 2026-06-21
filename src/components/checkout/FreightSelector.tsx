@@ -21,7 +21,7 @@ export function FreightSelector() {
         <ul className="mt-2 flex flex-col gap-1 text-xs text-brand-muted">
           <li>· £28 shipping under £50</li>
           <li>· £20 flat shipping once you reach £50</li>
-          <li>· Dispatch in 3 working days, 5–6 days transit</li>
+          <li>· Dispatch in 4–5 working days · ~5–7 days air freight · sea freight ~3–4 weeks</li>
           <li>· Tracked end-to-end · other countries quoted on WhatsApp</li>
         </ul>
       </div>

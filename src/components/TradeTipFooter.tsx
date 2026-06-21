@@ -6,7 +6,7 @@ const TIPS = [
   "Pick a thread colour on supported holders — adds 2 working days, but you can match any belt.",
   "Buying 2 or 3 of the same product? Some lines auto-discount at the quantity step.",
   "Use Compare (the three-line icon) to put up to 3 products side-by-side on /compare.",
-  "Dispatch is ~3 working days for most items (confirmed on the WhatsApp quote). Then 5–6 days transit worldwide.",
+  "Dispatch is 4–5 working days for every item. Air freight transit ~5–7 days worldwide; sea freight ~3–4 weeks (varies by country).",
   "Flat £20 shipping to UK, USA and Australia — one fee per order via EMS Air Mail. Other countries confirmed on WhatsApp.",
   "Heavy-duty leather is fully repairable — we re-stitch and re-rivet your belts at cost."
 ];

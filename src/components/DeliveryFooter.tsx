@@ -11,10 +11,12 @@ export function DeliveryFooter() {
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-brand-text">International shipping — quoted per order</h3>
             <p className="mt-1 text-xs text-brand-muted">
-              Dispatched within 3 working days via EMS Air Mail — typical 5–6 days
-              transit. Shipping cost is confirmed on WhatsApp after checkout based on
-              destination, weight and freight method (air or sea). Import duties and
-              local taxes are not included and are paid by the buyer on arrival.
+              Dispatched in 4–5 working days. Carrier-estimated air freight transit
+              ~5–7 days; sea freight is approximately 3–4 weeks for most countries
+              (varies country to country). Shipping cost is confirmed on WhatsApp after
+              checkout based on destination, weight and freight method (air or sea).
+              Import duties and local taxes are not included and are paid by the buyer
+              on arrival.
             </p>
           </div>
         </article>
@@ -49,7 +51,7 @@ export function DeliveryFooter() {
         ))}
       </nav>
 
-      <div className="mt-4 flex items-center justify-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
         <a
           href="https://www.instagram.com/hammerexproductsdirect/"
           target="_blank"
@@ -63,6 +65,20 @@ export function DeliveryFooter() {
             <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none" />
           </svg>
           @hammerexproductsdirect
+        </a>
+        <a
+          href="https://www.youtube.com/@hammerexdirect"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Watch Hammerex on YouTube"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold uppercase tracking-widest text-brand-muted transition hover:border-red-500 hover:text-red-400 active:scale-95"
+        >
+          <span aria-hidden="true" className="grid h-5 w-7 place-items-center rounded bg-[#FF0000] text-white">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
+          @hammerexdirect
         </a>
       </div>
 

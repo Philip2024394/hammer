@@ -1,11 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { HX_COUNTRY_COOKIE } from "@/lib/geo";
+import { verifyAdminCookieEdge } from "@/lib/adminAuthEdge";
+
+// Must stay in sync with ADMIN_COOKIE in lib/adminAuth.ts. Inlined here so
+// middleware (edge runtime) doesn't pull node's `crypto` in via that file.
+const ADMIN_COOKIE = "hx_admin";
 
 // Promotes the buyer's country code from the platform-provided geo headers
 // into a cookie so server components can read it without re-checking every
 // request. Runs on every page-class request; bypassed for static assets and
 // API routes via the matcher below.
-export function middleware(req: NextRequest) {
+//
+// Also gates /admin/* — without a valid signed cookie, redirects to
+// /admin/login. The login form itself stays accessible.
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    const cookie = req.cookies.get(ADMIN_COOKIE)?.value;
+    const ok = await verifyAdminCookieEdge(cookie, process.env.ADMIN_COOKIE_SECRET);
+    if (!ok) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/admin/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   const existing = req.cookies.get(HX_COUNTRY_COOKIE);
   if (existing?.value) {
     return NextResponse.next();

@@ -3,7 +3,7 @@
 // The message string below is editable in one place — keep it short so the
 // marquee reads at a glance.
 const NOTICE =
-  "Production update: a handful of products are dispatching slightly later than usual this week as we work through a manufacturing backlog. We're catching up — standard 3 working-day dispatch resumes in the coming week. Thanks for your patience.";
+  "Production update: a handful of products are dispatching slightly later than usual this week as we work through a manufacturing backlog. We're catching up — standard 4–5 working-day dispatch resumes in the coming week. Thanks for your patience.";
 
 export function HomePageNotice() {
   return (

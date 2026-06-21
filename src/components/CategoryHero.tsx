@@ -5,7 +5,21 @@ import { imageUrl } from "@/lib/imageUrl";
 // is rendered uncluttered — no badge, no gradient, no overlay text. The trade
 // title + product count sit BELOW the image so the hero artwork is fully
 // visible. Categories without an image_url just skip the image block.
-export function CategoryHero({ category, productCount }: { category: HammerexCategory; productCount: number }) {
+export function CategoryHero({
+  category,
+  productCount,
+  imageFit = "cover"
+}: {
+  category: HammerexCategory;
+  productCount: number;
+  /**
+   * "cover" (default) — crops the image to fill the 16:6/16:9 container.
+   * Use when the source banner was designed to fill that aspect.
+   * "contain" — shows the entire image inside the container (letterboxed
+   * if the aspect doesn't match). Use when the source isn't a 16:6 banner.
+   */
+  imageFit?: "cover" | "contain";
+}) {
   const hasImage = Boolean(category.image_url);
 
   return (
@@ -21,7 +35,7 @@ export function CategoryHero({ category, productCount }: { category: HammerexCat
             height="600"
             fetchPriority="high"
             decoding="async"
-            className="absolute inset-0 h-full w-full object-cover"
+            className={`absolute inset-0 h-full w-full ${imageFit === "contain" ? "object-contain" : "object-cover"}`}
           />
         </div>
       )}

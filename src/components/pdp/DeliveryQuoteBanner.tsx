@@ -10,10 +10,11 @@ export function DeliveryQuoteBanner() {
       <p className="mt-1 text-xs leading-relaxed text-brand-muted">
         <span className="font-semibold text-brand-text">£28 shipping under £50.</span>{" "}
         <span className="font-semibold text-brand-text">£20 flat</span> once you reach £50.
-        Dispatched within{" "}
-        <span className="font-semibold text-brand-text">3 working days</span> via EMS Air
-        Mail · <span className="font-semibold text-brand-text">5–6 days transit</span> to UK,
-        USA, Australia. Other countries are confirmed on WhatsApp after checkout.
+        Dispatched in{" "}
+        <span className="font-semibold text-brand-text">4–5 working days</span>. Carrier-estimated
+        air freight transit <span className="font-semibold text-brand-text">~5–7 days</span> to UK,
+        USA, Australia. Sea freight (most countries) ~3–4 weeks and varies country to country.
+        Other countries are confirmed on WhatsApp after checkout.
       </p>
     </div>
   );

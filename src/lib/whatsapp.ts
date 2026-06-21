@@ -59,7 +59,7 @@ export function buildQuoteMessage(input: QuoteInput): string {
     "📦 Items:",
     items,
     "",
-    "🚚 Shipping: EMS Air Mail (5–6 days transit worldwide)",
+    "🚚 Shipping: 4–5 working days dispatch · EMS Air Mail ~5–7 days air freight (sea freight ~3–4 weeks, varies by country)",
     "",
     `💰 Subtotal: ${formatPrice(subtotal, "IDR")}`,
     `📮 Shipping (${shippingLabel} · other countries confirmed below): ${formatPrice(shipping, "IDR")}`,

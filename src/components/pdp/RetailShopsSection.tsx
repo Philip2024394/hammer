@@ -22,7 +22,7 @@ export function RetailShopsSection({ productName, productSku }: { productName: s
               alt=""
               loading="lazy"
               decoding="async"
-              className="h-20 w-20 shrink-0 object-contain sm:h-[125px] sm:w-[125px]"
+              className="h-40 w-40 shrink-0 object-contain sm:h-[250px] sm:w-[250px]"
             />
 
             <div className="flex-1">

@@ -44,6 +44,35 @@ export function CustomBrandingSection({
   return (
     <div className="rounded-xl border border-brand-line bg-black/40 p-3">
       <div className="flex flex-col gap-3">
+        {/* Banner example — always visible the moment the section opens
+            so the buyer can see what custom branding actually looks like
+            before deciding to add it. Tap to zoom. */}
+        {config.sampleImageUrl && (
+          <button
+            type="button"
+            onClick={() => setZoom(true)}
+            aria-label="Enlarge logo placement example"
+            className="group relative block w-full overflow-hidden rounded-lg border border-brand-line bg-black"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={config.sampleImageUrl}
+              alt="Example: company logo placement on the belt"
+              className="block h-40 w-full object-contain p-2 sm:h-48"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-brand-accent/95 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-black shadow-[0_1px_6px_rgba(0,0,0,0.5)]"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7" />
+                <line x1="21" y1="21" x2="16.5" y2="16.5" />
+              </svg>
+              Tap to enlarge
+            </span>
+          </button>
+        )}
+
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <span className="text-sm font-bold text-brand-text">Your company brand name</span>
           <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">
@@ -110,34 +139,7 @@ export function CustomBrandingSection({
       )}
 
       {enabled && (
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start">
-          {config.sampleImageUrl && (
-            <div className="flex w-full shrink-0 flex-col gap-2 sm:w-32">
-              <div
-                aria-hidden="true"
-                className="grid h-32 w-full place-items-center overflow-hidden rounded-lg border border-brand-line bg-black sm:h-28"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={config.sampleImageUrl}
-                  alt="Logo placement reference"
-                  className="h-full w-full object-contain p-2"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => setZoom(true)}
-                aria-label="Enlarge logo placement reference"
-                className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-brand-accent text-xs font-bold uppercase tracking-widest text-black shadow-[0_1px_6px_rgba(255,179,0,0.4)] transition active:scale-95 hover:opacity-90"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="21" y1="21" x2="16.5" y2="16.5" />
-                </svg>
-                View example
-              </button>
-            </div>
-          )}
+        <div className="mt-3 flex flex-col gap-3">
           <div className="flex flex-1 flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-widest text-brand-accent">
               Company name (max 24 characters)

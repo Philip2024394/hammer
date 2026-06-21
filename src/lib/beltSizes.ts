@@ -7,7 +7,7 @@ export type BeltSizingConfig = {
   guideUrl: string;
 };
 
-const STANDARD_BELT_WAIST_SIZES = ["32\"", "34\"", "36\"", "38\"", "40\"", "42\"", "44\"", "46\"", "48\""];
+const STANDARD_BELT_WAIST_SIZES = ["30\"", "32\"", "34\"", "36\"", "38\"", "40\"", "42\"", "44\"", "46\"", "48\""];
 const STANDARD_BELT_GUIDE_URL = "https://ik.imagekit.io/9mrgsv2rp/Untitledasassassfdsdf.png?updatedAt=1781813285522";
 
 export const BELT_SIZING_BY_SLUG: Record<string, BeltSizingConfig> = {
@@ -19,7 +19,25 @@ export const BELT_SIZING_BY_SLUG: Record<string, BeltSizingConfig> = {
     sizes: STANDARD_BELT_WAIST_SIZES,
     guideUrl: STANDARD_BELT_GUIDE_URL
   },
+  // Every scaffolding belt-set / wearable belt gets the same waist-size
+  // picker so the buyer experience is consistent across the category.
   "scaffolders-setup-kit": {
+    sizes: STANDARD_BELT_WAIST_SIZES,
+    guideUrl: STANDARD_BELT_GUIDE_URL
+  },
+  "heavy-duty-leather-tool-belt": {
+    sizes: STANDARD_BELT_WAIST_SIZES,
+    guideUrl: STANDARD_BELT_GUIDE_URL
+  },
+  "scaffolders-tool-belt": {
+    sizes: STANDARD_BELT_WAIST_SIZES,
+    guideUrl: STANDARD_BELT_GUIDE_URL
+  },
+  "forgex-7-station-scaffolders-belt": {
+    sizes: STANDARD_BELT_WAIST_SIZES,
+    guideUrl: STANDARD_BELT_GUIDE_URL
+  },
+  "leather-scaffolding-belt-tilted-ratchet-frog-holder": {
     sizes: STANDARD_BELT_WAIST_SIZES,
     guideUrl: STANDARD_BELT_GUIDE_URL
   }

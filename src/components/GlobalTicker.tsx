@@ -33,19 +33,17 @@ function buildTickerString(productNotice: string | null | undefined): string {
 }
 
 export function ProductTicker({ productNotice }: { productNotice?: string | null }) {
-  // 50% slower than the previous pass — the ticker should feel deliberate.
-  // The `-gap` keyframe holds at off-screen-left for the last 4% of each
-  // cycle so there's a visible pause before the next loop starts, instead
-  // of the text instantly snapping back.
+  // ~50% slower than the previous pass — the ticker should feel deliberate
+  // enough to actually read mid-scroll. The `-gap` keyframe holds at
+  // off-screen-left for the last ~4% of each cycle so there's a visible
+  // pause before the next loop starts, instead of an instant snap-back.
   //
-  //   total duration = scroll-time + ~2s gap (4% of total)
-  //   per-product   : 55 s total → ~2.2 s gap, ~52.8 s scroll
-  //   brand rotation: 135 s total → ~5.4 s gap (longer payload, slightly
-  //                                   bigger gap is acceptable)
-  const animationDuration = productNotice && productNotice.trim() ? "55s" : "135s";
+  //   per-product   : 85 s total → ~3.4 s gap, ~81.6 s scroll
+  //   brand rotation: 200 s total → ~8 s gap (longer payload, longer gap)
+  const animationDuration = productNotice && productNotice.trim() ? "85s" : "200s";
   // Negative delay = animation starts mid-scroll so text is already on
   // screen during the first paint, not waiting off-screen to the right.
-  const animationDelay = productNotice && productNotice.trim() ? "-15s" : "-40s";
+  const animationDelay = productNotice && productNotice.trim() ? "-25s" : "-60s";
   return (
     <div
       // Thin horizontal gray rules above + below frame the strip without

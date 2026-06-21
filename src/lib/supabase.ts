@@ -64,6 +64,14 @@ export type HammerexProduct = {
   // Per-product marquee shown under the hero image on the PDP. Falls back
   // to the brand-wide rotation when null.
   running_notice?: string | null;
+  // Optional product video. Supports YouTube watch URLs, youtu.be short
+  // URLs, and YouTube Shorts URLs. Rendered by ProductVideo on the PDP
+  // only when set.
+  video_url?: string | null;
+  // Optional custom poster shown as a click-to-play facade over the video
+  // block. When set, the PDP renders this image with a red YouTube play
+  // button overlay; clicking loads the iframe with autoplay.
+  video_cover_url?: string | null;
 };
 
 export type HammerexGuide = {

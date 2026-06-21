@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { absolute, breadcrumbJsonLd, clampDescription, faqJsonLd, productJsonLd, stripMarkdown, BRAND } from "@/lib/seo";
+import { WORKSHOP_FAQ } from "@/lib/workshopFaq";
 import { ProductGallery } from "@/components/pdp/ProductGallery";
 import { BuyColumn } from "@/components/pdp/BuyColumn";
 import { InTheBox } from "@/components/pdp/InTheBox";
@@ -30,12 +31,14 @@ import { VariantProvider } from "@/components/pdp/VariantContext";
 import { DealProvider } from "@/components/pdp/DealContext";
 import { BundleReturnButton } from "@/components/pdp/BundleReturnButton";
 import { RetailShopsSection } from "@/components/pdp/RetailShopsSection";
+import { ProductVideo } from "@/components/pdp/ProductVideo";
 import { CompareSection } from "@/components/pdp/CompareSection";
 import { ProductDelayNotice } from "@/components/pdp/ProductDelayNotice";
 import { RecordRecentView } from "@/components/RecordRecentView";
 import { ProductTicker } from "@/components/GlobalTicker";
 import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
+import { TrackPageEvent } from "@/components/TrackPageEvent";
 
 // PDPs are ISR-cached for fast first paint. Currency / geo personalisation
 // happens client-side in BuyColumn from the hx_country cookie. Revalidate
@@ -230,13 +233,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      {product.faq && product.faq.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(product.faq)) }}
-        />
-      )}
+      {/* FAQPage JSON-LD — combines the product-specific FAQ (if any) with
+          the brand-wide workshop FAQ. Every PDP gets at least 12 Q&As of
+          structured data, which gives Google "People also ask" coverage on
+          shipping, dispatch, custom branding, warranty, etc. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd([...(product.faq ?? []), ...WORKSHOP_FAQ]))
+        }}
+      />
       <Header />
+      <TrackPageEvent eventType="pdp_view" productId={product.id} />
       <BundleReturnButton />
 
       <nav className="mx-auto max-w-6xl px-4 pt-4 text-xs text-brand-muted" aria-label="Breadcrumb">
@@ -281,6 +289,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </DealProvider>
       </VariantProvider>
 
+      {product.video_url && (
+        <ProductVideo
+          url={product.video_url}
+          title={product.name}
+          coverUrl={product.video_cover_url}
+        />
+      )}
+
       <InTheBox
         items={box}
         fallbackImage={product.image_url}
@@ -311,6 +327,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <ShippingReturns
         warrantyYears={product.warranty_years ?? 1}
         dispatchLeadDays={product.dispatch_lead_days ?? 0}
+        shippingPerUnitIdr={product.shipping_per_unit_idr}
       />
       <WarrantyTimeline warrantyYears={product.warranty_years ?? 1} />
     </main>
