@@ -208,7 +208,7 @@ select
     {"icon":"🔧","label":"2\" front lips compatible with standard pouches"},
     {"icon":"📐","label":"Larger mounting area for multi-hole holders"}
   ]'::jsonb,
-  0,
+  524194,
   0,
   'GBP',
   'Hammerex',

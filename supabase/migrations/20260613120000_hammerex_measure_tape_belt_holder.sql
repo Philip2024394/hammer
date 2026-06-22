@@ -1,6 +1,6 @@
 -- HAMMEREX Measure Tape Belt Holder — leather, industrial sewn, fits tape
--- measures up to 8m, soft-close button belt loop. £9.80 GBP (Rp 196,000 @
--- 20k/£). Primary category: carpentry. Cross-listed to EVERY existing
+-- measures up to 8m, soft-close button belt loop. £12.00 GBP (Rp 285,924 @
+-- current fx.ts rate). Primary category: carpentry. Cross-listed to EVERY existing
 -- category at user request ("add to all category").
 
 insert into public.hammerex_products (
@@ -13,7 +13,7 @@ insert into public.hammerex_products (
 select c.id,
   'Hammerex Measure Tape Belt Holder',
   'Heavy-duty leather tape measure belt holder — fits tapes up to 8m, soft-close button belt loop, open-top fast access. Industrial sewn for daily site use.',
-  196000,
+  285924,
   'https://ik.imagekit.io/pinky/asdasaaasssfsfsdfsdhhjhjhj.png',
   true,
   'measure-tape-belt-holder', 'HX-MTAP-001', 'Hammerex', 'HX-MTAP', '14:00',
@@ -81,7 +81,7 @@ from public.hammerex_products p,
     ('Design',       'Access',         'Open-top design for fast tape access',                 20),
     ('Design',       'Belt loop',      'Reinforced loop with soft-close button',               21),
     ('Fit',          'Belt width',     'Suitable for most professional work belts',            30),
-    ('Pricing',      'Single unit',    '£9.80',                                                40),
+    ('Pricing',      'Single unit',    '£12.00',                                               40),
     ('Stock',        'Availability',   'In stock',                                             50),
     ('Dispatch',     'Lead time',      'Dispatched within 3 working days of order',            51),
     ('Dispatch',     'UK delivery',    'Typical UK delivery within 5 working days',            52),

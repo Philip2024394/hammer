@@ -1,6 +1,6 @@
 -- HAMMEREX Phone Belt Case — leather phone belt holder with side pen sleeve
--- and integrated key clip. Black leather with yellow stitching. £19.99 GBP
--- per size (Rp 399,800 @ 20k/£). Four user-selectable sizes covering all
+-- and integrated key clip. Black leather with yellow stitching. £27.00 GBP
+-- per size (Rp 643,329 @ current fx.ts rate). Four user-selectable sizes covering all
 -- mainstream modern flagships (biased toward the larger phones per user
 -- request). Primary category: carpentry. Flagged is_universal=true so it
 -- appears on every trade category page without needing per-category
@@ -16,7 +16,7 @@ insert into public.hammerex_products (
 select c.id,
   'Hammerex Phone Belt Case',
   'Premium leather phone belt case — side pen sleeve, integrated key clip, reinforced stitching. Choose your size: Standard / Plus / Pro Max / Ultra. Same price across sizes.',
-  399800,
+  643329,
   'https://ik.imagekit.io/pinky/Untitledasdfasdfasdfasdasdadsasdasdczxczxc.png',
   true,
   'phone-belt-case', 'HX-PBC-001', 'Hammerex', 'HX-PBC', '14:00',
@@ -64,16 +64,16 @@ insert into public.hammerex_product_variants
 select p.id, v.label, v.sku, v.price_idr, v.image_url, v.model_number, v.sort_order, v.is_default, v.stock_count
 from public.hammerex_products p,
   (values
-    ('Standard — iPhone 13–16, Galaxy S24/S25, Pixel 9, OnePlus 12',     'HX-PBC-STD', 399800,
+    ('Standard — iPhone 13–16, Galaxy S24/S25, Pixel 9, OnePlus 12',     'HX-PBC-STD', 643329,
        'https://ik.imagekit.io/pinky/Untitledasdfasdfasdfasdasdadsasdasdczxczxc.png',
        'HX-PBC-STD', 0, true,  80),
-    ('Plus — iPhone Plus, Galaxy S24+/S25+, OnePlus 13, Xiaomi 15',      'HX-PBC-PLS', 399800,
+    ('Plus — iPhone Plus, Galaxy S24+/S25+, OnePlus 13, Xiaomi 15',      'HX-PBC-PLS', 643329,
        'https://ik.imagekit.io/pinky/Untitledasdfasdfasdfasdasdadsasdasdczxczxc.png',
        'HX-PBC-PLS', 1, false, 80),
-    ('Pro Max — iPhone 14/15/16 Pro Max',                                'HX-PBC-PRM', 399800,
+    ('Pro Max — iPhone 14/15/16 Pro Max',                                'HX-PBC-PRM', 643329,
        'https://ik.imagekit.io/pinky/Untitledasdfasdfasdfasdasdadsasdasdczxczxc.png',
        'HX-PBC-PRM', 2, false, 80),
-    ('Ultra — Galaxy S24/S25 Ultra, Pixel 9 Pro XL, biggest flagships', 'HX-PBC-ULT', 399800,
+    ('Ultra — Galaxy S24/S25 Ultra, Pixel 9 Pro XL, biggest flagships', 'HX-PBC-ULT', 643329,
        'https://ik.imagekit.io/pinky/Untitledasdfasdfasdfasdasdadsasdasdczxczxc.png',
        'HX-PBC-ULT', 3, false, 80)
   ) as v(label, sku, price_idr, image_url, model_number, sort_order, is_default, stock_count)
@@ -107,7 +107,7 @@ from public.hammerex_products p,
     ('Design',       'Pen sleeve',     'Integrated side sleeve for marker or pen',                 30),
     ('Design',       'Key clip',       'Built-in key clip',                                        31),
     ('Design',       'Mounting',       'Belt loop attachment — fits standard work belts',          32),
-    ('Pricing',      'Per size',       '£19.99 — same price across all four sizes',                40),
+    ('Pricing',      'Per size',       '£27.00 — same price across all four sizes',                40),
     ('Stock',        'Availability',   'In stock — all sizes',                                     50),
     ('Dispatch',     'Lead time',      'Dispatched within 3 working days of order',                51),
     ('Dispatch',     'UK delivery',    'Typical UK delivery within 5 working days',                52),

@@ -1,6 +1,5 @@
 -- HAMMEREX Measure Tape Pro Holder — three user-selectable sizes (5m / 8m /
--- 10m). Prices intentionally seeded as 0 (placeholder pending user
--- confirmation per size). Dispatch lead time is 5 working days for this
+-- 10m). £18.70 GBP per size (Rp 445,565 @ current fx.ts rate). Dispatch lead time is 5 working days for this
 -- model (overrides the usual 3-day Hammerex default). Primary category:
 -- carpentry. Cross-listed to EVERY existing category at user request
 -- ("all category").
@@ -15,7 +14,7 @@ insert into public.hammerex_products (
 select c.id,
   'Hammerex Measure Tape Pro Holder',
   'Premium measure tape pro holder — secure and stylish carry for your tape measure. Choose 5m / 8m / 10m. Heavy-duty construction, quick access.',
-  0,
+  445565,
   'https://ik.imagekit.io/pinky/ChatGPT%20Image%20Jun%2014,%202026,%2001_01_42%20AM.png',
   true,
   'measure-tape-pro-holder', 'HX-MTP-001', 'Hammerex', 'HX-MTP', '14:00',
@@ -59,19 +58,19 @@ cross join public.hammerex_categories c
 where p.slug = 'measure-tape-pro-holder'
 on conflict (product_id, category_id) do nothing;
 
--- Three size variants. Placeholder price 0 — user will confirm each size.
+-- Three size variants. £18.70 GBP per size — same price across sizes.
 insert into public.hammerex_product_variants
   (product_id, label, sku, price_idr, image_url, model_number, sort_order, is_default, stock_count)
 select p.id, v.label, v.sku, v.price_idr, v.image_url, v.model_number, v.sort_order, v.is_default, v.stock_count
 from public.hammerex_products p,
   (values
-    ('5 Meter',  'HX-MTP-5M',  0,
+    ('5 Meter',  'HX-MTP-5M',  445565,
        'https://ik.imagekit.io/pinky/ChatGPT%20Image%20Jun%2014,%202026,%2001_01_42%20AM.png',
        'HX-MTP-5M',  0, true,  60),
-    ('8 Meter',  'HX-MTP-8M',  0,
+    ('8 Meter',  'HX-MTP-8M',  445565,
        'https://ik.imagekit.io/pinky/ChatGPT%20Image%20Jun%2014,%202026,%2001_01_42%20AM.png',
        'HX-MTP-8M',  1, false, 60),
-    ('10 Meter', 'HX-MTP-10M', 0,
+    ('10 Meter', 'HX-MTP-10M', 445565,
        'https://ik.imagekit.io/pinky/ChatGPT%20Image%20Jun%2014,%202026,%2001_01_42%20AM.png',
        'HX-MTP-10M', 2, false, 60)
   ) as v(label, sku, price_idr, image_url, model_number, sort_order, is_default, stock_count)
@@ -100,7 +99,7 @@ from public.hammerex_products p,
     ('Design',       'Access',         'Quick insertion and removal',                          30),
     ('Design',       'Retention',      'Secure hold during movement and climbing',             31),
     ('Use',          'Built for',      'Tradespeople demanding performance and style',         40),
-    ('Pricing',      'Per size',       'Price set per size at the size picker above',          50),
+    ('Pricing',      'Per size',       '£18.70 — same price across all three sizes',           50),
     ('Stock',        'Availability',   'In stock — all sizes',                                 60),
     ('Dispatch',     'Lead time',      'Dispatched within 5 working days of order',            61),
     ('Dispatch',     'UK delivery',    'Typical UK delivery within 5 working days after dispatch', 62),
