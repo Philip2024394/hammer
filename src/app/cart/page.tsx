@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
+import { PreCheckoutModal } from "@/components/cart/PreCheckoutModal";
 
 export default function CartPage() {
+  const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [payNowLoading, setPayNowLoading] = useState(false);
   const [payNowError, setPayNowError] = useState<string | null>(null);
+  const [showPreCheckout, setShowPreCheckout] = useState(false);
 
   useEffect(() => {
     const sync = () => setLines(cart.read());
@@ -227,10 +231,11 @@ export default function CartPage() {
                   >Or quote on WhatsApp instead</a>
                 </>
               ) : (
-                <a
-                  href="/checkout"
-                  className="grid h-12 place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
-                >Proceed to checkout</a>
+                <button
+                  type="button"
+                  onClick={() => setShowPreCheckout(true)}
+                  className="grid h-12 w-full place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
+                >Proceed to checkout</button>
               )}
               <a
                 href="/"
@@ -280,14 +285,21 @@ export default function CartPage() {
                 className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90 disabled:opacity-60"
               >{payNowLoading ? "Opening…" : "Pay now →"}</button>
             ) : (
-              <a
-                href="/checkout"
+              <button
+                type="button"
+                onClick={() => setShowPreCheckout(true)}
                 className="grid h-12 place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition active:scale-[0.98] hover:opacity-90"
-              >Checkout →</a>
+              >Checkout →</button>
             )}
           </div>
         </div>
       )}
+
+      <PreCheckoutModal
+        open={showPreCheckout}
+        onContinue={() => { setShowPreCheckout(false); router.push("/checkout"); }}
+        onCancel={() => setShowPreCheckout(false)}
+      />
     </main>
   );
 }
