@@ -73,6 +73,16 @@ export default function HammerexGroupPage() {
             Every year since launch has added new products, new partners and new markets.
           </Block>
 
+          <Block title="Leadership" eyebrow="Founder + Head of Design">
+            Hammerex is led by founder and Head of Design <span className="font-semibold text-brand-accent">Philip Francis O'Farrell</span>,
+            who has shaped every product across both the TW and Hammerex eras. In 2026
+            the brand enters a new era of innovative tools and trade gear, designed to
+            surpass trade expectations while meeting every required safety and
+            manufacturing standard. With Hammerex, you can be assured of the latest
+            designs reaching the market — backed by fifteen years of trade-grade build
+            history and a workshop run by the same person who designs the product.
+          </Block>
+
           <Block title="Standards" eyebrow="Compliance and quality">
             Hammerex is a registered company operating in full compliance with the laws
             and standards required for manufacturing, export licensing and product
