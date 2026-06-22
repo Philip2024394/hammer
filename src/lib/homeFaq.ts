@@ -21,15 +21,15 @@ export const HOME_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Do you ship tool belts and tool bags to the UK, USA and Australia?",
-    a: "Yes. Flat £20 EMS Air Mail shipping to UK, USA and Australia, with most products in production-line stock for 4–5 working day dispatch. Air freight transit is around 5–7 working days. Other countries are quoted on WhatsApp based on weight and destination."
+    a: "Yes — we ship worldwide. Once you've added items to your basket and submitted your order on WhatsApp, the Hammerex team prices delivery for the whole order — best combined rate, never per item — within 24 hours, before any payment is taken. Most items dispatch 3–5 working days after payment is confirmed; air freight transit is typically 5–7 days to the UK, USA and Australia, longer to more remote destinations."
   },
   {
-    q: "Are Hammerex tools good for full-time trade use?",
-    a: "Every Hammerex product is designed around a real on-site problem and is built for daily trade use — full-grain leather, brass-bound rivets, contrast stitching and reinforced stress points. We back this with a 1-year manufacturing-defect warranty plus optional 3-year Pro Trade Cover for re-stitching, rivet replacement and slider service across normal site wear."
+    q: "Are Hammerex tool belts and tool bags good for full-time trade use?",
+    a: "Yes. Our leather belt and pouch range uses full-grain hide, brass-bound rivets and contrast yellow stitching; canvas bags, pouches and backpacks are made from heavy-duty ballistic fabric with reinforced stress points and matched workshop hardware. Every product carries a 1-year manufacturing-defect warranty, with optional 3-year Pro Trade Cover available on leather belts and pouches for re-stitching, rivet replacement and slider service."
   },
   {
     q: "What categories of hand tools and trade gear do you make?",
-    a: "Tool belts and waist-belt slides, single and double pouches, hammer holders, tape holders, knife and cutter holders, trowel holders, hawk holders, drill holders, electrician pouches, scaffolder kits, plastering bags, drywall accessories, tool bags and backpacks, gloves and PPE, aprons and workwear. The full catalogue is laid out by trade on the home page."
+    a: "Tool belts and waist-belt slides, tool pouches, single and double belt-slide pouches, hammer holders, tape holders, knife and cutter holders, trowel holders, hawk holders, drill holders, electrician pouches, scaffolder kits, plastering bags, drywall accessories, tool bags and backpacks, gloves and PPE, aprons and workwear. The full catalogue is laid out by trade on the home page and by tool type in the 'Shop by Tool Type' grid."
   },
   {
     q: "Can hardware stores and building merchants stock Hammerex direct?",
