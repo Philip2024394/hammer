@@ -5,6 +5,10 @@
 import type { Currency } from "./fx";
 
 export const HX_COUNTRY_COOKIE = "hx_country";
+export const HX_CITY_COOKIE   = "hx_city";
+export const HX_REGION_COOKIE = "hx_region";
+export const HX_LAT_COOKIE    = "hx_lat";
+export const HX_LON_COOKIE    = "hx_lon";
 
 export const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   GB: "GBP", IE: "EUR",
@@ -36,6 +40,47 @@ export function getCountryFromRequest(headers: Headers, cookies: { get(name: str
   const fromCloudflare = headers.get("cf-ipcountry");
   if (fromCloudflare) return fromCloudflare.toUpperCase();
   return null;
+}
+
+// City + region (state / subdivision). Populated by Vercel
+// (`x-vercel-ip-city`, `x-vercel-ip-country-region`) and by Cloudflare
+// Enterprise (`cf-ipcity`). Localhost and non-Enterprise CF return null.
+// Cities are URL-encoded by Vercel (e.g. "New%20York"); we decode here.
+function decode(value: string | null): string | null {
+  if (!value) return null;
+  try { return decodeURIComponent(value); } catch { return value; }
+}
+
+export function getCityFromRequest(headers: Headers, cookies: { get(name: string): { value: string } | undefined }): string | null {
+  const cookied = cookies.get(HX_CITY_COOKIE)?.value;
+  if (cookied) return cookied;
+  return decode(headers.get("x-vercel-ip-city") || headers.get("cf-ipcity"));
+}
+
+export function getRegionFromRequest(headers: Headers, cookies: { get(name: string): { value: string } | undefined }): string | null {
+  const cookied = cookies.get(HX_REGION_COOKIE)?.value;
+  if (cookied) return cookied;
+  return decode(headers.get("x-vercel-ip-country-region") || headers.get("cf-region-code"));
+}
+
+// Lat/lon comes from Vercel's `x-vercel-ip-latitude` / `x-vercel-ip-longitude`.
+// Cloudflare doesn't ship coordinates on the free/Pro tier — those visitors
+// fall back to the country centroid in the admin map. Stored as decimals.
+export function getLatLonFromRequest(
+  headers: Headers,
+  cookies: { get(name: string): { value: string } | undefined }
+): { latitude: number | null; longitude: number | null } {
+  function parse(name: string, cookieName: string): number | null {
+    const c = cookies.get(cookieName)?.value;
+    const raw = (c && c.length > 0) ? c : headers.get(name);
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+  return {
+    latitude:  parse("x-vercel-ip-latitude",  HX_LAT_COOKIE),
+    longitude: parse("x-vercel-ip-longitude", HX_LON_COOKIE)
+  };
 }
 
 // Optional micro-localisations the PDP/cart can use to feel "local".

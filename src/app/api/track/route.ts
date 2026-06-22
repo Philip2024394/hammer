@@ -8,10 +8,11 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { logPageEvent, logSearchQuery, type PageEventType } from "@/lib/track";
-import { getCountryFromRequest } from "@/lib/geo";
+import { getCountryFromRequest, getCityFromRequest, getRegionFromRequest, getLatLonFromRequest } from "@/lib/geo";
 
 const VALID_EVENT_TYPES: PageEventType[] = [
   "pdp_view",
+  "category_view",
   "cart_view",
   "checkout_view",
   "checkout_started",
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
   }
 
   const country = getCountryFromRequest(req.headers, req.cookies);
+  const city    = getCityFromRequest(req.headers, req.cookies);
+  const region  = getRegionFromRequest(req.headers, req.cookies);
+  const { latitude, longitude } = getLatLonFromRequest(req.headers, req.cookies);
   const session_id = typeof body.session_id === "string" ? body.session_id : null;
 
   if (body.kind === "page") {
@@ -38,6 +42,10 @@ export async function POST(req: NextRequest) {
       event_type,
       product_id: typeof body.product_id === "string" ? body.product_id : null,
       country,
+      city,
+      region,
+      latitude,
+      longitude,
       session_id,
       path: typeof body.path === "string" ? body.path : null
     });

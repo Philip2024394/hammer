@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { HX_COUNTRY_COOKIE } from "@/lib/geo";
+import { HX_COUNTRY_COOKIE, HX_CITY_COOKIE, HX_REGION_COOKIE, HX_LAT_COOKIE, HX_LON_COOKIE } from "@/lib/geo";
 import { verifyAdminCookieEdge } from "@/lib/adminAuthEdge";
 
 // Must stay in sync with ADMIN_COOKIE in lib/adminAuth.ts. Inlined here so
@@ -27,29 +27,45 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  const existing = req.cookies.get(HX_COUNTRY_COOKIE);
-  if (existing?.value) {
-    return NextResponse.next();
+  const existingCountry = req.cookies.get(HX_COUNTRY_COOKIE)?.value;
+  const existingCity    = req.cookies.get(HX_CITY_COOKIE)?.value;
+  const existingRegion  = req.cookies.get(HX_REGION_COOKIE)?.value;
+  const existingLat     = req.cookies.get(HX_LAT_COOKIE)?.value;
+  const existingLon     = req.cookies.get(HX_LON_COOKIE)?.value;
+
+  // Vercel URL-encodes city headers ("New%20York"); decode before storing.
+  function decode(v: string | null): string | null {
+    if (!v) return null;
+    try { return decodeURIComponent(v); } catch { return v; }
   }
 
-  const country =
+  const country = existingCountry ||
     req.headers.get("x-vercel-ip-country") ||
     req.headers.get("cf-ipcountry") ||
     null;
+  const city   = existingCity   || decode(req.headers.get("x-vercel-ip-city")           || req.headers.get("cf-ipcity"));
+  const region = existingRegion || decode(req.headers.get("x-vercel-ip-country-region") || req.headers.get("cf-region-code"));
+  const lat    = existingLat    || req.headers.get("x-vercel-ip-latitude");
+  const lon    = existingLon    || req.headers.get("x-vercel-ip-longitude");
 
-  if (!country) {
-    // No platform geo header — the client-side GeoBridge will fill it in
-    // after the first paint via a free IP→country API.
+  if (!country && !city) {
+    // No platform geo signal at all — the client-side GeoBridge fills
+    // country in after first paint via a free IP→country API.
     return NextResponse.next();
   }
 
   const res = NextResponse.next();
-  res.cookies.set(HX_COUNTRY_COOKIE, country.toUpperCase(), {
+  const opts = {
     path: "/",
-    sameSite: "lax",
-    httpOnly: false, // readable client-side too so JS can localise on the fly
-    maxAge: 60 * 60 * 24 * 30 // 30 days
-  });
+    sameSite: "lax" as const,
+    httpOnly: false,
+    maxAge: 60 * 60 * 24 * 30
+  };
+  if (country && !existingCountry) res.cookies.set(HX_COUNTRY_COOKIE, country.toUpperCase(), opts);
+  if (city    && !existingCity)    res.cookies.set(HX_CITY_COOKIE,    city,                  opts);
+  if (region  && !existingRegion)  res.cookies.set(HX_REGION_COOKIE,  region,                opts);
+  if (lat     && !existingLat)     res.cookies.set(HX_LAT_COOKIE,     lat,                   opts);
+  if (lon     && !existingLon)     res.cookies.set(HX_LON_COOKIE,     lon,                   opts);
   return res;
 }
 

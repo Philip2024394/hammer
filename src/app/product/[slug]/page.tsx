@@ -64,7 +64,7 @@ async function loadProduct(slug: string) {
       .select("*, item:hammerex_products!hammerex_deal_breakers_item_product_id_fkey(*, variants:hammerex_product_variants(*))")
       .eq("anchor_product_id", product.id)
       .order("sort_order"),
-    supabase.from("hammerex_reviews").select("*").eq("product_id", product.id).order("created_at", { ascending: false }),
+    supabase.from("hammerex_reviews").select("*").eq("product_id", product.id).eq("status", "approved").order("created_at", { ascending: false }),
     supabase.from("hammerex_questions").select("*, hammerex_answers(*)").eq("product_id", product.id).order("created_at", { ascending: false }),
     supabase.from("hammerex_pair_with")
       .select("*, accessory:hammerex_products!hammerex_pair_with_accessory_product_id_fkey(*)")
@@ -339,7 +339,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <ReviewsBlock
         productId={product.id}
         productName={product.name}
-        productSku={product.sku}
         reviews={reviews}
       />
       <ProductFAQ faq={product.faq} />

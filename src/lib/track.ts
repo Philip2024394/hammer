@@ -6,6 +6,7 @@ import { supabase } from "./supabase";
 
 export type PageEventType =
   | "pdp_view"
+  | "category_view"
   | "cart_view"
   | "checkout_view"
   | "checkout_started"
@@ -15,6 +16,10 @@ export async function logPageEvent(input: {
   event_type: PageEventType;
   product_id?: string | null;
   country?: string | null;
+  city?: string | null;
+  region?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   session_id?: string | null;
   path?: string | null;
 }): Promise<void> {
@@ -23,6 +28,10 @@ export async function logPageEvent(input: {
       event_type: input.event_type,
       product_id: input.product_id ?? null,
       country: input.country ?? null,
+      city: input.city ?? null,
+      region: input.region ?? null,
+      latitude: input.latitude ?? null,
+      longitude: input.longitude ?? null,
       session_id: input.session_id ?? null,
       path: input.path ?? null
     });

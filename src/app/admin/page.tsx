@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { funnelFromEvents, summariseSessions, formatMinutes } from "./helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +13,11 @@ export default async function AdminOverviewPage() {
 
   const [searches30, events30] = await Promise.all([
     supabaseAdmin.from("hammerex_search_queries").select("id,q,results_count").gte("created_at", since30),
-    supabaseAdmin.from("hammerex_page_events").select("event_type,session_id,country").gte("created_at", since30)
+    supabaseAdmin.from("hammerex_page_events").select("event_type,session_id,country,city,created_at").gte("created_at", since30)
   ]);
 
   const searches = (searches30.data ?? []) as { q: string; results_count: number }[];
-  const events = (events30.data ?? []) as { event_type: string; session_id: string | null; country: string | null }[];
+  const events = (events30.data ?? []) as { event_type: string; session_id: string | null; country: string | null; city: string | null; created_at: string }[];
 
   const queryCounts: Record<string, { count: number; zero: number }> = {};
   for (const s of searches) {
@@ -40,18 +41,32 @@ export default async function AdminOverviewPage() {
     .sort((a, b) => b.sessions - a.sessions)
     .slice(0, 5);
 
+  const cityCounts: Record<string, { sessions: Set<string>; country: string }> = {};
+  for (const e of events) {
+    if (!e.city) continue;
+    const key = `${e.city}|${(e.country ?? "").toUpperCase()}`;
+    if (!cityCounts[key]) cityCounts[key] = { sessions: new Set(), country: (e.country ?? "").toUpperCase() };
+    if (e.session_id) cityCounts[key].sessions.add(e.session_id);
+  }
+  const topCity = Object.entries(cityCounts)
+    .map(([k, v]) => ({ city: k.split("|")[0], country: v.country, sessions: v.sessions.size }))
+    .sort((a, b) => b.sessions - a.sessions)
+    .slice(0, 5);
+
+  const session = summariseSessions(events);
   const funnel = funnelFromEvents(events);
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-bold">Overview · last 30 days</h1>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card label="Searches (30d)" value={searches.length.toString()} sub={`${Object.keys(queryCounts).length} unique terms`} />
-        <Card label="Sessions (30d)" value={new Set(events.map((e) => e.session_id).filter(Boolean)).size.toString()} sub={`${events.length} page events`} />
-        <Card label="PDPs viewed (30d)" value={events.filter((e) => e.event_type === "pdp_view").length.toString()} sub="WhatsApp-only — orders not tracked in-app" />
+        <Card label="Sessions (30d)" value={session.totalSessions.toString()} sub={`${events.length} page events`} />
+        <Card label="PDPs viewed (30d)" value={events.filter((e) => e.event_type === "pdp_view").length.toString()} sub="Quote requests at /admin/orders" />
+        <Card label="Avg session" value={formatMinutes(session.avgSeconds)} sub={`median ${formatMinutes(session.medianSeconds)}`} />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Panel title="Top searches" cta={{ href: "/admin/search", label: "All →" }}>
           {topQ.length === 0 ? <Empty>No searches yet.</Empty> : (
             <ul className="divide-y divide-brand-line">
@@ -73,6 +88,21 @@ export default async function AdminOverviewPage() {
               {topC.map((c) => (
                 <li key={c.country} className="flex items-center justify-between gap-2 py-2 text-sm">
                   <span className="text-brand-text">{c.country}</span>
+                  <span className="text-xs text-brand-muted">{c.sessions} sessions</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title="Top cities" cta={{ href: "/admin/traffic", label: "Breakdown →" }}>
+          {topCity.length === 0 ? (
+            <Empty>No city data yet. Cities populate once deployed to Vercel (or Cloudflare Enterprise).</Empty>
+          ) : (
+            <ul className="divide-y divide-brand-line">
+              {topCity.map((c) => (
+                <li key={`${c.city}-${c.country}`} className="flex items-center justify-between gap-2 py-2 text-sm">
+                  <span className="text-brand-text">{c.city}<span className="ml-2 text-xs text-brand-muted">{c.country}</span></span>
                   <span className="text-xs text-brand-muted">{c.sessions} sessions</span>
                 </li>
               ))}
@@ -113,33 +143,6 @@ function Panel({ title, children, cta }: { title: string; children: React.ReactN
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <p className="rounded-xl border border-dashed border-brand-line p-3 text-xs text-brand-muted">{children}</p>;
-}
-
-export function funnelFromEvents(events: { event_type: string; session_id: string | null }[]) {
-  const stages: { key: string; label: string }[] = [
-    { key: "pdp_view",         label: "Product view" },
-    { key: "cart_view",        label: "Cart view" },
-    { key: "checkout_view",    label: "Checkout view" },
-    { key: "checkout_success", label: "Paid" }
-  ];
-  const sessionsByStage = stages.map((s) => ({
-    ...s,
-    sessions: new Set(
-      events.filter((e) => e.event_type === s.key && e.session_id).map((e) => e.session_id as string)
-    )
-  }));
-  const top = sessionsByStage[0].sessions.size || 0;
-  return sessionsByStage.map((s, i) => {
-    const prev = i === 0 ? top : sessionsByStage[i - 1].sessions.size;
-    const dropOff = i === 0 ? 0 : (prev === 0 ? 0 : 1 - s.sessions.size / prev);
-    return {
-      key: s.key,
-      label: s.label,
-      sessions: s.sessions.size,
-      sharePctOfTop: top ? Math.round((s.sessions.size / top) * 100) : 0,
-      dropOffPct: Math.round(dropOff * 100)
-    };
-  });
 }
 
 function FunnelList({ funnel }: { funnel: ReturnType<typeof funnelFromEvents> }) {

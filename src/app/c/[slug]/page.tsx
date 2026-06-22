@@ -5,6 +5,7 @@ import { ProductRow } from "@/components/ProductRow";
 import { CategoryHero } from "@/components/CategoryHero";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { WelcomeTrigger } from "@/components/WelcomeTrigger";
+import { TrackPageEvent } from "@/components/TrackPageEvent";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
 import { absolute, breadcrumbJsonLd, categoryDescription, categoryTitle, collectionJsonLd, BRAND, SEO_KEYWORDS } from "@/lib/seo";
 
@@ -161,6 +162,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collection) }}
       />
       <Header />
+      <TrackPageEvent eventType="category_view" path={`/c/${category.slug}`} />
       <CategoryHero
         category={category}
         productCount={products.length}

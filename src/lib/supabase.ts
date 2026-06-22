@@ -142,6 +142,10 @@ export type HammerexReview = {
   verified_purchase: boolean;
   helpful_count: number;
   created_at: string;
+  status: "pending" | "approved" | "rejected";
+  reviewer_whatsapp: string | null;
+  reviewer_country: string | null;
+  reviewed_at: string | null;
 };
 
 export type HammerexQuestion = {

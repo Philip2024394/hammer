@@ -16,6 +16,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <nav className="flex flex-1 items-center gap-1 overflow-x-auto text-xs">
             <NavLink href="/admin">Overview</NavLink>
+            <NavLink href="/admin/orders">Orders</NavLink>
+            <NavLink href="/admin/product-requests">Projects</NavLink>
+            <NavLink href="/admin/pricing">Pricing</NavLink>
+            <NavLink href="/admin/reviews">Reviews</NavLink>
+            <NavLink href="/admin/world">Live map</NavLink>
             <NavLink href="/admin/search">Searches</NavLink>
             <NavLink href="/admin/traffic">Traffic</NavLink>
           </nav>

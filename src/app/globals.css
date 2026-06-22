@@ -112,6 +112,32 @@ body {
 }
 .hx-flash-red { animation: hx-flash-red-kf 700ms ease-in-out infinite; }
 
+/* Pulsing "online" satellite ping on Leaflet markers in /admin/world. */
+.hx-presence-ping {
+  animation: hx-presence-pulse 1.8s ease-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+@keyframes hx-presence-pulse {
+  0%   { stroke-opacity: 1;   stroke-width: 2; }
+  60%  { stroke-opacity: 0.1; stroke-width: 16; }
+  100% { stroke-opacity: 0;   stroke-width: 16; }
+}
+
+/* Leaflet tooltip + attribution — restore readability on the dark theme. */
+.leaflet-tooltip {
+  background: #0f0f0f !important;
+  border: 1px solid #2a2a2a !important;
+  color: #f5f5f5 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+}
+.leaflet-tooltip-top:before { border-top-color: #2a2a2a !important; }
+.leaflet-control-attribution {
+  background: rgba(15,15,15,0.85) !important;
+  color: #a3a3a3 !important;
+}
+.leaflet-control-attribution a { color: #ffb300 !important; }
+
 /* Yellow ring pulse on primary tap (use on Add to cart / WhatsApp CTAs) */
 @keyframes hx-pulse-kf {
   0%   { box-shadow: 0 0 0 0   rgb(var(--brand-accent) / 0.55); }
