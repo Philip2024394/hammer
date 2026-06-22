@@ -19,7 +19,7 @@ export const BRAND = {
   legalName: "Hammerex Products",
   tagline: "Construction tools, tool belts & tool bags — direct from the maker",
   description:
-    "Hammerex supplies construction tools, hand tools, tool belts, tool bags and trade PPE direct from our Yogyakarta workshop — the hardware-store-direct alternative to building merchants. 4–5 working day dispatch worldwide · flat £20 EMS Air Mail to UK, USA, Australia · other countries quoted on WhatsApp.",
+    "Hammerex supplies construction tools, hand tools, tool belts, tool bags and trade PPE direct from our Yogyakarta workshop — the hardware-store-direct alternative to building merchants. Worldwide shipping with delivery quoted by the Hammerex team within 24 hours via WhatsApp — best combined rate for your whole order, never per item.",
   // Short-form descriptor for OG/Twitter where punchy beats complete.
   descriptionShort:
     "Construction tools, tool belts & tool bags direct from the Hammerex workshop — hardware-store-direct prices, worldwide shipping.",
@@ -255,7 +255,7 @@ export function categoryTitle(slug: string, fallbackName: string): string {
 export function categoryDescription(category: HammerexCategory): string {
   const keyword = CATEGORY_SEO_TITLES[category.slug]?.split(" — ")[0] ?? category.name;
   return clampDescription(
-    `${keyword} direct from the Hammerex workshop — the maker-direct alternative to building merchants and hardware stores. Trade-grade, stitched and riveted in Yogyakarta, shipped worldwide with flat £20 EMS Air Mail to UK, USA and Australia.`
+    `${keyword} direct from the Hammerex workshop — the maker-direct alternative to building merchants and hardware stores. Trade-grade, stitched and riveted in Yogyakarta, shipped worldwide. Delivery quoted as one package by the Hammerex team within 24 hours.`
   );
 }
 
