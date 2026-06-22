@@ -484,14 +484,16 @@ export function BuyColumn({
           selectedLabel={
             beltSize
               ? `Selected: ${beltSize} · cut to your waist`
-              : "Pick your waist size — we cut the belt to fit"
+              : "Tap to pick your waist size — we cut the belt to fit"
           }
-          // Open on arrival when no size has been chosen so the buyer sees
-          // the pills immediately. Stays open until they pick.
-          defaultOpen={!beltSize}
+          // Stay CLOSED on arrival — the flashing yellow⇄red header is
+          // the cue to the buyer to click it open. Auto-open only when
+          // they try to add to cart / buy now without a size picked.
+          defaultOpen={false}
+          forceOpen={beltSizeError}
           closeOnSelection={beltSize}
-          // Pulse a red rim around the whole container until they pick,
-          // so it's unmissable on first page render.
+          // Pulse the header yellow⇄red until they pick, so it's
+          // unmissable on first page render even while collapsed.
           attention={beltActive && !beltSize}
         >
           <p className="mb-3 text-xs leading-relaxed text-brand-muted">

@@ -20,6 +20,7 @@ export function CollapsibleSection({
   defaultOpen = false,
   closeOnSelection,
   attention = false,
+  forceOpen = false,
   children
 }: {
   title: string;
@@ -38,9 +39,23 @@ export function CollapsibleSection({
    * has not been made yet (e.g. belt waist size on a belt set).
    */
   attention?: boolean;
+  /**
+   * Imperative override that forces the section to be open as long as
+   * it's true. Used by BuyColumn to auto-open the belt-size section
+   * after the buyer hits Add to cart / Buy now without picking a size.
+   * Header click still works once the trigger is cleared.
+   */
+  forceOpen?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+
+  // Imperative open trigger — when forceOpen flips to true (e.g. the
+  // buyer just tried to add to cart without a required selection), open
+  // the section so they can see the choices.
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
 
   // Auto-close on selection change. Compare against the initial value
   // captured in a ref (rather than a "first render" flag), so Strict-Mode's
