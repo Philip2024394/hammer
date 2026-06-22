@@ -37,7 +37,7 @@ export const WORKSHOP_FAQ: WorkshopFaqItem[] = [
   },
   {
     q: "Can I get a custom thread colour on a Hammerex belt?",
-    a: "Yes. Black is the house thread colour and is included free. Six other colours (Yellow, Red, Brown, Orange, Green, White) carry a small per-unit fee and add +2 working days to dispatch while we stitch your order to spec. Selectable on the product page in the \"Thread colour\" slider."
+    a: "Yes. Black is the house thread colour and is included free. Five other colours (Yellow, Red, Brown, Green, White) carry a small per-unit fee and add +2 working days to dispatch while we stitch your order to spec. Selectable on the product page in the \"Thread colour\" slider — available on scaffolding belts and scaffolding tool/belt holders only."
   },
   {
     q: "How do Hammerex multi-buy discounts work?",
