@@ -133,9 +133,9 @@ export default function CheckoutPage() {
                     {l.threadColor && <div className="text-brand-muted">Thread: {threadColorLabel(l.threadColor)}</div>}
                     {l.backpackStraps && <div className="text-brand-accent">+ Backpack straps add-on</div>}
                     {l.variantLabel === "WELCOME GIFT" && <div className="font-bold uppercase tracking-widest text-brand-accent">🎁 Welcome gift</div>}
-                    <div className="text-brand-muted">{l.size ? `${l.size} · ` : ""}{l.qty}× {l.unitPriceIdr === 0 ? "FREE" : formatPrice(l.unitPriceIdr, "IDR")}</div>
+                    <div className="text-brand-muted">{l.size ? `${l.size} · ` : ""}{l.qty}× {l.unitPriceIdr === 0 ? (l.variantLabel === "WELCOME GIFT" ? "FREE" : "Quoted at checkout") : formatPrice(l.unitPriceIdr, "IDR")}</div>
                   </div>
-                  <div className="text-xs font-semibold text-brand-text">{l.unitPriceIdr === 0 ? <span className="text-brand-accent">FREE</span> : formatPrice(l.unitPriceIdr * l.qty, "IDR")}</div>
+                  <div className="text-xs font-semibold text-brand-text">{l.unitPriceIdr === 0 ? (l.variantLabel === "WELCOME GIFT" ? <span className="text-brand-accent">FREE</span> : <span className="text-brand-accent">Quoted at checkout</span>) : formatPrice(l.unitPriceIdr * l.qty, "IDR")}</div>
                 </li>
               ))}
             </ul>

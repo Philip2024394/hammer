@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CURRENCIES, CURRENCY_FLAGS, formatPrice, type Currency } from "@/lib/fx";
+import { CURRENCIES, CURRENCY_FLAGS, formatPrice, formatPriceOrQuote, type Currency } from "@/lib/fx";
 import { effectivePricePerUnit } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
 import { sparkBurst } from "@/lib/sparks";
@@ -314,7 +314,7 @@ export function BuyColumn({
               upgrades (belt swap, thread colour, branding, trade cover) or
               picks a multi-buy deal. unitPrice already folds the deal /
               tier discounts in via basePrice. */}
-          <span className="text-xl font-bold text-brand-text">{formatPrice(unitPrice, currency)}</span>
+          <span className="text-xl font-bold text-brand-text">{formatPriceOrQuote(unitPrice, currency)}</span>
           {activeDeal && dealPct > 0 && (
             <>
               <span className="text-sm text-brand-muted line-through">{formatPrice(variantBaseIdr * activeDeal.qty, currency)}</span>
@@ -619,7 +619,7 @@ export function BuyColumn({
                 grows as the buyer adds quantity — the number they're about
                 to actually pay, not a static per-unit anchor. The per-unit
                 price moves to a smaller line below. */}
-            <span className="text-2xl font-bold text-brand-text">{formatPrice(lineTotal, currency)}</span>
+            <span className="text-2xl font-bold text-brand-text">{formatPriceOrQuote(lineTotal, currency)}</span>
             {activeDeal && dealPct > 0 ? (
               <>
                 <span className="text-sm text-brand-muted line-through">{formatPrice(variantBaseIdr * activeDeal.qty * qty, currency)}</span>
@@ -641,11 +641,11 @@ export function BuyColumn({
           <div className="text-xs text-brand-muted">
             {qty > 1 ? (
               <>
-                {qty} × <span className="font-semibold text-brand-text">{formatPrice(unitPrice, currency)}</span> per unit
+                {qty} × <span className="font-semibold text-brand-text">{formatPriceOrQuote(unitPrice, currency)}</span> per unit
               </>
             ) : (
               <>
-                Per unit · <span className="font-semibold text-brand-text">{formatPrice(unitPrice, currency)}</span>
+                Per unit · <span className="font-semibold text-brand-text">{formatPriceOrQuote(unitPrice, currency)}</span>
               </>
             )}
           </div>

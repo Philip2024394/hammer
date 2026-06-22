@@ -29,6 +29,17 @@ export function formatPrice(priceIdr: number, currency: Currency): string {
   return fmt(currency).format(priceIdr * FX[currency].perIDR);
 }
 
+// Surfaces where a product carries no listed price (price_idr=0) should
+// show this label instead of "£0.00" or "FREE". Welcome-gift cart lines
+// keep saying FREE — the WELCOME GIFT marker is what distinguishes a
+// deliberate freebie from a "price quoted at checkout" placeholder.
+export const QUOTE_AT_CHECKOUT_LABEL = "Quoted at checkout";
+
+export function formatPriceOrQuote(priceIdr: number, currency: Currency): string {
+  if (priceIdr === 0) return QUOTE_AT_CHECKOUT_LABEL;
+  return formatPrice(priceIdr, currency);
+}
+
 export const CURRENCIES = Object.keys(FX) as Currency[];
 
 // Country / region flag emoji for each currency. Rendered to the LEFT of

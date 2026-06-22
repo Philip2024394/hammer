@@ -2,7 +2,7 @@ import type { HammerexProduct } from "@/lib/supabase";
 import { SectionHeader } from "./SectionHeader";
 import { CardActionOverlay } from "./CardActionOverlay";
 import { imageUrl } from "@/lib/imageUrl";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceOrQuote, type Currency } from "@/lib/fx";
 
 const FALLBACK_EXTRAS = {
   slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
@@ -26,7 +26,7 @@ const FALLBACK: HammerexProduct[] = [
 // Uses the live FX from fx.ts so the displayed amount matches the PDP.
 function formatProductPrice(p: HammerexProduct): string {
   const cur = (p.base_currency as Currency | null) ?? "IDR";
-  return formatPrice(p.price_idr, cur);
+  return formatPriceOrQuote(p.price_idr, cur);
 }
 
 function Check() {

@@ -165,7 +165,9 @@ export default function CartPage() {
                       <div className="text-right">
                         <div className="text-sm font-bold text-brand-text">
                           {l.unitPriceIdr === 0
-                            ? <span className="text-brand-accent">FREE</span>
+                            ? l.variantLabel === "WELCOME GIFT"
+                              ? <span className="text-brand-accent">FREE</span>
+                              : <span className="text-brand-accent">Quoted at checkout</span>
                             : l.baseCurrency && l.baseCurrency !== "IDR"
                               ? formatPrice(l.unitPriceIdr * l.qty, l.baseCurrency as any)
                               : formatPrice(l.unitPriceIdr * l.qty, "IDR")}

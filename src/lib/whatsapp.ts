@@ -31,10 +31,12 @@ export function buildQuoteMessage(input: QuoteInput): string {
         const isDealBreaker = l.variantLabel === "DEAL BREAKER";
         const price = isGift
           ? "FREE — welcome gift 🎁"
-          : l.baseCurrency && l.baseCurrency !== "IDR"
-            ? formatPrice(l.unitPriceIdr, l.baseCurrency as any)
-            : formatPrice(l.unitPriceIdr, "IDR");
-        const suffix = isGift ? "" : isDealBreaker ? " each ⚡ Deal Breaker · 15% off" : " each";
+          : l.unitPriceIdr === 0
+            ? "Price quoted at checkout"
+            : l.baseCurrency && l.baseCurrency !== "IDR"
+              ? formatPrice(l.unitPriceIdr, l.baseCurrency as any)
+              : formatPrice(l.unitPriceIdr, "IDR");
+        const suffix = isGift || l.unitPriceIdr === 0 ? "" : isDealBreaker ? " each ⚡ Deal Breaker · 15% off" : " each";
         return `• ${l.qty}× ${l.name}${variant}${size}${belt}${thread}${straps}${branding}${cover}${beltUp}${ref} — ${price}${suffix}`;
       }).join("\n")
     : "(empty cart)";
