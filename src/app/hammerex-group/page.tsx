@@ -33,11 +33,12 @@ export default function HammerexGroupPage() {
         </h1>
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-brand-muted sm:text-base">
           Hammerex is a registered manufacturing business engineering innovative tools,
-          PPE and trade accessories for construction and daily professional use. Fifteen
-          years on from the first Hammerex product landing on the market, the company
-          has grown from strength to strength — adding categories, partners and markets
-          year on year — while keeping the same operating principle that started it all:
-          solve a real problem, build it to last, sell it at a fair price.
+          PPE and trade accessories for construction and daily professional use. The
+          brand began fifteen years ago under the <span className="font-semibold text-brand-text">TW</span> name
+          and relaunched worldwide in late 2023 as <span className="font-semibold text-brand-text">Hammerex Products</span>.
+          The company has grown from strength to strength — adding categories, partners
+          and markets year on year — while keeping the operating principle that
+          started it all: solve a real problem, build it to last, sell it at a fair price.
         </p>
       </section>
 
@@ -58,15 +59,18 @@ export default function HammerexGroupPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-10">
         <article className="flex flex-col gap-6 text-sm leading-relaxed text-brand-text">
-          <Block title="Our story" eyebrow="From one product to a full range">
-            Fifteen years ago Hammerex entered the market with a single, purpose-engineered
-            tool designed to do one job better than anything else available at the time.
-            That product earned its place in the trades by performance, not marketing —
-            and it set the standard the company has carried forward ever since. Every
-            item added to the range since has been measured against the same brief:
-            does it solve a real problem on site, is it built to outlast the alternatives,
-            and is it priced honestly. Every year since launch has added new products,
-            new partners and new markets.
+          <Block title="Our story" eyebrow="From TW to Hammerex Products">
+            Fifteen years ago the brand entered the market under the TW name with a
+            single, purpose-engineered tool designed to do one job better than anything
+            else available at the time. That product earned its place in the trades by
+            performance, not marketing — and it set the standard the company has
+            carried forward ever since. In late 2023 the business relaunched worldwide
+            as Hammerex Products, consolidating the range under one brand and taking
+            distribution direct to tradespeople in the UK, USA and Australia. Every
+            item added to the range — whether in the TW years or under Hammerex today
+            — has been measured against the same brief: does it solve a real problem
+            on site, is it built to outlast the alternatives, and is it priced honestly.
+            Every year since launch has added new products, new partners and new markets.
           </Block>
 
           <Block title="Standards" eyebrow="Compliance and quality">
