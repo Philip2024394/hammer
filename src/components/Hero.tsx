@@ -78,6 +78,18 @@ export function Hero() {
               ))}
             </div>
           )}
+
+          <div
+            className="hammerex-marquee-mask pointer-events-none absolute inset-x-0 bottom-0 z-10 overflow-hidden border-t border-brand-accent/40 bg-black/65 py-2 backdrop-blur-sm"
+            aria-label="Hammerex welcome message"
+          >
+            <span
+              className="hammerex-marquee-track px-4 text-[11px] font-semibold uppercase tracking-wider text-brand-accent sm:text-xs"
+              style={{ animationDuration: "60s" }}
+            >
+              ⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp; ⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp;
+            </span>
+          </div>
         </div>
       </div>
     </section>
