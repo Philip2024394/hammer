@@ -72,7 +72,7 @@ export function CollapsibleSection({
         aria-expanded={open}
         aria-controls={bodyId}
         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition active:scale-[0.995] hover:opacity-95 ${
-          attention ? "bg-red-500 text-white" : "bg-brand-accent text-black"
+          attention ? "hx-attention-flash" : "bg-brand-accent text-black"
         }`}
       >
         <span className="flex flex-col gap-0.5">

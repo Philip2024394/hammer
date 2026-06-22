@@ -112,6 +112,20 @@ body {
 }
 .hx-flash-red { animation: hx-flash-red-kf 700ms ease-in-out infinite; }
 
+/* Required-section attention flash — toggles the CollapsibleSection
+   header between brand yellow and red, drawing the eye instantly when
+   the buyer hasn't picked something the order can't complete without
+   (e.g. belt waist size on a belt set). The outer container keeps the
+   subtler ring-pulse from Tailwind's animate-pulse; this is for the
+   header itself. */
+@keyframes hx-attention-flash-kf {
+  0%, 100% { background-color: #ffb300; color: #000; }
+  50%      { background-color: #ef4444; color: #fff; }
+}
+.hx-attention-flash {
+  animation: hx-attention-flash-kf 0.9s ease-in-out infinite;
+}
+
 /* Pulsing "online" satellite ping on Leaflet markers in /admin/world. */
 .hx-presence-ping {
   animation: hx-presence-pulse 1.8s ease-out infinite;
