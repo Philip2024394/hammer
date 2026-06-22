@@ -43,7 +43,7 @@ export function BeltSizeSelector({
       id="hx-belt-size-selector"
       className={`rounded-xl border p-3 transition-colors ${
         inError
-          ? "border-red-500 bg-red-500/10 ring-2 ring-red-500/50 animate-pulse"
+          ? "border-red-500 bg-red-500/10 ring-2 ring-red-500/50"
           : "border-brand-line bg-black/40"
       }`}
     >
@@ -113,21 +113,34 @@ export function BeltSizeSelector({
           aria-modal="true"
           aria-label="Belt size guide"
           onClick={() => setGuideOpen(false)}
-          className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4"
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/90"
+          style={{
+            // Use 100dvh so mobile browser UI showing/hiding doesn't
+            // crop the image. Honour the notch on iOS via safe-area
+            // insets.
+            paddingTop:    "calc(env(safe-area-inset-top) + 64px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)",
+            paddingLeft:   "calc(env(safe-area-inset-left) + 12px)",
+            paddingRight:  "calc(env(safe-area-inset-right) + 12px)"
+          }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={guideUrl}
             alt="How to measure your waist for the leather belt"
             onClick={(e) => e.stopPropagation()}
-            className="block max-h-[88vh] max-w-full rounded-xl object-contain"
+            className="block h-auto max-h-full w-auto max-w-full rounded-xl object-contain"
             style={{ touchAction: "pinch-zoom" }}
           />
           <button
             type="button"
             onClick={() => setGuideOpen(false)}
             aria-label="Close size guide"
-            className="fixed right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-brand-accent text-black shadow-[0_2px_10px_rgba(255,179,0,0.4)] transition active:scale-95 hover:opacity-90"
+            className="fixed grid h-11 w-11 place-items-center rounded-full bg-brand-accent text-black shadow-[0_2px_10px_rgba(255,179,0,0.4)] transition active:scale-95 hover:opacity-90"
+            style={{
+              top:   "calc(env(safe-area-inset-top) + 12px)",
+              right: "calc(env(safe-area-inset-right) + 12px)"
+            }}
           >×</button>
         </div>
       )}
