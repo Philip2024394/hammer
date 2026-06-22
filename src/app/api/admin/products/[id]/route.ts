@@ -57,6 +57,23 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     return NextResponse.json({ ok: false, error: upd.error?.message ?? "Not found" }, { status: 404 });
   }
 
+  // Re-align any "Buy 2 / Buy 3" multi-buy deal rows for this product so
+  // their absolute totals match the canonical 10% / 15% off the new
+  // unit price. Without this the deal totals drift into negative or
+  // nonsense percentages every time the unit price moves.
+  await Promise.all([
+    supabaseAdmin
+      .from("hammerex_product_deals")
+      .update({ price_idr: Math.round(upd.data.price_idr * 2 * 0.90) })
+      .eq("product_id", id)
+      .eq("qty", 2),
+    supabaseAdmin
+      .from("hammerex_product_deals")
+      .update({ price_idr: Math.round(upd.data.price_idr * 3 * 0.85) })
+      .eq("product_id", id)
+      .eq("qty", 3)
+  ]);
+
   // Purge ISR cache so the new price appears on the public site within
   // the next request — instead of waiting up to the 60s revalidate
   // window. The PDP is the priority; the layout-level purge covers home,
