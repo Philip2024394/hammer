@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -9,23 +9,14 @@ function isoDaysAgo(days: number): string {
 
 export default async function AdminOverviewPage() {
   const since30 = isoDaysAgo(30);
-  const since1 = isoDaysAgo(1);
 
-  const [ordersAll, ordersDay, searches30, events30] = await Promise.all([
-    supabase.from("hammerex_orders").select("id,status,total_pence,created_at").gte("created_at", since30).order("created_at", { ascending: false }),
-    supabase.from("hammerex_orders").select("id").gte("created_at", since1),
-    supabase.from("hammerex_search_queries").select("id,q,results_count").gte("created_at", since30),
-    supabase.from("hammerex_page_events").select("event_type,session_id,country").gte("created_at", since30)
+  const [searches30, events30] = await Promise.all([
+    supabaseAdmin.from("hammerex_search_queries").select("id,q,results_count").gte("created_at", since30),
+    supabaseAdmin.from("hammerex_page_events").select("event_type,session_id,country").gte("created_at", since30)
   ]);
 
-  const orders = (ordersAll.data ?? []) as { id: string; status: string; total_pence: number; created_at: string }[];
-  const ordersDayCount = (ordersDay.data ?? []).length;
   const searches = (searches30.data ?? []) as { q: string; results_count: number }[];
   const events = (events30.data ?? []) as { event_type: string; session_id: string | null; country: string | null }[];
-
-  const revenue = orders
-    .filter((o) => o.status === "captured" || o.status === "authorized")
-    .reduce((s, o) => s + (o.total_pence ?? 0), 0);
 
   const queryCounts: Record<string, { count: number; zero: number }> = {};
   for (const s of searches) {
@@ -54,11 +45,10 @@ export default async function AdminOverviewPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-bold">Overview · last 30 days</h1>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card label="Orders (30d)" value={orders.length.toString()} sub={`${ordersDayCount} in last 24h`} />
-        <Card label="Card-paid £" value={`£${(revenue / 100).toFixed(2)}`} sub="authorised + captured" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Card label="Searches (30d)" value={searches.length.toString()} sub={`${Object.keys(queryCounts).length} unique terms`} />
         <Card label="Sessions (30d)" value={new Set(events.map((e) => e.session_id).filter(Boolean)).size.toString()} sub={`${events.length} page events`} />
+        <Card label="PDPs viewed (30d)" value={events.filter((e) => e.event_type === "pdp_view").length.toString()} sub="WhatsApp-only — orders not tracked in-app" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -95,20 +85,6 @@ export default async function AdminOverviewPage() {
         </Panel>
       </div>
 
-      <Panel title="Latest orders" cta={{ href: "/admin/orders", label: "All orders →" }}>
-        {orders.length === 0 ? <Empty>No orders yet.</Empty> : (
-          <ul className="divide-y divide-brand-line">
-            {orders.slice(0, 5).map((o) => (
-              <li key={o.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                <span className="text-xs font-mono text-brand-muted">{o.id.slice(0, 8)}</span>
-                <span className="rounded-full bg-brand-bg px-2 py-0.5 text-xs uppercase text-brand-accent">{o.status}</span>
-                <span className="text-xs text-brand-muted">£{((o.total_pence ?? 0) / 100).toFixed(2)}</span>
-                <span className="text-xs text-brand-muted">{new Date(o.created_at).toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Panel>
     </div>
   );
 }

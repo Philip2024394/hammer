@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -6,7 +6,7 @@ type Row = { id: string; q: string; results_count: number; country: string | nul
 
 export default async function AdminSearchPage() {
   const since30 = new Date(Date.now() - 30 * 86400 * 1000).toISOString();
-  const res = await supabase
+  const res = await supabaseAdmin
     .from("hammerex_search_queries")
     .select("id,q,results_count,country,created_at")
     .gte("created_at", since30)

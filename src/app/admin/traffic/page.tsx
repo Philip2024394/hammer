@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { funnelFromEvents } from "../page";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ type Event = {
 
 export default async function AdminTrafficPage() {
   const since30 = new Date(Date.now() - 30 * 86400 * 1000).toISOString();
-  const res = await supabase
+  const res = await supabaseAdmin
     .from("hammerex_page_events")
     .select("event_type,product_id,country,session_id,path,created_at")
     .gte("created_at", since30)

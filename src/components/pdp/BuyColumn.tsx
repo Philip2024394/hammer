@@ -32,7 +32,6 @@ import { useDeal, dealDiscountPct } from "./DealContext";
 import { VariantSelector } from "./VariantSelector";
 import { RelatedUpsell } from "./RelatedUpsell";
 import { PdpRunningBasket } from "./PdpRunningBasket";
-import { StripePayNowButton } from "./StripePayNowButton";
 import { YouTubeChannelButton } from "./YouTubeChannelButton";
 
 type CategoryLite = { slug: string; name: string };
@@ -854,15 +853,7 @@ export function BuyColumn({
         </button>
       </div>
 
-      {/* Stripe Pay-now CTA — feature-flagged off by default. Only renders
-          when NEXT_PUBLIC_STRIPE_ENABLED=true AND the product ships free
-          to the UK. The button reads cart at click time, hits the
-          /api/checkout/stripe route, then redirects to Stripe-hosted
-          checkout. Capture is manual on the server side so the dispatch
-          buffer is preserved. */}
-      <StripePayNowButton productHasFreeUkDelivery={product.shipping_per_unit_idr === 0} />
-
-      <div className="flex flex-col items-center gap-1.5 rounded-xl border border-brand-line bg-brand-surface/60 p-2">
+<div className="flex flex-col items-center gap-1.5 rounded-xl border border-brand-line bg-brand-surface/60 p-2">
         <span className="text-xs font-bold uppercase tracking-widest text-brand-muted">
           Payment arranged via WhatsApp · all major methods accepted
         </span>
