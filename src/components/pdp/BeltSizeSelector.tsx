@@ -36,8 +36,23 @@ export function BeltSizeSelector({
 
   if (!sizes.length) return null;
 
+  const inError = flashFirst && !value;
+
   return (
-    <div className="rounded-xl border border-brand-line bg-black/40 p-3" id="hx-belt-size-selector">
+    <div
+      id="hx-belt-size-selector"
+      className={`rounded-xl border p-3 transition-colors ${
+        inError
+          ? "border-red-500 bg-red-500/10 ring-2 ring-red-500/50 animate-pulse"
+          : "border-brand-line bg-black/40"
+      }`}
+    >
+      {inError && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-500/60 bg-red-500/15 px-3 py-2 text-sm font-bold uppercase tracking-wider text-red-300">
+          <span aria-hidden className="text-base">⚠</span>
+          Choose your belt size
+        </div>
+      )}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs uppercase tracking-widest text-brand-muted">
           Belt waist size{" "}
