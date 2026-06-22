@@ -63,12 +63,12 @@ export function PreCheckoutModal({
         <img
           src="https://ik.imagekit.io/9mrgsv2rp/ChatGPT%20Image%20Jun%2022,%202026,%2002_49_28%20PM.png"
           alt="Hammerex team rep"
-          width="72"
-          height="72"
-          className="absolute right-4 top-4 h-16 w-16 rounded-xl border border-brand-accent/40 bg-black object-cover sm:h-20 sm:w-20"
+          width="144"
+          height="144"
+          className="absolute right-4 top-4 h-32 w-32 object-contain sm:h-40 sm:w-40"
         />
 
-        <div className="pr-20 sm:pr-24">
+        <div className="pr-32 sm:pr-44">
           <p className="inline-flex items-center gap-2 rounded-full border border-brand-accent/40 bg-brand-accent/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-accent">
             <span
               aria-hidden

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
-import { CheckoutDealBreakers } from "@/components/checkout/CheckoutDealBreakers";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
 import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
@@ -81,8 +80,6 @@ export default function CheckoutPage() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-6">
-            <CheckoutDealBreakers />
-
             <fieldset className="flex flex-col gap-3">
               <legend className="mb-1 flex items-center gap-2 text-sm font-semibold text-brand-text">
                 <HeaderIcon icon={<User size={16} />} />
@@ -94,6 +91,29 @@ export default function CheckoutPage() {
               <Field label="WhatsApp number"  icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="whatsapp" />
               <Field label="Email"             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
             </fieldset>
+
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-disabled={!formValid}
+              onClick={(e) => {
+                if (!formValid) { e.preventDefault(); return; }
+                for (const l of lines) void logQuoteClick(l.productId, "checkout_wa");
+                cart.clear();
+                setTimeout(() => router.push("/thank-you"), 80);
+              }}
+              className={`grid h-14 place-items-center rounded-full text-sm font-bold uppercase tracking-widest shadow-[0_4px_16px_rgba(255,179,0,0.35)] ${
+                formValid ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
+              }`}
+            >
+              Quote me delivery via WhatsApp →
+            </a>
+            {!formValid && lines.length > 0 && hasPaidLine && (
+              <p className="-mt-3 text-xs text-brand-muted">
+                Fill in every field above to enable the button.
+              </p>
+            )}
           </div>
 
           <aside className="h-fit rounded-2xl border border-brand-line bg-brand-surface p-5">
