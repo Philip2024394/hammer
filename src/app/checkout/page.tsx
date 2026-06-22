@@ -20,11 +20,16 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
+  const [ticket, setTicket] = useState<string>("");
 
   useEffect(() => {
     const sync = () => setLines(cart.read());
     sync();
     setReady(true);
+    try {
+      const t = window.sessionStorage.getItem("hx_ticket");
+      if (t) setTicket(t);
+    } catch {}
     return cart.subscribe(sync);
   }, []);
 
@@ -34,9 +39,9 @@ export default function CheckoutPage() {
 
   const href = useMemo(() => {
     if (!formValid) return "#";
-    const message = buildQuoteMessage({ lines, name, country, address, whatsapp, email });
+    const message = buildQuoteMessage({ lines, name, country, address, whatsapp, email, ticket });
     return quoteUrl(message, adminWhatsapp());
-  }, [formValid, lines, name, country, address, whatsapp, email]);
+  }, [formValid, lines, name, country, address, whatsapp, email, ticket]);
 
   if (!ready) return <main><Header /></main>;
 
@@ -63,6 +68,16 @@ export default function CheckoutPage() {
       <TrackPageEvent eventType="checkout_view" />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
+        {ticket && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-brand-accent/40 bg-brand-accent/5 px-3 py-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">
+              Your ticket
+            </span>
+            <span className="font-mono text-sm font-bold tracking-wider text-brand-accent">
+              {ticket}
+            </span>
+          </div>
+        )}
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
           <HeaderIcon icon={<Truck size={18} />} />
           <div>

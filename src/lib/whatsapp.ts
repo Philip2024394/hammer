@@ -13,6 +13,10 @@ export type QuoteInput = {
   address: string;
   whatsapp: string;
   email: string;
+  /** Per-session ticket id issued by the pre-checkout modal. Empty string
+   *  if the buyer somehow reached /checkout without going through the
+   *  modal — the message still sends, just without a ticket header. */
+  ticket?: string;
 };
 
 export function buildQuoteMessage(input: QuoteInput): string {
@@ -43,14 +47,18 @@ export function buildQuoteMessage(input: QuoteInput): string {
 
   const subtotal = input.lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
 
+  const header = input.ticket
+    ? `Hi Hammerex — please confirm my order (Ticket ${input.ticket}).`
+    : "Hi Hammerex — please confirm my order.";
+
   return [
-    "Hi Hammerex — please quote my delivery for the order below.",
+    header,
     "",
     "📦 Items:",
     items,
     "",
     `💰 Items subtotal: ${formatPrice(subtotal, "IDR")}`,
-    "🚚 Delivery: to be priced by the Hammerex team within 24 hours as a single package (best rate, not per item).",
+    "🚚 Delivery: to be priced by the Hammerex team within 24 hours as a single package (best rate, not per item). Free-delivery items are still confirmed before dispatch.",
     "",
     "👤 Customer details:",
     `Name: ${input.name}`,
@@ -59,7 +67,7 @@ export function buildQuoteMessage(input: QuoteInput): string {
     `WhatsApp: ${input.whatsapp}`,
     `Email: ${input.email}`,
     "",
-    "Please send the delivery quote and payment instructions — thank you."
+    "Please send the order confirmation (and delivery quote where applicable) — thank you."
   ].join("\n");
 }
 
