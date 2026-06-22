@@ -299,6 +299,35 @@ export function BuyColumn({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Fixed-position toast shown when the buyer tries to add to cart or
+          buy now without picking a belt waist size. Auto-dismisses as soon
+          as they pick a size (BeltSizeSelector clears beltSizeError on
+          change); they can also dismiss manually with the × . */}
+      {beltSizeError && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed left-1/2 top-4 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border-2 border-red-500 bg-red-500/95 px-4 py-3 text-white shadow-[0_8px_30px_rgba(239,68,68,0.5)]"
+        >
+          <div className="flex items-start gap-3">
+            <span aria-hidden className="text-xl leading-none">⚠</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-bold uppercase tracking-wide">Select your belt size</div>
+              <p className="mt-1 text-xs font-medium leading-relaxed opacity-95">
+                Pick your waist size above so we cut the leather belt to fit you — required before
+                Add to cart or Buy now for the proper fit.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBeltSizeError(false)}
+              aria-label="Dismiss"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-black/30 text-white transition hover:bg-black/50"
+            >×</button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-brand-muted">
         <span className="font-semibold text-brand-text">{product.brand ?? "Hammerex"}</span>
         <StockBadge count={variantStock} productId={product.id} isAccessory={product.is_accessory ?? false} />
@@ -455,13 +484,17 @@ export function BuyColumn({
           selectedLabel={
             beltSize
               ? `Selected: ${beltSize} · cut to your waist`
-              : `No upcharge · default 44" ships if not selected`
+              : "Pick your waist size — we cut the belt to fit"
           }
-          defaultOpen={beltSizeError}
+          // Open on arrival when no size has been chosen so the buyer sees
+          // the pills immediately. Stays open until they pick.
+          defaultOpen={!beltSize}
           closeOnSelection={beltSize}
+          // Pulse a red rim around the whole container until they pick,
+          // so it's unmissable on first page render.
+          attention={beltActive && !beltSize}
         >
           <p className="mb-3 text-xs leading-relaxed text-brand-muted">
-            <span className="font-semibold text-brand-accent">If no size is selected we ship the default 44".</span>{" "}
             For the best fit, pick the waist that fits you today — leather belts are cut to
             your number, not punched with extra holes. Allow{" "}
             <span className="font-semibold text-brand-text">3" up or down</span> of headroom for

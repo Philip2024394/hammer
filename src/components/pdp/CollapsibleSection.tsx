@@ -19,6 +19,7 @@ export function CollapsibleSection({
   selectedLabel,
   defaultOpen = false,
   closeOnSelection,
+  attention = false,
   children
 }: {
   title: string;
@@ -31,6 +32,12 @@ export function CollapsibleSection({
    * `closeOnSelection={threadColor}` for the thread picker.
    */
   closeOnSelection?: unknown;
+  /**
+   * Highlight the whole section as needing attention — red pulsing rim
+   * + suppresses the "Optional" tag inside. Use when a required choice
+   * has not been made yet (e.g. belt waist size on a belt set).
+   */
+  attention?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -51,8 +58,12 @@ export function CollapsibleSection({
   const bodyId = `collapsible-${safeId}-body`;
 
   return (
-    <div className={`overflow-hidden rounded-xl border ${
-      selectedLabel ? "border-brand-accent shadow-[0_0_0_1px_rgba(255,179,0,0.35)]" : "border-brand-line"
+    <div className={`overflow-hidden rounded-xl border transition-colors ${
+      attention
+        ? "border-red-500 ring-2 ring-red-500/50 shadow-[0_0_0_4px_rgba(239,68,68,0.15)] animate-pulse"
+        : selectedLabel
+          ? "border-brand-accent shadow-[0_0_0_1px_rgba(255,179,0,0.35)]"
+          : "border-brand-line"
     }`}>
       <button
         type="button"
@@ -60,7 +71,9 @@ export function CollapsibleSection({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={bodyId}
-        className="flex w-full items-center justify-between gap-3 bg-brand-accent px-4 py-3 text-left text-black transition active:scale-[0.995] hover:opacity-95"
+        className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition active:scale-[0.995] hover:opacity-95 ${
+          attention ? "bg-red-500 text-white" : "bg-brand-accent text-black"
+        }`}
       >
         <span className="flex flex-col gap-0.5">
           <span className="text-sm font-bold uppercase tracking-wide">{title}</span>
@@ -93,9 +106,11 @@ export function CollapsibleSection({
           <div className="p-4">
             {/* "Optional" tag — bold red, sits as the first piece of text in
                 every collapsible body so the buyer instantly understands the
-                section is an opt-in upgrade, not a required choice. */}
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-red-400">
-              Optional
+                section is an opt-in upgrade, not a required choice. When
+                `attention` is on the section IS required, so show a
+                "Required" pill instead. */}
+            <p className={`mb-3 text-xs font-bold uppercase tracking-widest ${attention ? "text-red-500" : "text-red-400"}`}>
+              {attention ? "Required — pick to continue" : "Optional"}
             </p>
             {children}
           </div>
