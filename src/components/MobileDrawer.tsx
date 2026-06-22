@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { adminWhatsapp, quoteUrl } from "@/lib/whatsapp";
 
 const TRADES: { slug: string; label: string }[] = [
   { slug: "plastering", label: "Plastering" },
@@ -41,8 +40,6 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
-
-  const wa = quoteUrl("Hi Hammerex — I have a question about your products.", adminWhatsapp());
 
   return (
     <div
@@ -107,17 +104,6 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
           </ul>
         </div>
 
-        <footer className="border-t border-brand-line bg-brand-surface px-4 py-3">
-          <a
-            href={wa}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-            className="grid h-12 place-items-center rounded-full bg-brand-whatsapp text-xs font-bold uppercase tracking-widest text-black transition hover:opacity-90 active:scale-[0.98]"
-          >
-            Quote on WhatsApp
-          </a>
-        </footer>
       </aside>
     </div>
   );
