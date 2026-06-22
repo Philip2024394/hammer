@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { BrandStatementStrip } from "@/components/BrandStatementStrip";
-import { HomePageNotice } from "@/components/HomePageNotice";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { ToolTypesGrid } from "@/components/ToolTypesGrid";
 import { ProPicks } from "@/components/ProPicks";
@@ -64,7 +63,6 @@ export default function HomePage() {
       <Header />
       <Hero />
       <BrandStatementStrip />
-      <HomePageNotice />
       <Suspense fallback={<div aria-hidden="true" className="h-64" />}>
         <HomeContent />
       </Suspense>
