@@ -1,12 +1,6 @@
 import { formatPrice } from "./fx";
 import type { CartLine } from "./cart";
 import { threadColorLabel } from "./threadColor";
-import {
-  FLAT_SHIPPING_LABEL_GBP,
-  TIER_1_SHIPPING_LABEL_GBP,
-  TIER_2_THRESHOLD_IDR,
-  shippingForSubtotal
-} from "./shipping";
 
 // Legacy alias retained for any older imports — only "air" is used now that
 // shipping is a single flat fee. Anything new should just drop this entirely.
@@ -46,24 +40,15 @@ export function buildQuoteMessage(input: QuoteInput): string {
     : "(empty cart)";
 
   const subtotal = input.lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
-  const shipping = shippingForSubtotal(subtotal);
-  const orderTotal = subtotal + shipping;
-  const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
-  const shippingLabel = tier2Reached
-    ? `${FLAT_SHIPPING_LABEL_GBP} flat — UK / USA / AU`
-    : `${TIER_1_SHIPPING_LABEL_GBP} small-parcel — UK / USA / AU`;
 
   return [
-    "Hi Hammerex — confirming my order below.",
+    "Hi Hammerex — please quote my delivery for the order below.",
     "",
     "📦 Items:",
     items,
     "",
-    "🚚 Shipping: 4–5 working days dispatch · EMS Air Mail ~5–7 days air freight (sea freight ~3–4 weeks, varies by country)",
-    "",
-    `💰 Subtotal: ${formatPrice(subtotal, "IDR")}`,
-    `📮 Shipping (${shippingLabel} · other countries confirmed below): ${formatPrice(shipping, "IDR")}`,
-    `🧾 Order total: ${formatPrice(orderTotal, "IDR")}`,
+    `💰 Items subtotal: ${formatPrice(subtotal, "IDR")}`,
+    "🚚 Delivery: to be priced by the Hammerex team within 24 hours as a single package (best rate, not per item).",
     "",
     "👤 Customer details:",
     `Name: ${input.name}`,
@@ -72,7 +57,7 @@ export function buildQuoteMessage(input: QuoteInput): string {
     `WhatsApp: ${input.whatsapp}`,
     `Email: ${input.email}`,
     "",
-    "Please confirm shipping (if I'm outside UK / USA / AU) and send the payment instructions — thank you."
+    "Please send the delivery quote and payment instructions — thank you."
   ].join("\n");
 }
 

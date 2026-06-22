@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
-import { FreightSelector } from "@/components/checkout/FreightSelector";
 import { CheckoutDealBreakers } from "@/components/checkout/CheckoutDealBreakers";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
 import { cart, type CartLine } from "@/lib/cart";
@@ -11,8 +10,6 @@ import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
 import { adminWhatsapp, buildQuoteMessage, quoteUrl } from "@/lib/whatsapp";
 import { logQuoteClick } from "@/lib/quoteSignals";
-import { TIER_2_THRESHOLD_IDR, shippingForCart } from "@/lib/shipping";
-import { CartProgressBar } from "@/components/cart/CartProgressBar";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
 
 export default function CheckoutPage() {
@@ -33,9 +30,6 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
-  const shipping = shippingForCart(lines);
-  const orderTotal = subtotal + shipping;
-  const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const hasPaidLine = lines.some((l) => l.unitPriceIdr > 0);
   const formValid = name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
 
@@ -70,23 +64,23 @@ export default function CheckoutPage() {
       <TrackPageEvent eventType="checkout_view" />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
-        <div className="mb-4">
-          <CartProgressBar subtotalIdr={subtotal} />
-        </div>
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
           <HeaderIcon icon={<Truck size={18} />} />
           <div>
-            <p className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia.</p>
+            <p className="text-sm font-semibold text-brand-text">
+              Delivery is quoted by the Hammerex team — within 24 hours.
+            </p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-<span className="font-semibold text-brand-text">£28 shipping under £50</span>, <span className="font-semibold text-brand-text">£20 flat once you reach £50</span>. Dispatched in <span className="font-semibold text-brand-text">4–5 working days</span>. Carrier-estimated air freight transit <span className="font-semibold text-brand-text">~5–7 days</span>. Sea freight (most countries) ~3–4 weeks and varies country to country. Shipping to other countries is confirmed on WhatsApp after you submit your details below.
+              Fill in your details below and submit on WhatsApp. We calculate the
+              <span className="font-semibold text-brand-text"> best combined rate</span> for your whole
+              order as a single package — never per item. You only pay once you've seen and
+              accepted the delivery quote. Dispatch follows 3–5 working days after payment.
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-6">
-            <FreightSelector />
-
             <CheckoutDealBreakers />
 
             <fieldset className="flex flex-col gap-3">
@@ -127,24 +121,17 @@ export default function CheckoutPage() {
             </ul>
             <div className="border-t border-brand-line pt-3 text-xs">
               <div className="flex justify-between text-brand-muted">
-                <span>Subtotal</span>
+                <span>Items subtotal</span>
                 <span className="text-brand-text">{formatPrice(subtotal, "IDR")}</span>
               </div>
               <div className="mt-1 flex justify-between text-brand-muted">
-                <span>
-                  Shipping{tier2Reached ? " (£20 flat)" : " (£28 — £30–£49 tier)"}
-                </span>
-                <span className="text-brand-text">{formatPrice(shipping, "IDR")}</span>
-              </div>
-              <div className="my-2 border-t border-brand-line" />
-              <div className="flex justify-between text-sm font-semibold">
-                <span className="text-brand-text">Order total</span>
-                <span className="text-brand-accent">{formatPrice(orderTotal, "IDR")}</span>
+                <span>Delivery</span>
+                <span className="text-brand-accent">Quoted within 24h</span>
               </div>
               {dominantCurrency !== "IDR" && (
                 <div className="mt-1 flex justify-between text-brand-muted">
-                  <span>Indicative</span>
-                  <span className="text-brand-accent">{formatPrice(orderTotal, dominantCurrency)}</span>
+                  <span>Indicative items total</span>
+                  <span className="text-brand-accent">{formatPrice(subtotal, dominantCurrency)}</span>
                 </div>
               )}
             </div>
@@ -172,8 +159,9 @@ export default function CheckoutPage() {
               </p>
             )}
             <p className="mt-2 text-xs text-brand-muted">
-              Opens WhatsApp with your order pre-filled. £20 flat shipping applies to UK, USA
-              and Australia — other countries are confirmed on the same chat before payment.
+              Opens WhatsApp with your order pre-filled. The Hammerex team replies with a
+              combined delivery quote within 24 hours — best rate for the whole order, not
+              per item — before any payment is taken.
             </p>
           </aside>
         </div>
@@ -184,10 +172,10 @@ export default function CheckoutPage() {
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-xs text-brand-muted">
               {lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}
-              {` · ${tier2Reached ? "£20 flat" : "£28 ship"} UK/USA/AU`}
+              {" · delivery quoted within 24h"}
             </span>
             <span className="truncate text-sm font-bold text-brand-text">
-              {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}
+              {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
             </span>
           </div>
           <a

@@ -6,8 +6,6 @@ import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
-import { TIER_2_THRESHOLD_IDR, shippingForCart } from "@/lib/shipping";
-import { CartProgressBar } from "@/components/cart/CartProgressBar";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
 
 export default function CartPage() {
@@ -25,9 +23,6 @@ export default function CartPage() {
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
-  const shipping = shippingForCart(lines);
-  const orderTotal = subtotal + shipping;
-  const tier2Reached = subtotal >= TIER_2_THRESHOLD_IDR;
   const dominantCurrency = (lines.find((l) => l.baseCurrency && l.baseCurrency !== "IDR")?.baseCurrency ?? "IDR") as "IDR" | "USD" | "SGD" | "AUD" | "EUR" | "GBP";
 
   // Stripe Checkout is restricted to free-UK-delivery products. Every paid
@@ -84,17 +79,19 @@ export default function CartPage() {
       <section className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="mb-3 text-2xl font-bold text-brand-text">Your cart</h1>
 
-        <div
-          className="hammerex-marquee-mask relative mb-6 overflow-hidden rounded-full border border-brand-accent/40 bg-brand-accent/5 py-2"
-          aria-label="Air freight shipping offer"
-        >
-          <span
-            className="hammerex-marquee-track px-4 text-xs font-semibold uppercase tracking-wider text-brand-accent"
-            style={{ animationDuration: "60s" }}
-          >
-            ✈ Air freight shipments: add £50 or more to unlock flat-rate £20 shipping — the fastest, most efficient way to get your products.&nbsp;&nbsp;·&nbsp;&nbsp;
-            ✈ Air freight shipments: add £50 or more to unlock flat-rate £20 shipping — the fastest, most efficient way to get your products.&nbsp;&nbsp;·&nbsp;&nbsp;
-          </span>
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
+          <span aria-hidden className="text-base">🚚</span>
+          <div>
+            <p className="text-sm font-semibold text-brand-text">
+              Add as much as you like — we quote delivery as one package.
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-brand-muted">
+              Once you submit your order on WhatsApp, the Hammerex team prices delivery
+              within <span className="font-semibold text-brand-text">24 hours</span>. We calculate the
+              <span className="font-semibold text-brand-text"> best combined rate</span> for your whole
+              order — never per item.
+            </p>
+          </div>
         </div>
 
         {!ready ? null : lines.length === 0 ? (
@@ -182,33 +179,27 @@ export default function CartPage() {
             </ul>
 
             <aside className="h-fit rounded-2xl border border-brand-line bg-brand-surface p-5">
-              <div className="mb-4">
-                <CartProgressBar subtotalIdr={subtotal} />
-              </div>
               <h2 className="text-sm font-semibold text-brand-text">Summary</h2>
               <dl className="mt-4 space-y-2">
                 <div className="flex justify-between text-xs text-brand-muted">
-                  <dt>Subtotal ({lines.reduce((s, l) => s + l.qty, 0)} items)</dt>
+                  <dt>Items subtotal ({lines.reduce((s, l) => s + l.qty, 0)})</dt>
                   <dd className="text-brand-text">{formatPrice(subtotal, "IDR")}</dd>
                 </div>
                 <div className="flex justify-between text-xs text-brand-muted">
-                  <dt>
-                    Shipping{tier2Reached ? " (£20 flat)" : " (£28)"}
-                  </dt>
-                  <dd className="text-brand-text">
-                    {formatPrice(shipping, "IDR")}
-                  </dd>
+                  <dt>Delivery</dt>
+                  <dd className="text-brand-accent">Quoted within 24h</dd>
                 </div>
-                <div className="my-1 border-t border-brand-line" />
-                <div className="flex justify-between text-sm font-semibold">
-                  <dt className="text-brand-text">Order total</dt>
-                  <dd className="text-brand-accent">{formatPrice(orderTotal, "IDR")}</dd>
-                </div>
+                {dominantCurrency !== "IDR" && (
+                  <div className="flex justify-between text-xs text-brand-muted">
+                    <dt>Indicative items total</dt>
+                    <dd className="text-brand-accent">{formatPrice(subtotal, dominantCurrency)}</dd>
+                  </div>
+                )}
               </dl>
               <p className="mt-3 text-xs leading-relaxed text-brand-muted">
-                £20 flat shipping to UK, USA and Australia via EMS Air Mail. Dispatch in
-                4–5 working days, ~5–7 days air freight transit. Sea freight ~3–4 weeks (varies country to country). Shipping to other countries is confirmed
-                on WhatsApp after checkout.
+                Delivery is quoted by the Hammerex team within 24 hours via WhatsApp. We
+                calculate the best combined rate for your whole order — never per item.
+                Dispatch is 3–5 working days after payment confirmation.
               </p>
               <div className="my-4 border-t border-brand-line" />
               {stripeEligible ? (
@@ -278,7 +269,7 @@ export default function CartPage() {
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="text-xs text-brand-muted">{lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}</span>
               <span className="truncate text-sm font-bold text-brand-text">
-                {dominantCurrency !== "IDR" ? formatPrice(orderTotal, dominantCurrency) : formatPrice(orderTotal, "IDR")}
+                {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
               </span>
             </div>
             {stripeEligible ? (

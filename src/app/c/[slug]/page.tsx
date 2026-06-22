@@ -161,7 +161,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collection) }}
       />
       <Header />
-      <CategoryHero category={category} productCount={products.length} />
+      <CategoryHero
+        category={category}
+        productCount={products.length}
+        imageFit={category.slug === "drill-holders" ? "contain" : "cover"}
+      />
 
       <section className="mx-auto max-w-6xl px-4 pt-4">
         <nav className="text-xs text-brand-muted">
