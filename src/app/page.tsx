@@ -61,6 +61,17 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />
       <Header />
+      <div
+        className="hammerex-marquee-mask overflow-hidden border-y border-brand-accent/40 bg-black/85 py-2"
+        aria-label="Hammerex welcome message"
+      >
+        <span
+          className="hammerex-marquee-track px-4 text-[11px] font-semibold uppercase tracking-wider text-brand-accent sm:text-xs"
+          style={{ animationDuration: "60s" }}
+        >
+          ⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp; ⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp;
+        </span>
+      </div>
       <Hero />
       <BrandStatementStrip />
       <Suspense fallback={<div aria-hidden="true" className="h-64" />}>
