@@ -708,7 +708,7 @@ export function BuyColumn({
                 Shipping to {effectiveLocale.countryName || effectiveLocale.country}
               </span>
               <span className="text-xs text-brand-muted">
-                Shipped via EMS · 4–5 day dispatch · ~5–7 days air freight (sea ~3–4 weeks) · price confirmed on WhatsApp at checkout
+                Shipped via EMS · 4–5 day dispatch · ~5–7 days air freight (sea ~3–4 weeks) · price confirmed by email or phone after checkout
               </span>
             </div>
           </div>
@@ -855,12 +855,12 @@ export function BuyColumn({
 
 <div className="flex flex-col items-center gap-1.5 rounded-xl border border-brand-line bg-brand-surface/60 p-2">
         <span className="text-xs font-bold uppercase tracking-widest text-brand-muted">
-          Payment arranged via WhatsApp · all major methods accepted
+          Payment arranged by email or phone · all major methods accepted
         </span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://ik.imagekit.io/9mrgsv2rp/Untitledsdfsdfsdfdfdf-removebg-preview.png?updatedAt=1781804828663"
-          alt="Visa, Mastercard, Amex, PayPal, Apple Pay, bank transfer and WhatsApp accepted"
+          alt="Visa, Mastercard, Amex, PayPal, Apple Pay and bank transfer accepted"
           className="h-8 w-auto max-w-full"
         />
       </div>

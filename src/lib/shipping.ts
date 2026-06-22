@@ -1,6 +1,7 @@
 // Single source of truth for the flat shipping policy. £20 GBP per order
 // for the three priority lanes (UK, USA, Australia); other destinations
-// are confirmed on WhatsApp after the order goes through. Hammerex absorbs
+// are confirmed by the Hammerex team by email or phone after the order
+// goes through. Hammerex absorbs
 // the gap between £20 and the real EMS Air Mail rate (£38–£76 per kg
 // band) via product margin on those three lanes. Update in one place when
 // policy changes — every UI surface reads from here.
@@ -57,7 +58,7 @@ export const FLAT_SHIPPING_DESCRIPTION =
   "£28 shipping under £50, £20 flat once you reach £50. " +
   "Dispatched in 4–5 working days. Carrier-estimated air freight transit ~5–7 days to UK, " +
   "USA and Australia. Sea freight is approximately 3–4 weeks for most countries (varies country to country). " +
-  "Shipping to other countries is confirmed on WhatsApp after checkout.";
+  "Shipping to other countries is confirmed by the Hammerex team by email or phone after checkout.";
 
 // UK air-freight tariff (6-day delivery). Real per-parcel courier rates
 // quoted from Indonesia → UK in IDR. Each product is assigned ONE tier

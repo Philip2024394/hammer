@@ -23,8 +23,8 @@ export default function RouteError({
         <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">Something went wrong</p>
         <h1 className="mt-3 text-xl font-bold text-brand-text">We hit a problem loading this page</h1>
         <p className="mt-2 text-sm text-brand-muted">
-          The error has been logged. Try again, head back to the homepage, or message us
-          on WhatsApp if it persists.
+          The error has been logged. Try again, head back to the homepage, or email us
+          if it persists.
         </p>
         {error.digest && (
           <p className="mt-2 font-mono text-[11px] text-brand-muted">Ref: {error.digest}</p>

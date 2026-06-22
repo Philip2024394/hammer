@@ -14,28 +14,42 @@ export const metadata: Metadata = {
   alternates: { canonical: "/search" }
 };
 
-// Case-insensitive substring search across product name, subtitle and SKU.
-// Postgres ILIKE pattern uses % wildcards; the Supabase `.or()` filter strings
-// each condition with comma separators. A %-escape on the user input keeps it
-// safe from operator injection.
+// Token-AND search across name, subtitle, SKU and description. Each
+// whitespace-separated token from the user's query must match at least
+// one of the four fields; multi-word queries like "plastering bag" now
+// surface products that contain both words anywhere, not just adjacent.
+// Postgres ILIKE pattern uses % wildcards; the Supabase `.or()` filter
+// strings each condition with comma separators, and chained `.or()` calls
+// AND together — exactly the per-token AND we want.
+// hide_from_upsell doubles as a generic "exclude from discovery" flag.
 async function searchProducts(q: string): Promise<HammerexProduct[]> {
-  const term = q.trim();
-  if (!term) return [];
-  const safe = term.replace(/[%,]/g, " ");
-  const filter = `name.ilike.%${safe}%,subtitle.ilike.%${safe}%,sku.ilike.%${safe}%`;
-  // hide_from_upsell doubles as a generic "exclude from discovery" flag —
-  // applied here so non-canonical products (e.g. Scaffolders Gloves, Glove
-  // Clip when "leather work gloves" is the canonical hit) don't pollute
-  // a buyer's results when they search a generic category word.
-  const res = await supabase
+  const tokens = tokenize(q);
+  if (tokens.length === 0) return [];
+  let query = supabase
     .from("hammerex_products")
     .select("*")
-    .or(filter)
-    .eq("hide_from_upsell", false)
+    .eq("hide_from_upsell", false);
+  for (const tok of tokens) {
+    query = query.or(
+      `name.ilike.%${tok}%,subtitle.ilike.%${tok}%,sku.ilike.%${tok}%,description.ilike.%${tok}%`
+    );
+  }
+  const res = await query
     .order("is_featured", { ascending: false })
     .order("rating_count", { ascending: false, nullsFirst: false })
     .limit(60);
   return (res.data ?? []) as HammerexProduct[];
+}
+
+// Lowercase, strip operator-significant chars (%, comma, parens), drop
+// 1-char and empty tokens so single stray letters don't blow up results.
+function tokenize(q: string): string[] {
+  return q
+    .toLowerCase()
+    .replace(/[%,()]/g, " ")
+    .split(/\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= 2);
 }
 
 async function loadCategoriesById() {

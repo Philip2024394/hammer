@@ -166,7 +166,7 @@ export function CustomBrandingSection({
             />
             <p className="text-xs text-brand-muted">
               <span className="font-semibold text-brand-accent">Our admin will confirm all details with you at checkout</span> —
-              you&apos;ll send your logo file on WhatsApp, we&apos;ll send a mock-up for approval, and only then
+              you&apos;ll send your logo file by email, we&apos;ll send a mock-up for approval, and only then
               do we cut and stitch. Nothing is locked in until you sign off.
             </p>
           </div>

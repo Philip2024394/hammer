@@ -13,10 +13,10 @@ export function DeliveryFooter() {
             <p className="mt-1 text-xs text-brand-muted">
               Dispatched in 4–5 working days. Carrier-estimated air freight transit
               ~5–7 days; sea freight is approximately 3–4 weeks for most countries
-              (varies country to country). Shipping cost is confirmed on WhatsApp after
-              checkout based on destination, weight and freight method (air or sea).
-              Import duties and local taxes are not included and are paid by the buyer
-              on arrival.
+              (varies country to country). Shipping cost is confirmed by the Hammerex
+              team by email or phone after checkout based on destination, weight and
+              freight method (air or sea). Import duties and local taxes are not
+              included and are paid by the buyer on arrival.
             </p>
           </div>
         </article>

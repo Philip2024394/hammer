@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 // Modal shown when the buyer leaves /cart for /checkout. Explains the
-// per-order air-freight quote process before the WhatsApp hand-off and
+// per-order air-freight quote process before the team submission and
 // issues a per-session ticket number so the buyer can refer to their
 // enquiry. Mounting parent owns visibility + the "continue" callback.
 //
@@ -48,8 +48,8 @@ function formatCountdown(ms: number): string {
 }
 
 // Ticket id format: HX-YYMMDD-XXXX (4 chars, alphanumeric, ambiguous
-// chars I/O/0/1 excluded so it's easy to read aloud on WhatsApp). The
-// ticket is generated client-side on first modal open and held in
+// chars I/O/0/1 excluded so it's easy to read aloud over phone/email).
+// The ticket is generated client-side on first modal open and held in
 // sessionStorage so a refresh doesn't change it during the same session.
 function generateTicket(): string {
   const d = new Date();
@@ -153,30 +153,31 @@ export function PreCheckoutModal({
             </span>
           </div>
           <p className="mt-1 text-[11px] leading-snug text-brand-muted">
-            Tickets are processed in the order they're received. Keep this
-            number — it lets our team find your enquiry instantly on WhatsApp.
+            Tickets are processed in the order they&rsquo;re received. Keep this
+            number — it lets our team find your enquiry instantly when we email
+            or call you back.
           </p>
         </div>
 
         <div className="mt-4 space-y-3 text-sm leading-relaxed text-brand-muted">
           <p>
-            <span className="font-semibold text-brand-text">Every order is confirmed by our team on WhatsApp.</span>
+            <span className="font-semibold text-brand-text">Every order is confirmed by our team direct from your dashboard submission.</span>
             {" "}For items shipped by air freight, we quote the combined delivery cost —
-            best rate, never per item — within 24 hours.
+            best rate, never per item — within 24 hours, by email or phone.
           </p>
           <p>
             For items already marked <span className="font-semibold text-brand-text">free delivery</span>,
             no delivery quote is needed, but the team still confirms your order details with
-            you on WhatsApp before dispatch.
+            you before dispatch.
           </p>
           <p>
-            We may also have <span className="font-semibold text-brand-text">new models that aren't on
+            We may also have <span className="font-semibold text-brand-text">new models that aren&rsquo;t on
             the site yet</span>. Our team will let you know if anything new fits your order.
           </p>
           <p>
-            It's an important step: we make sure every box is ticked and every question
+            It&rsquo;s an important step: we make sure every box is ticked and every question
             answered before we send your final confirmation link. Yes, it adds a little time
-            — but isn't that how ordering should work?
+            — but isn&rsquo;t that how ordering should work?
           </p>
         </div>
 

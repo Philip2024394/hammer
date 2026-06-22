@@ -46,7 +46,7 @@ export function ShippingReturns({
             <article className="rounded-2xl border border-brand-line bg-brand-surface p-5">
               <h3 className="text-sm font-semibold text-brand-text">Two-tier shipping — UK · USA · Australia</h3>
               <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-                £28 shipping under £50, £20 flat once you reach £50. Dispatched in <span className="text-brand-text">4–5 working days</span>. Carrier-estimated air freight transit <span className="text-brand-text">~5–7 days</span>, tracked end-to-end. Sea freight (most countries) is approximately <span className="text-brand-text">3–4 weeks</span> and varies country to country. Shipping to other countries is confirmed on WhatsApp after checkout. Import duties and local taxes are the buyer&apos;s responsibility on arrival.
+                £28 shipping under £50, £20 flat once you reach £50. Dispatched in <span className="text-brand-text">4–5 working days</span>. Carrier-estimated air freight transit <span className="text-brand-text">~5–7 days</span>, tracked end-to-end. Sea freight (most countries) is approximately <span className="text-brand-text">3–4 weeks</span> and varies country to country. Shipping to other countries is confirmed by email or phone after checkout. Import duties and local taxes are the buyer&apos;s responsibility on arrival.
               </p>
             </article>
           )}

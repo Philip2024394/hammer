@@ -21,7 +21,7 @@ export const WORKSHOP_FAQ: WorkshopFaqItem[] = [
   },
   {
     q: "How long does Hammerex UK delivery take?",
-    a: "Typical UK delivery is 5-6 working days from EMS pickup. We send tracking on dispatch. Free UK delivery is available on selected products; non-UK destinations are confirmed on WhatsApp at checkout."
+    a: "Typical UK delivery is 5-6 working days from EMS pickup. We send tracking on dispatch. Free UK delivery is available on selected products; non-UK destinations are confirmed by the Hammerex team by email or phone after checkout."
   },
   {
     q: "Is Hammerex a new brand?",
@@ -29,7 +29,7 @@ export const WORKSHOP_FAQ: WorkshopFaqItem[] = [
   },
   {
     q: "Does Hammerex offer custom company branding on belts?",
-    a: "Yes — most leather belts and tool pouches can be laser-printed with your company name and logo for +£10 per item. Open the \"Your company brand name\" slider on the product page; our admin confirms artwork with you via WhatsApp and sends a mock-up for approval before production starts."
+    a: "Yes — most leather belts and tool pouches can be laser-printed with your company name and logo for +£10 per item. Open the \"Your company brand name\" slider on the product page; our admin confirms artwork with you by email or phone and sends a mock-up for approval before production starts."
   },
   {
     q: "What is the Hammerex Pro Trade Cover?",
@@ -57,6 +57,6 @@ export const WORKSHOP_FAQ: WorkshopFaqItem[] = [
   },
   {
     q: "How do I track my Hammerex order?",
-    a: "We send the EMS tracking number on WhatsApp the day your order is dispatched. EMS provides updates from collection through customs to your door — typical UK transit is 5-6 working days. If anything stalls, message us on WhatsApp and we'll chase EMS for you."
+    a: "We send the EMS tracking number by email the day your order is dispatched. EMS provides updates from collection through customs to your door — typical UK transit is 5-6 working days. If anything stalls, message us by email or phone and we'll chase EMS for you."
   }
 ];

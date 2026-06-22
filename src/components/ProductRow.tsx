@@ -21,9 +21,10 @@ const FALLBACK: HammerexProduct[] = [
 ];
 
 // Grid card prices are the **product price only** — shipping is NEVER added
-// here. Some products ship free UK / +£10 air freight, others are quoted on
-// WhatsApp for sea-freight; that nuance belongs on the PDP, not the grid.
-// Uses the live FX from fx.ts so the displayed amount matches the PDP.
+// here. Some products ship free UK / +£10 air freight, others are quoted by
+// the team by email or phone for sea-freight; that nuance belongs on the PDP,
+// not the grid. Uses the live FX from fx.ts so the displayed amount matches
+// the PDP.
 function formatProductPrice(p: HammerexProduct): string {
   const cur = (p.base_currency as Currency | null) ?? "IDR";
   return formatPriceOrQuote(p.price_idr, cur);

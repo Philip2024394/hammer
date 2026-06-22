@@ -65,12 +65,10 @@ function Stars({ value }: { value: number }) {
 export function ReviewsBlock({
   productId,
   productName,
-  productSku,
   reviews
 }: {
   productId: string;
   productName: string;
-  productSku: string | null;
   reviews: HammerexReview[];
 }) {
   const [open, setOpen] = useState(false);
@@ -190,8 +188,8 @@ export function ReviewsBlock({
             {open && (
               <div id="write-review-form" className="mb-6">
                 <WriteReviewForm
+                  productId={productId}
                   productName={productName}
-                  productSku={productSku}
                   onClose={() => setOpen(false)}
                 />
               </div>

@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { CartCount } from "./CartCount";
 import { MobileDrawer } from "./MobileDrawer";
+import { SearchBar } from "./SearchBar";
 
 export function Header() {
-  const [q, setQ] = useState("");
   const [drawer, setDrawer] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -33,18 +33,9 @@ export function Header() {
             />
           </a>
 
-          <form action="/search" method="get" className="hidden flex-1 sm:block">
-            <label className="sr-only" htmlFor="search">Search products</label>
-            <input
-              id="search"
-              name="q"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search products…"
-              autoComplete="off"
-              className="h-11 w-full rounded-full border border-brand-line bg-brand-surface px-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
-            />
-          </form>
+          <div className="hidden flex-1 sm:block">
+            <SearchBar id="search" />
+          </div>
 
           <div className="flex-1 sm:hidden" />
 
@@ -75,18 +66,9 @@ export function Header() {
           </button>
         </div>
 
-        <form action="/search" method="get" className="border-t border-brand-line bg-brand-bg/95 px-3 py-2 sm:hidden">
-          <label className="sr-only" htmlFor="search-m">Search products</label>
-          <input
-            id="search-m"
-            name="q"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search products…"
-            autoComplete="off"
-            className="h-11 w-full rounded-full border border-brand-line bg-brand-surface px-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
-          />
-        </form>
+        <div className="border-t border-brand-line bg-brand-bg/95 px-3 py-2 sm:hidden">
+          <SearchBar id="search-m" mobile />
+        </div>
       </header>
 
       <MobileDrawer open={drawer} onClose={() => setDrawer(false)} />

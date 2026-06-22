@@ -9,7 +9,8 @@ import { formatPrice } from "@/lib/fx";
 // Hammerex "Deal Breakers". Each is small-ticket and broadly useful so
 // trade pros can impulse-add without thinking. Each line is added to the
 // cart at DISCOUNT_PCT off the listed price and tagged as "DEAL BREAKER"
-// so it's visually distinct on the cart and in the WhatsApp quote message.
+// so it's visually distinct on the cart and in the team quote that
+// follows checkout.
 //
 // Each card opens a quick-view modal on tap that shows a larger image,
 // short description, star rating and the discounted price — so the buyer

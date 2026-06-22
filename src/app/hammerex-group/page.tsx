@@ -107,10 +107,10 @@ export default function HammerexGroupPage() {
             sewing, riveting, quality inspection and pack-out all happen under one
             roof. Every batch is inspected before stock leaves the building, and
             dispatch goes direct via EMS Air Mail — no middleman warehouse, no
-            reseller stage between us and the customer. The team is reachable on
-            WhatsApp during working hours for queries on orders, freight, partnership
-            applications or product advice, and most enquiries are responded to
-            within one working day.
+            reseller stage between us and the customer. The team is reachable by
+            email or phone during working hours for queries on orders, freight,
+            partnership applications or product advice, and most enquiries are
+            responded to within one working day.
           </Block>
 
           <Block title="Where Hammerex sells today" eyebrow="Retail across Asia · direct to UK, USA, Australia">
@@ -121,7 +121,7 @@ export default function HammerexGroupPage() {
             actively building out international wholesale partnerships in protected
             territories. Direct retail orders to UK, USA and Australia ship via EMS Air
             Mail (£28 on £30–£49 carts · £20 flat once you reach £50 · 4–5 working days dispatch · ~5–7 days air freight transit · sea freight ~3–4 weeks, varies by country).
-            Other destinations are quoted on WhatsApp after checkout.
+            Other destinations are quoted by the Hammerex team by email or phone after checkout.
           </Block>
 
           <Block title="Our aim" eyebrow="What we are building toward">

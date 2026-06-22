@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
 import { cart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/fx";
 import { threadColorLabel } from "@/lib/threadColor";
-import { adminWhatsapp, buildQuoteMessage, quoteUrl } from "@/lib/whatsapp";
 import { logQuoteClick } from "@/lib/quoteSignals";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
 
@@ -17,31 +16,72 @@ export default function CheckoutPage() {
   const [ready, setReady] = useState(false);
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
-  const [address, setAddress] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
-  const [ticket, setTicket] = useState<string>("");
+  const [address, setAddress] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     const sync = () => setLines(cart.read());
     sync();
     setReady(true);
-    try {
-      const t = window.sessionStorage.getItem("hx_ticket");
-      if (t) setTicket(t);
-    } catch {}
     return cart.subscribe(sync);
   }, []);
 
   const subtotal = lines.reduce((s, l) => s + l.unitPriceIdr * l.qty, 0);
   const hasPaidLine = lines.some((l) => l.unitPriceIdr > 0);
-  const formValid = name.trim() && country.trim() && address.trim() && whatsapp.trim() && email.trim() && lines.length > 0 && hasPaidLine;
+  const formValid = !!(name.trim() && country.trim() && whatsapp.trim() && email.trim() && address.trim() && lines.length > 0 && hasPaidLine);
 
-  const href = useMemo(() => {
-    if (!formValid) return "#";
-    const message = buildQuoteMessage({ lines, name, country, address, whatsapp, email, ticket });
-    return quoteUrl(message, adminWhatsapp());
-  }, [formValid, lines, name, country, address, whatsapp, email, ticket]);
+  async function submit() {
+    if (!formValid || submitting) return;
+    setErr(null);
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: name.trim(),
+        email: email.trim(),
+        whatsapp: whatsapp.trim(),
+        country: country.trim(),
+        address: address.trim(),
+        lines: lines.map((l) => ({
+          productId: l.productId,
+          slug: l.slug,
+          name: l.name,
+          sku: l.sku,
+          image: l.image,
+          unitPriceIdr: l.unitPriceIdr,
+          qty: l.qty,
+          size: l.size,
+          variantLabel: l.variantLabel,
+          threadColor: l.threadColor,
+          backpackStraps: l.backpackStraps,
+          beltSize: l.beltSize ?? null,
+          beltUpgrade: l.beltUpgrade ?? null,
+          customBrandName: l.customBrandName ?? null,
+          repairCover: l.repairCover ?? false
+        }))
+      };
+      const res = await fetch("/api/quote-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        setErr(json.error || `Submission failed (${res.status}).`);
+        setSubmitting(false);
+        return;
+      }
+      for (const l of lines) void logQuoteClick(l.productId, "checkout_quote");
+      cart.clear();
+      const ref = encodeURIComponent(json.reference ?? "");
+      router.push(`/thank-you?ref=${ref}`);
+    } catch (e) {
+      setErr((e as Error).message);
+      setSubmitting(false);
+    }
+  }
 
   if (!ready) return <main><Header /></main>;
 
@@ -68,16 +108,6 @@ export default function CheckoutPage() {
       <TrackPageEvent eventType="checkout_view" />
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
-        {ticket && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-brand-accent/40 bg-brand-accent/5 px-3 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">
-              Your ticket
-            </span>
-            <span className="font-mono text-sm font-bold tracking-wider text-brand-accent">
-              {ticket}
-            </span>
-          </div>
-        )}
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
           <HeaderIcon icon={<Truck size={18} />} />
           <div>
@@ -85,15 +115,20 @@ export default function CheckoutPage() {
               Delivery is quoted by the Hammerex team — within 24 hours.
             </p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              Fill in your details below and submit on WhatsApp. We calculate the
+              Fill in your details and press Quote me delivery — your order is submitted
+              straight to a team member at Hammerex. We calculate the
               <span className="font-semibold text-brand-text"> best combined rate</span> for your whole
-              order as a single package — never per item. You only pay once you've seen and
-              accepted the delivery quote. Dispatch follows 3–5 working days after payment.
+              order as a single package — never per item — and reply by email or phone. You
+              only pay once you&rsquo;ve seen and accepted the delivery quote. Dispatch follows
+              3–5 working days after payment.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+        <form
+          onSubmit={(e) => { e.preventDefault(); void submit(); }}
+          className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]"
+        >
           <div className="flex flex-col gap-6">
             <fieldset className="flex flex-col gap-3">
               <legend className="mb-1 flex items-center gap-2 text-sm font-semibold text-brand-text">
@@ -101,30 +136,28 @@ export default function CheckoutPage() {
                 Your details
               </legend>
               <Field label="Full name"        icon={<User size={14} />}   value={name}     onChange={setName}     placeholder="John Smith" autoComplete="name" name="name" />
-              <Field label="Country"           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
-              <Field label="Delivery address" icon={<MapPin size={14} />} value={address}  onChange={setAddress}  placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
-              <Field label="WhatsApp number"  icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="whatsapp" />
               <Field label="Email"             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
+              <Field label="Phone number"     icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="phone" />
+              <Field label="Country"           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
+              <Field label="Delivery address" icon={<MapPin size={14} />} value={address} onChange={setAddress} placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
             </fieldset>
 
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-disabled={!formValid}
-              onClick={(e) => {
-                if (!formValid) { e.preventDefault(); return; }
-                for (const l of lines) void logQuoteClick(l.productId, "checkout_wa");
-                cart.clear();
-                setTimeout(() => router.push("/thank-you"), 80);
-              }}
+            {err && (
+              <p className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-300">
+                {err}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={!formValid || submitting}
               className={`grid h-14 place-items-center rounded-full text-sm font-bold uppercase tracking-widest shadow-[0_4px_16px_rgba(255,179,0,0.35)] ${
-                formValid ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
+                formValid && !submitting ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
               }`}
             >
-              Quote me delivery via WhatsApp →
-            </a>
-            {!formValid && lines.length > 0 && hasPaidLine && (
+              {submitting ? "Sending…" : "Quote me delivery →"}
+            </button>
+            {!formValid && lines.length > 0 && hasPaidLine && !submitting && (
               <p className="-mt-3 text-xs text-brand-muted">
                 Fill in every field above to enable the button.
               </p>
@@ -171,35 +204,25 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-disabled={!formValid}
-              onClick={(e) => {
-                if (!formValid) { e.preventDefault(); return; }
-                for (const l of lines) void logQuoteClick(l.productId, "checkout_wa");
-                cart.clear();
-                setTimeout(() => router.push("/thank-you"), 80);
-              }}
-              className={`mt-5 grid h-12 place-items-center rounded-full text-sm font-semibold ${
-                formValid ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
+            <button
+              type="submit"
+              disabled={!formValid || submitting}
+              className={`mt-5 grid h-12 w-full place-items-center rounded-full text-sm font-semibold ${
+                formValid && !submitting ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
               }`}
             >
-              Quote me delivery via WhatsApp
-            </a>
+              {submitting ? "Sending…" : "Quote me delivery"}
+            </button>
             {!hasPaidLine && lines.length > 0 && (
               <p className="mt-2 rounded-xl border border-brand-accent/40 bg-brand-accent/10 p-2 text-xs text-brand-accent">
                 🎁 Your welcome gift comes with your first paid order — add at least one item to claim it.
               </p>
             )}
             <p className="mt-2 text-xs text-brand-muted">
-              Opens WhatsApp with your order pre-filled. The Hammerex team replies with a
-              combined delivery quote within 24 hours — best rate for the whole order, not
-              per item — before any payment is taken.
+              Hits the Hammerex order desk. We reply by email or phone — usually within 24 hours — with a combined delivery quote before any payment is taken.
             </p>
           </aside>
-        </div>
+        </form>
       </section>
 
       <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 border-t border-brand-line bg-brand-bg/95 px-3 py-2 backdrop-blur lg:hidden">
@@ -213,20 +236,14 @@ export default function CheckoutPage() {
               {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
             </span>
           </div>
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-disabled={!formValid}
-            onClick={(e) => {
-              if (!formValid) { e.preventDefault(); return; }
-              cart.clear();
-              setTimeout(() => router.push("/thank-you"), 80);
-            }}
+          <button
+            type="button"
+            disabled={!formValid || submitting}
+            onClick={() => void submit()}
             className={`grid h-12 place-items-center rounded-full px-4 text-xs font-bold uppercase tracking-widest transition active:scale-[0.98] ${
-              formValid ? "bg-brand-whatsapp text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"
+              formValid && !submitting ? "bg-brand-accent text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"
             }`}
-          >Quote on WhatsApp</a>
+          >{submitting ? "Sending…" : "Quote me delivery"}</button>
         </div>
       </div>
     </main>
@@ -259,7 +276,7 @@ function Field({ label, icon, value, onChange, placeholder, multiline, inputMode
           autoComplete={autoComplete}
           name={name}
           rows={3}
-          className="rounded-xl border border-brand-line bg-brand-surface px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+          className="rounded-2xl border border-brand-line bg-brand-surface px-4 py-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
         />
       ) : (
         <input

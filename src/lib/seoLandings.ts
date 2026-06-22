@@ -38,7 +38,7 @@ export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
     metaDescription:
       "Tool belts for plasterers, electricians, scaffolders, carpenters & drywallers. Full-grain leather, stitched and riveted in Yogyakarta. Worldwide shipping direct.",
     intro:
-      "A tool belt is the working belt that keeps your hand tools — tape, pliers, hammer, knife, fixings — at arm's reach all day. Hammerex tool belts are designed, stitched and riveted in our own Yogyakarta workshop and shipped direct to tradesmen worldwide, with no reseller markup between the maker and you.\n\nOur tool belt range covers full leather work belts, scaffolders' setup belts, plasterer kits, drywaller and electrician pouch slides, carpenter and bricklayer rigs, and modular pouches and holders that fit standard 2\" trade belts. Every belt is full-grain leather with brass-bound rivets, contrast stitching and reinforced stress points — built for full-time site use, not weekend DIY. Flat £20 EMS Air Mail shipping to UK, USA and Australia; other countries quoted on WhatsApp.",
+      "A tool belt is the working belt that keeps your hand tools — tape, pliers, hammer, knife, fixings — at arm's reach all day. Hammerex tool belts are designed, stitched and riveted in our own Yogyakarta workshop and shipped direct to tradesmen worldwide, with no reseller markup between the maker and you.\n\nOur tool belt range covers full leather work belts, scaffolders' setup belts, plasterer kits, drywaller and electrician pouch slides, carpenter and bricklayer rigs, and modular pouches and holders that fit standard 2\" trade belts. Every belt is full-grain leather with brass-bound rivets, contrast stitching and reinforced stress points — built for full-time site use, not weekend DIY. Flat £20 EMS Air Mail shipping to UK, USA and Australia; other countries quoted by email or phone.",
     categorySlugs: ["belts", "trowel-holders", "belt-holders", "scaffolding", "electrical", "plastering"],
     ctaCategorySlug: "belts",
     faq: [
@@ -52,7 +52,7 @@ export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
       },
       {
         q: "Do you ship tool belts to the UK and USA?",
-        a: "Yes. Flat £20 shipping to UK, USA and Australia with 4–5 working day dispatch and ~5–7 day air freight transit. Other destinations are quoted on WhatsApp."
+        a: "Yes. Flat £20 shipping to UK, USA and Australia with 4–5 working day dispatch and ~5–7 day air freight transit. Other destinations are quoted by email or phone."
       },
       {
         q: "How long does a Hammerex tool belt last?",
@@ -77,7 +77,7 @@ export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
       },
       {
         q: "Are Hammerex tool bags waterproof?",
-        a: "The canvas is water-resistant and treated for site exposure. Heavy weatherproofing (full waterproof seal) is not standard — most trades work covered or in vans and prefer the ventilation. Custom waterproof variants can be quoted on WhatsApp."
+        a: "The canvas is water-resistant and treated for site exposure. Heavy weatherproofing (full waterproof seal) is not standard — most trades work covered or in vans and prefer the ventilation. Custom waterproof variants can be quoted by email or phone."
       },
       {
         q: "Can hardware stores stock Hammerex tool bags wholesale?",
@@ -92,7 +92,7 @@ export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
     metaDescription:
       "Construction tools and hand tools for trades — tool belts, pouches, trowels, holders, PPE. Stitched in Yogyakarta. Direct shipping worldwide.",
     intro:
-      "Construction tools cover everything a tradesman needs on site: hand tools, tool belts, pouches, trowels, holders, PPE, workwear, lunch and hydration gear. Hammerex designs and makes the trade-side of that catalogue — leather and canvas trade gear — in our own Yogyakarta workshop.\n\nWe are the maker-direct alternative to building merchants and the marked-up hardware-store brands. Plasterers, drywallers, scaffolders, electricians, plumbers, bricklayers, tilers, carpenters and stone masons all carry Hammerex tool belts and tool bags. Direct from the workshop, no resellers — which means you pay the trade price, not the retail price. Flat £20 EMS Air Mail to UK, USA and Australia; other countries on WhatsApp.",
+      "Construction tools cover everything a tradesman needs on site: hand tools, tool belts, pouches, trowels, holders, PPE, workwear, lunch and hydration gear. Hammerex designs and makes the trade-side of that catalogue — leather and canvas trade gear — in our own Yogyakarta workshop.\n\nWe are the maker-direct alternative to building merchants and the marked-up hardware-store brands. Plasterers, drywallers, scaffolders, electricians, plumbers, bricklayers, tilers, carpenters and stone masons all carry Hammerex tool belts and tool bags. Direct from the workshop, no resellers — which means you pay the trade price, not the retail price. Flat £20 EMS Air Mail to UK, USA and Australia; other countries quoted by email or phone.",
     categorySlugs: [
       "belts",
       "tool-bags-backpacks",

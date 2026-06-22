@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminWhatsapp, quoteUrl } from "@/lib/whatsapp";
 
 export function ProductRequestModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [qty, setQty] = useState("");
   const [details, setDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -21,26 +22,39 @@ export function ProductRequestModal({ onClose }: { onClose: () => void }) {
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
   }, [onClose]);
 
-  const valid = name.trim() && country.trim() && whatsapp.trim() && email.trim() && qty.trim() && details.trim();
+  const valid = !!(name.trim() && country.trim() && phone.trim() && email.trim() && qty.trim() && details.trim()) && !submitting;
 
-  const href = useMemo(() => {
-    if (!valid) return "#";
-    const body = [
-      "Hi Hammerex — I'd like to discuss a product project.",
-      "",
-      `📦 Quantity needed: ${qty}`,
-      `📝 Project details: ${details}`,
-      "",
-      "👤 Customer details:",
-      `Name: ${name}`,
-      `Country: ${country}`,
-      `WhatsApp: ${whatsapp}`,
-      `Email: ${email}`,
-      "",
-      "Please get back to me — I understand you reply within 24 hours."
-    ].join("\n");
-    return quoteUrl(body, adminWhatsapp());
-  }, [valid, name, country, whatsapp, email, qty, details]);
+  async function submit() {
+    if (!valid) return;
+    setErr(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/product-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          country: country.trim(),
+          quantity: qty.trim(),
+          details: details.trim()
+        })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        setErr(json.error || `Submission failed (${res.status}).`);
+        setSubmitting(false);
+        return;
+      }
+      const ref = encodeURIComponent(json.reference ?? "");
+      onClose();
+      router.push(`/thank-you?ref=${ref}`);
+    } catch (e) {
+      setErr((e as Error).message);
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div
@@ -50,7 +64,11 @@ export function ProductRequestModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
       className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4"
     >
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
+      <form
+        onSubmit={(e) => { e.preventDefault(); void submit(); }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-brand-line bg-brand-surface"
+      >
         <div className="flex items-center justify-between border-b border-brand-line px-5 py-4">
           <h3 className="text-sm font-bold uppercase tracking-wider text-brand-text sm:text-base">Submit your project</h3>
           <button
@@ -63,38 +81,37 @@ export function ProductRequestModal({ onClose }: { onClose: () => void }) {
 
         <div className="max-h-[70vh] overflow-y-auto px-5 py-5">
           <p className="mb-4 text-xs leading-relaxed text-brand-muted">
-            Tell us what you need — design, manufacturing or supply, from one piece to 500. We reply within 24 hours.
+            Tell us what you need — design, manufacturing or supply, from one piece to 500. The Hammerex team replies by email or phone within 24 hours.
           </p>
 
           <div className="flex flex-col gap-3">
-            <Field label="Full name"            value={name}     onChange={setName}     placeholder="John Smith" />
-            <Field label="Country"               value={country}  onChange={setCountry}  placeholder="United Kingdom" />
-            <Field label="WhatsApp number"       value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" />
-            <Field label="Email"                 value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" />
-            <Field label="Quantity of products"  value={qty}      onChange={setQty}      placeholder="e.g. 1, 50, 500" />
-            <Field label="Project details"        value={details}  onChange={setDetails}  placeholder="What product, sizes, materials, deadlines…" multiline />
+            <Field label="Full name"            value={name}    onChange={setName}    placeholder="John Smith" />
+            <Field label="Country"               value={country} onChange={setCountry} placeholder="United Kingdom" />
+            <Field label="Phone number"          value={phone}   onChange={setPhone}   placeholder="+44 7700 900000" inputMode="tel" />
+            <Field label="Email"                 value={email}   onChange={setEmail}   placeholder="you@example.com" inputMode="email" />
+            <Field label="Quantity of products"  value={qty}     onChange={setQty}     placeholder="e.g. 1, 50, 500" />
+            <Field label="Project details"       value={details} onChange={setDetails} placeholder="What product, sizes, materials, deadlines…" multiline />
           </div>
         </div>
 
         <div className="border-t border-brand-line px-5 py-4">
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-disabled={!valid}
-            onClick={(e) => {
-              if (!valid) { e.preventDefault(); return; }
-              setTimeout(() => router.push("/thank-you"), 80);
-            }}
-            className={`grid h-12 place-items-center rounded-md text-xs font-bold uppercase tracking-wider ${
+          {err && (
+            <p className="mb-3 rounded-xl border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-300">
+              {err}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={!valid}
+            className={`grid h-12 w-full place-items-center rounded-md text-xs font-bold uppercase tracking-wider ${
               valid ? "bg-brand-accent text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"
             }`}
           >
-            Submit via WhatsApp
-          </a>
-          <p className="mt-2 text-center text-xs text-brand-muted">Opens WhatsApp prefilled with your project details.</p>
+            {submitting ? "Sending…" : "Submit your project"}
+          </button>
+          <p className="mt-2 text-center text-xs text-brand-muted">We&rsquo;ll reply by email or phone within 24 hours.</p>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

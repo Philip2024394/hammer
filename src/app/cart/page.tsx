@@ -42,10 +42,10 @@ export default function CartPage() {
               Add as much as you like — we quote delivery as one package.
             </p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              Once you submit your order on WhatsApp, the Hammerex team prices delivery
-              within <span className="font-semibold text-brand-text">24 hours</span>. We calculate the
-              <span className="font-semibold text-brand-text"> best combined rate</span> for your whole
-              order — never per item.
+              Once you submit your delivery address and details, our team will calculate your
+              package weight and size to offer the
+              <span className="font-semibold text-brand-text"> best quote for airfreight and sea freight</span>
+              {" "}— usually within <span className="font-semibold text-brand-text">24 hours</span>, replied by email or phone.
             </p>
           </div>
         </div>
@@ -155,9 +155,10 @@ export default function CartPage() {
                 )}
               </dl>
               <p className="mt-3 text-xs leading-relaxed text-brand-muted">
-                Delivery is quoted by the Hammerex team within 24 hours via WhatsApp. We
-                calculate the best combined rate for your whole order — never per item.
-                Dispatch is 3–5 working days after payment confirmation.
+                Delivery is quoted by the Hammerex team within 24 hours — we&rsquo;ll
+                reply by email or phone. We calculate the best combined rate for your
+                whole order — never per item. Dispatch is 3–5 working days after
+                payment confirmation.
               </p>
               <div className="my-4 border-t border-brand-line" />
               <button

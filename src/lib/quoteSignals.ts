@@ -22,7 +22,7 @@ function throttle(productId: string): boolean {
   } catch { return true; }
 }
 
-export async function logQuoteClick(productId: string, source: "pdp_fab" | "checkout_wa"): Promise<void> {
+export async function logQuoteClick(productId: string, source: "pdp_fab" | "checkout_wa" | "checkout_quote"): Promise<void> {
   if (!productId) return;
   if (!throttle(productId)) return;
   // Fire-and-forget — never block navigation or surface errors to the user.

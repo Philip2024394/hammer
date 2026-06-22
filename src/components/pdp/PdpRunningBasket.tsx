@@ -220,7 +220,7 @@ export function PdpRunningBasket({
           <span className="text-base font-bold text-brand-text">{formatPrice(subtotal, currency)}</span>
         </div>
         <p className="text-xs text-brand-muted">
-          Dispatch / Shipping Confirmed On WhatsApp Check Out
+          Dispatch / shipping confirmed by email or phone after checkout
         </p>
       </div>
     </div>

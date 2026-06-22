@@ -19,7 +19,7 @@ export const BRAND = {
   legalName: "Hammerex Products",
   tagline: "Construction tools, tool belts & tool bags — direct from the maker",
   description:
-    "Hammerex supplies construction tools, hand tools, tool belts, tool bags and trade PPE direct from our Yogyakarta workshop — the hardware-store-direct alternative to building merchants. Worldwide shipping with delivery quoted by the Hammerex team within 24 hours via WhatsApp — best combined rate for your whole order, never per item.",
+    "Hammerex supplies construction tools, hand tools, tool belts, tool bags and trade PPE direct from our Yogyakarta workshop — the hardware-store-direct alternative to building merchants. Worldwide shipping with delivery quoted by the Hammerex team within 24 hours by email or phone — best combined rate for your whole order, never per item.",
   // Short-form descriptor for OG/Twitter where punchy beats complete.
   descriptionShort:
     "Construction tools, tool belts & tool bags direct from the Hammerex workshop — hardware-store-direct prices, worldwide shipping.",

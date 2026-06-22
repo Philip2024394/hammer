@@ -26,8 +26,7 @@ export default function GlobalError({
             </p>
             <h1 style={{ fontSize: 20, fontWeight: 700, margin: "12px 0 0" }}>The site failed to load</h1>
             <p style={{ fontSize: 14, color: "#a3a3a3", marginTop: 8 }}>
-              We've logged the issue. Please try again or message us on WhatsApp if it
-              keeps happening.
+              We've logged the issue. Please try again or email us if it keeps happening.
             </p>
             {error.digest && (
               <p style={{ fontFamily: "monospace", fontSize: 11, color: "#a3a3a3", marginTop: 8 }}>

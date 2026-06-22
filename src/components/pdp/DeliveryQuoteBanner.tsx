@@ -14,7 +14,7 @@ export function DeliveryQuoteBanner() {
         <span className="font-semibold text-brand-text">4–5 working days</span>. Carrier-estimated
         air freight transit <span className="font-semibold text-brand-text">~5–7 days</span> to UK,
         USA, Australia. Sea freight (most countries) ~3–4 weeks and varies country to country.
-        Other countries are confirmed on WhatsApp after checkout.
+        Other countries are confirmed by email or phone after checkout.
       </p>
     </div>
   );

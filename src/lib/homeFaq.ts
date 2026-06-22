@@ -21,7 +21,7 @@ export const HOME_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Do you ship tool belts and tool bags to the UK, USA and Australia?",
-    a: "Yes — we ship worldwide. Once you've added items to your basket and submitted your order on WhatsApp, the Hammerex team prices delivery for the whole order — best combined rate, never per item — within 24 hours, before any payment is taken. Most items dispatch 3–5 working days after payment is confirmed; air freight transit is typically 5–7 days to the UK, USA and Australia, longer to more remote destinations."
+    a: "Yes — we ship worldwide. Once you've added items to your basket and submitted your order to the Hammerex team, we price delivery for the whole order — best combined rate, never per item — within 24 hours by email or phone, before any payment is taken. Most items dispatch 3–5 working days after payment is confirmed; air freight transit is typically 5–7 days to the UK, USA and Australia, longer to more remote destinations."
   },
   {
     q: "Are Hammerex tool belts and tool bags good for full-time trade use?",

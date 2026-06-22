@@ -225,10 +225,10 @@ export default function TermsPage() {
             </p>
             <p className="mt-3 text-brand-muted">
               Any concern about the condition or specification of an item must be reported to
-              Hammerex on WhatsApp within that 48-hour window, supported by your unpacking
-              photographs or video, your order reference and the courier tracking number. Reports
-              received within this window will be treated as on-arrival claims and resolved
-              promptly.
+              the Hammerex team by email or phone within that 48-hour window, supported by your
+              unpacking photographs or video, your order reference and the courier tracking
+              number. Reports received within this window will be treated as on-arrival claims
+              and resolved promptly.
             </p>
             <p className="mt-3 text-brand-muted">
               This inspection requirement does not override any statutory right available to you
@@ -249,7 +249,7 @@ export default function TermsPage() {
             </p>
             <p className="mt-3 font-semibold text-brand-text">How year-1 cover works</p>
             <ul className="mt-2 flex flex-col gap-1 text-brand-muted">
-              <li className="flex gap-2"><span className="text-brand-accent">·</span>Contact Hammerex on WhatsApp with your order reference, photographs of the issue and a short description of the fault.</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>Contact the Hammerex team by email or phone with your order reference, photographs of the issue and a short description of the fault.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>We check the CCTV dispatch record for your order and confirm whether the fault is consistent with a manufacturing defect.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>If the claim is accepted, we issue a repair reference and a return address. <span className="font-semibold text-brand-text">Hammerex covers postage in both directions</span> using a tracked carrier of our choice.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>We repair the item at no charge for parts or labour and ship it back to you with <span className="font-semibold text-brand-text">return postage paid by Hammerex</span>. Where a repair is not economically possible, we may offer a replacement of the same or comparable specification at our discretion.</li>
@@ -271,7 +271,7 @@ export default function TermsPage() {
             </p>
             <p className="mt-3 font-semibold text-brand-text">How year-2 and year-3 cover works</p>
             <ul className="mt-2 flex flex-col gap-1 text-brand-muted">
-              <li className="flex gap-2"><span className="text-brand-accent">·</span>Contact Hammerex on WhatsApp with photographs and a short description of the issue.</li>
+              <li className="flex gap-2"><span className="text-brand-accent">·</span>Contact the Hammerex team by email or phone with photographs and a short description of the issue.</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>If the repair falls within scope, we issue a repair reference and a return address. <span className="font-semibold text-brand-text">The customer covers postage in both directions</span> using a carrier of their choice (we recommend a tracked service).</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>Hammerex covers <span className="font-semibold text-brand-text">parts and labour at no extra charge</span> for smaller repairs (zippers, stitching, fasteners, clings, rivets and similar consumables).</li>
               <li className="flex gap-2"><span className="text-brand-accent">·</span>Where the work needed is substantial (full re-line, frame replacement, etc.) we will quote in advance and only proceed with your written approval.</li>
@@ -326,7 +326,7 @@ export default function TermsPage() {
           <Block title="Talk to us first">
             Most concerns are resolved fastest by speaking to our team before escalating. We
             respond within one working day and we will always treat a genuine complaint with
-            respect. Reach us via WhatsApp on the number listed at checkout.
+            respect. Reach us by email or phone on the contact details listed at checkout.
           </Block>
         </article>
 

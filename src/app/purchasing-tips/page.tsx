@@ -2,28 +2,22 @@ import type { Metadata } from "next";
 import { Header } from "@/components/Header";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { BRAND } from "@/lib/seo";
-import { adminWhatsapp, quoteUrl } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
   title: "Purchasing Tips",
   description:
-    "Why Hammerex quotes every delivery on WhatsApp — best combined rate for your whole order, free space in the parcel for extras and a real person to talk to. Plus how international freight is actually priced.",
+    "Why Hammerex quotes every delivery by email or phone — best combined rate for your whole order, free space in the parcel for extras and a real person to talk to. Plus how international freight is actually priced.",
   alternates: { canonical: "/purchasing-tips" },
   openGraph: {
     type: "article",
     title: `Purchasing Tips | ${BRAND.name}`,
     description:
-      "Every Hammerex order is shipped after a per-order WhatsApp quote — best combined rate for your basket, never per item. Plus background on freight pricing for larger consignments.",
+      "Every Hammerex order is shipped after a per-order quote from the team — best combined rate for your basket, never per item. Plus background on freight pricing for larger consignments.",
     url: "/purchasing-tips",
     siteName: BRAND.name,
     images: [{ url: BRAND.logo, alt: `${BRAND.name} purchasing tips` }]
   }
 };
-
-const WHATSAPP_TEASER = quoteUrl(
-  "Hi Hammerex — I have a question about ordering and shipping.",
-  adminWhatsapp()
-);
 
 export default function PurchasingTipsPage() {
   return (
@@ -38,14 +32,14 @@ export default function PurchasingTipsPage() {
           Purchasing Tips
         </h1>
         <p className="mt-1 text-sm text-brand-muted">
-          Every order is quoted by our customer-service team on WhatsApp —
+          Every order is quoted by our customer-service team by email or phone —
           best combined rate for your whole basket, never per item.
         </p>
       </section>
 
       <section className="mx-auto max-w-3xl px-4 pb-10">
         <article className="flex flex-col gap-8 text-sm leading-relaxed text-brand-text">
-          <Block title="Why we quote delivery on WhatsApp">
+          <Block title="Why we quote delivery per order">
             <p className="text-brand-muted">
               Hammerex products come in <span className="font-semibold text-brand-text">very different sizes and weights</span> —
               a leather belt sits in a flat envelope, a plastering caddy fills a small box,
@@ -54,10 +48,10 @@ export default function PurchasingTipsPage() {
               everyone, otherwise it loses money on the larger ones.
             </p>
             <p className="mt-3 text-brand-muted">
-              We do it the other way round. You add what you want to your basket, send
-              the order on WhatsApp, and our team prices the actual parcel — single order
-              group, real weight, real route, real carrier rate — and comes back to you
-              within <span className="font-semibold text-brand-text">24 hours</span> with
+              We do it the other way round. You add what you want to your basket, submit
+              your order details on the checkout page, and our team prices the actual parcel —
+              single order group, real weight, real route, real carrier rate — and comes back
+              to you by email or phone within <span className="font-semibold text-brand-text">24 hours</span> with
               the genuine combined cost before you pay.
             </p>
           </Block>
@@ -135,7 +129,7 @@ export default function PurchasingTipsPage() {
                   reduces the per-item cost.
                 </p>
                 <p className="mt-2 text-xs leading-relaxed text-brand-muted">
-                  Dispatch is 3–5 working days after the WhatsApp quote is accepted and payment is
+                  Dispatch is 3–5 working days after the quote is accepted and payment is
                   confirmed.
                 </p>
               </div>
@@ -179,24 +173,19 @@ export default function PurchasingTipsPage() {
               before, during and after the order. It costs you nothing and it saves time on both sides.
             </p>
             <a
-              href={WHATSAPP_TEASER}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-whatsapp px-5 text-xs font-bold uppercase tracking-widest text-black transition hover:opacity-90 active:scale-[0.98]"
+              href="/checkout"
+              className="mt-4 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black transition hover:opacity-90 active:scale-[0.98]"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M20.5 3.5A11 11 0 0 0 3.6 17.3L2 22l4.8-1.6A11 11 0 1 0 20.5 3.5Zm-8.5 17a9 9 0 0 1-4.6-1.3l-.3-.2-2.8.9.9-2.7-.2-.3a9 9 0 1 1 7 3.6Zm4.8-6.7c-.3-.1-1.6-.8-1.9-.9-.3-.1-.5-.1-.7.1l-1 1.1c-.2.2-.4.3-.7.1-2-1-3.4-2.5-3.4-2.5-.2-.3-.1-.4 0-.6.1-.1.3-.4.4-.5l.3-.5c.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1-1.1 2.6 0 1.5 1.1 3 1.3 3.2.2.2 2.3 3.7 5.7 5.1.8.3 1.4.5 1.9.7.8.2 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5l-.5-.4Z" />
-              </svg>
-              Open WhatsApp chat
+              Start a quote request
             </a>
           </Block>
 
-          <Block title="Talk to us — just hit WhatsApp">
+          <Block title="Talk to us — email or phone">
             <p className="text-brand-muted">
               The fastest way to ask a freight question, check stock, request a custom run or kick
-              off an order is the Hammerex WhatsApp chat. One tap on the button above (or any{" "}
-              <em>Quote on WhatsApp</em> button across the site) and you are connected. We aim to
-              answer every enquiry within one working day — most are far faster.
+              off an order is to submit your basket on the checkout page. Our team will reply by
+              email or phone to confirm pricing, freight and dispatch. We aim to answer every
+              enquiry within one working day — most are far faster.
             </p>
           </Block>
         </article>

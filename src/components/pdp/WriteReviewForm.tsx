@@ -1,20 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { adminWhatsapp, quoteUrl } from "@/lib/whatsapp";
+import { useRef, useState } from "react";
 
-type YesNo = "" | "Yes" | "Mostly" | "No";
-type Timing = "" | "Yes" | "Slightly late" | "Late";
-type Expect = "" | "Exceeded" | "Met" | "Below";
-type Recommend = "" | "Yes" | "Maybe" | "No";
+const MAX_PHOTOS = 6;
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 
 export function WriteReviewForm({
+  productId,
   productName,
-  productSku,
   onClose
 }: {
+  productId: string;
   productName: string;
-  productSku: string | null;
   onClose: () => void;
 }) {
   const [name, setName] = useState("");
@@ -27,58 +24,99 @@ export function WriteReviewForm({
   const [service, setService] = useState(0);
   const [value, setValue] = useState(0);
 
-  const [asDescribed, setAsDescribed] = useState<YesNo>("");
-  const [onTime, setOnTime] = useState<Timing>("");
-  const [metExpectations, setMetExpectations] = useState<Expect>("");
-  const [serviceMet, setServiceMet] = useState<YesNo>("");
-  const [wouldOrderAgain, setWouldOrderAgain] = useState<Recommend>("");
-
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const valid = name.trim() && whatsapp.trim() && country.trim() && overall > 0;
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
-  const messageHref = useMemo(() => {
-    if (!valid) return "#";
-    const lines: (string | null)[] = [
-      "Hi Hammerex — product review submission.",
-      "",
-      `PRODUCT: ${productName}`,
-      productSku ? `Ref: ${productSku}` : null,
-      "",
-      "REVIEWER",
-      `Name: ${name}`,
-      `Country: ${country}`,
-      `WhatsApp: ${whatsapp}`,
-      "",
-      "RATINGS",
-      `Overall: ${overall}/5`,
-      quality > 0  ? `Quality: ${quality}/5`   : null,
-      delivery > 0 ? `Delivery: ${delivery}/5` : null,
-      service > 0  ? `Service: ${service}/5`   : null,
-      value > 0    ? `Value: ${value}/5`       : null,
-      "",
-      "DIAGNOSTIC",
-      asDescribed     ? `Was the product as described? ${asDescribed}`            : null,
-      onTime          ? `Was it delivered on time? ${onTime}`                     : null,
-      metExpectations ? `Did it meet your expectations? ${metExpectations}`       : null,
-      serviceMet      ? `Was Hammerex service as stated on site? ${serviceMet}`   : null,
-      wouldOrderAgain ? `Would you order from Hammerex again? ${wouldOrderAgain}` : null,
-      "",
-      title.trim() ? `TITLE: ${title.trim()}` : null,
-      body.trim() ? "REVIEW:" : null,
-      body.trim() || null,
-      "",
-      "PHOTOS: please attach any photos of the product on site or in use directly to this WhatsApp chat after sending — they get added to your review."
-    ];
-    return quoteUrl(lines.filter(Boolean).join("\n"), adminWhatsapp());
-  }, [valid, productName, productSku, name, country, whatsapp,
-      overall, quality, delivery, service, value,
-      asDescribed, onTime, metExpectations, serviceMet, wouldOrderAgain,
-      title, body]);
+  const valid = name.trim() && whatsapp.trim() && country.trim() && overall > 0 && !submitting;
+
+  function handlePhotos(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const next = [...photos];
+    for (const f of Array.from(files)) {
+      if (next.length >= MAX_PHOTOS) break;
+      if (f.size > MAX_PHOTO_BYTES) {
+        setErr(`"${f.name}" exceeds 8 MB.`);
+        continue;
+      }
+      if (!f.type.startsWith("image/")) {
+        setErr(`"${f.name}" is not an image.`);
+        continue;
+      }
+      next.push(f);
+    }
+    setPhotos(next);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removePhoto(idx: number) {
+    setPhotos((arr) => arr.filter((_, i) => i !== idx));
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!valid) return;
+    setErr(null);
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.set("product_id", productId);
+      fd.set("reviewer_name", name.trim());
+      fd.set("reviewer_country", country.trim());
+      fd.set("reviewer_whatsapp", whatsapp.trim());
+      fd.set("rating", String(overall));
+      if (quality > 0)  fd.set("pillar_quality",  String(quality));
+      if (delivery > 0) fd.set("pillar_delivery", String(delivery));
+      if (service > 0)  fd.set("pillar_service",  String(service));
+      if (value > 0)    fd.set("pillar_value",    String(value));
+      if (title.trim()) fd.set("title", title.trim());
+      if (body.trim())  fd.set("body",  body.trim());
+      for (const f of photos) fd.append("photos", f);
+
+      const res = await fetch("/api/reviews", { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        setErr(json.error || `Submission failed (${res.status}).`);
+        setSubmitting(false);
+        return;
+      }
+      setDone(true);
+    } catch (e) {
+      setErr((e as Error).message);
+      setSubmitting(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-brand-accent bg-brand-bg">
+        <div className="px-5 py-8 text-center">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-brand-accent">
+            Thanks — your review is in
+          </h3>
+          <p className="mt-2 text-xs leading-relaxed text-brand-muted">
+            Hammerex reviews are checked before publishing. We&rsquo;ll
+            confirm yours shortly and post it on this product page.
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-5 inline-grid h-11 min-w-[160px] place-items-center rounded-full bg-brand-accent px-5 text-xs font-bold uppercase tracking-widest text-black hover:opacity-90"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-brand-accent bg-brand-bg">
+    <form onSubmit={onSubmit} className="overflow-hidden rounded-2xl border border-brand-accent bg-brand-bg">
       <header className="flex items-start justify-between gap-3 border-b border-brand-line bg-brand-accent/10 px-5 py-4">
         <div className="min-w-0">
           <h3 className="text-sm font-bold uppercase tracking-widest text-brand-accent">Write a review</h3>
@@ -94,9 +132,9 @@ export function WriteReviewForm({
 
       <div className="px-5 py-5">
         <Section title="Your details">
-          <Field label="Name" required value={name} onChange={setName} placeholder="Full name" />
-          <Field label="WhatsApp" required value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" />
-          <Field label="Country" required value={country} onChange={setCountry} placeholder="United Kingdom" />
+          <Field label="Name"     required value={name}     onChange={setName}     placeholder="Full name" />
+          <Field label="Phone" required value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" />
+          <Field label="Country"  required value={country}  onChange={setCountry}  placeholder="United Kingdom" />
         </Section>
 
         <Section title="Overall rating" required>
@@ -110,41 +148,65 @@ export function WriteReviewForm({
           <PillarRow label="Value"    value={value}    onChange={setValue} />
         </Section>
 
-        <Section title="Quick check" subtitle="A few quick answers so we know exactly where to act">
-          <Choice label="Was the product as described?"               value={asDescribed}     onChange={(v) => setAsDescribed(v as YesNo)}        options={["Yes", "Mostly", "No"]} />
-          <Choice label="Was it delivered on time?"                   value={onTime}          onChange={(v) => setOnTime(v as Timing)}            options={["Yes", "Slightly late", "Late"]} />
-          <Choice label="Did it meet your expectations?"              value={metExpectations} onChange={(v) => setMetExpectations(v as Expect)}   options={["Exceeded", "Met", "Below"]} />
-          <Choice label="Was Hammerex service as stated on the site?" value={serviceMet}      onChange={(v) => setServiceMet(v as YesNo)}         options={["Yes", "Mostly", "No"]} />
-          <Choice label="Would you order from Hammerex again?"        value={wouldOrderAgain} onChange={(v) => setWouldOrderAgain(v as Recommend)} options={["Yes", "Maybe", "No"]} />
+        <Section title="Your review">
+          <Field label="Title"  value={title} onChange={setTitle} placeholder="A short title (optional)" />
+          <Field label="Review" value={body}  onChange={setBody}  placeholder="Tell other tradespeople about your experience" multiline />
         </Section>
 
-        <Section title="Your review">
-          <Field label="Title" value={title} onChange={setTitle} placeholder="A short title (optional)" />
-          <Field label="Review" value={body} onChange={setBody} placeholder="Tell other tradespeople about your experience" multiline />
+        <Section title={`Photos (${photos.length}/${MAX_PHOTOS})`} subtitle="Up to 6 images, 8 MB each. Reviewed before going live.">
+          <div className="flex flex-wrap items-start gap-2">
+            {photos.map((file, i) => {
+              const url = URL.createObjectURL(file);
+              return (
+                <div key={`${file.name}-${i}`} className="relative h-20 w-20 overflow-hidden rounded-lg border border-brand-line bg-black">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={file.name} className="h-full w-full object-cover" onLoad={() => URL.revokeObjectURL(url)} />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(i)}
+                    aria-label={`Remove ${file.name}`}
+                    className="absolute right-0.5 top-0.5 grid h-6 w-6 place-items-center rounded-full bg-black/80 text-xs text-white hover:bg-red-500"
+                  >×</button>
+                </div>
+              );
+            })}
+            {photos.length < MAX_PHOTOS && (
+              <label className="grid h-20 w-20 cursor-pointer place-items-center rounded-lg border border-dashed border-brand-line bg-brand-surface text-xs font-semibold uppercase tracking-widest text-brand-muted transition hover:border-brand-accent hover:text-brand-accent">
+                + Add
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handlePhotos(e.target.files)}
+                />
+              </label>
+            )}
+          </div>
         </Section>
       </div>
 
       <footer className="border-t border-brand-line bg-brand-accent/5 px-5 py-4">
-        <a
-          href={messageHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-disabled={!valid}
-          onClick={(e) => {
-            if (!valid) { e.preventDefault(); return; }
-            setTimeout(() => onClose(), 80);
-          }}
-          className={`grid h-12 place-items-center rounded-full text-xs font-bold uppercase tracking-widest ${
+        {err && (
+          <p className="mb-3 rounded-xl border border-red-500/40 bg-red-500/10 p-2 text-xs text-red-300">
+            {err}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={!valid}
+          className={`grid h-12 w-full place-items-center rounded-full text-xs font-bold uppercase tracking-widest ${
             valid ? "bg-brand-accent text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"
           }`}
         >
-          Submit review via WhatsApp
-        </a>
+          {submitting ? "Submitting…" : "Submit review"}
+        </button>
         <p className="mt-2 text-center text-xs text-brand-muted">
-          Opens WhatsApp prefilled with your review and diagnostic answers. We publish verified reviews after our team confirms the purchase.
+          Hammerex publishes reviews after the team confirms the purchase.
         </p>
       </footer>
-    </div>
+    </form>
   );
 }
 
@@ -258,40 +320,6 @@ function PillarRow({ label, value, onChange }: { label: string; value: number; o
             </svg>
           </button>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function Choice({
-  label, value, onChange, options
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold text-brand-text">{label}</span>
-      <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0,1fr))` }}>
-        {options.map((opt) => {
-          const active = value === opt;
-          return (
-            <button
-              key={opt}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => onChange(active ? "" : opt)}
-              className={`h-11 rounded-full border text-xs font-semibold transition ${
-                active
-                  ? "border-brand-accent bg-brand-accent/10 text-brand-accent"
-                  : "border-brand-line bg-black/30 text-brand-muted hover:border-brand-accent"
-              }`}
-            >{opt}</button>
-          );
-        })}
       </div>
     </div>
   );
