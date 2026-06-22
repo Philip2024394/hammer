@@ -65,11 +65,9 @@ export default function HomePage() {
         className="hammerex-marquee-mask overflow-hidden border-y border-brand-accent/40 bg-black/85 py-2"
         aria-label="Hammerex welcome message"
       >
-        <span
-          className="hammerex-marquee-track px-4 text-[11px] font-semibold uppercase tracking-wider text-brand-accent sm:text-xs"
-          style={{ animationDuration: "60s" }}
-        >
-          ⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp; ⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp;
+        <span className="hammerex-marquee-seamless-track text-[11px] font-semibold uppercase tracking-wider text-brand-accent sm:text-xs">
+          <span className="px-4">⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp;</span>
+          <span aria-hidden="true" className="px-4">⚒ Welcome to Hammerex Direct &nbsp;·&nbsp; Our team is on standby 7 days a week, 9 am – 9 pm Indonesia time &nbsp;·&nbsp; Questions, orders or delivery — we're here to help &nbsp;·&nbsp; Glad you stopped by &nbsp;·&nbsp;</span>
         </span>
       </div>
       <Hero />

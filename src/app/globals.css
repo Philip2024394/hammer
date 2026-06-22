@@ -54,13 +54,28 @@ body {
   will-change: transform;
   animation: hammerex-marquee 28s linear infinite;
 }
+/* Seamless variant. The track must contain the message duplicated end to
+   end; animating from 0 to -50% scrolls exactly one copy off-screen left
+   while the second copy slides in from the right, then loops back to 0
+   visually-identically — no blank gap between cycles. */
+@keyframes hammerex-marquee-seamless {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.hammerex-marquee-seamless-track {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  animation: hammerex-marquee-seamless 60s linear infinite;
+}
 .hammerex-marquee-mask {
   -webkit-mask-image: linear-gradient(to right, transparent 0, rgb(var(--brand-bg)) 12%, rgb(var(--brand-bg)) 100%);
           mask-image: linear-gradient(to right, transparent 0, rgb(var(--brand-bg)) 12%, rgb(var(--brand-bg)) 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hammerex-marquee-track { animation: none; }
+  .hammerex-marquee-track,
+  .hammerex-marquee-seamless-track { animation: none; }
   .hx-pulse,
   .hx-fade-in-up,
   .hx-shimmer,
