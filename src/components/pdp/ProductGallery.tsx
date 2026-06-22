@@ -190,7 +190,7 @@ export function ProductGallery({ media, fallbackImage, name }: {
             type="button"
             onClick={() => setZoomed(false)}
             aria-label="Close zoom"
-            className="fixed right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-brand-surface text-brand-text hover:text-brand-accent"
+            className="fixed right-4 top-4 z-10 grid h-12 w-12 place-items-center rounded-full bg-brand-accent text-black text-2xl font-bold shadow-[0_4px_16px_rgba(255,179,0,0.45)] ring-2 ring-brand-accent/30 transition hover:opacity-90 active:scale-95"
           >×</button>
         </div>
       )}
