@@ -37,7 +37,7 @@ export default async function GuidesIndexPage() {
           Hammerex Guides
         </p>
         <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
-          Honest answers from the workshop.
+          Got a question? We've got the answer.
         </h1>
         <p className="mt-2 text-sm text-brand-muted">
           Buyer questions, material explanations and trade-tested advice — written so you

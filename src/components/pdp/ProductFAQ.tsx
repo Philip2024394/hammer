@@ -19,7 +19,7 @@ export function ProductFAQ({ faq }: { faq: { q: string; a: string }[] | null }) 
       <div className="mx-auto max-w-6xl px-4">
         <details className="group" open>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3">
-            <h2 className="text-lg font-semibold text-brand-text">Honest answers from the workshop</h2>
+            <h2 className="text-lg font-semibold text-brand-text">Got a question? We've got the answer.</h2>
             <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-accent text-black transition group-open:rotate-180">▾</span>
           </summary>
           <p className="mb-4 text-xs text-brand-muted">

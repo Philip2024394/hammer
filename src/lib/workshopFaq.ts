@@ -1,4 +1,4 @@
-// Brand-wide "Honest answers from the workshop" FAQ. Appended to every PDP
+// Brand-wide "Got a question? We've got the answer." FAQ. Appended to every PDP
 // (plus piped into FAQPage JSON-LD) so we earn SERP coverage on the long-
 // tail queries buyers actually type before ordering: shipping, dispatch
 // times, factory provenance, custom branding, multi-buy maths, Pro Trade
