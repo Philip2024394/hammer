@@ -53,7 +53,7 @@ export default async function AdminTrafficPage() {
 
   const productNames = new Map<string, { name: string; slug: string | null }>();
   if (topPdps.length > 0) {
-    const pr = await supabase
+    const pr = await supabaseAdmin
       .from("hammerex_products")
       .select("id,name,slug")
       .in("id", topPdps.map((p) => p.id));
