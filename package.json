@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3007",
+    "dev": "next dev --webpack -p 3007",
+    "dev:turbo": "next dev -p 3007",
     "build": "next build",
     "start": "next start -p 3007",
     "lint": "next lint",
@@ -11,11 +12,14 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
+    "leaflet": "^1.9.4",
     "next": "^16.2.9",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^22.9.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
