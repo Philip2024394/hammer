@@ -94,7 +94,7 @@ export function WelcomePopup() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="welcome-title"
-      className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3 sm:items-center sm:px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center px-3 py-4 sm:px-4"
     >
       <button
         type="button"
@@ -121,13 +121,8 @@ export function WelcomePopup() {
           </button>
         </div>
 
-        <div className="flex gap-4 p-4">
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-black">
-            {gift?.image_url && (
-              <img src={gift.image_url} alt={gift?.name ?? "Free Hammerex knife"} className="h-full w-full object-contain" />
-            )}
-          </div>
-          <div className="flex-1 text-sm leading-relaxed text-brand-muted">
+        <div className="space-y-4 p-4">
+          <div className="text-sm leading-relaxed text-brand-muted">
             <p className="text-brand-text">
               First time here? Have a <span className="font-semibold text-brand-accent">free Hammerex Folding Safety Cutter Knife (£9.80 RRP)</span> on us — added straight to your cart with your first paid order, no code needed.
             </p>
@@ -148,13 +143,25 @@ export function WelcomePopup() {
               — Hammerex Team :-)
             </p>
           </div>
+
+          {gift?.image_url && (
+            <div className="aspect-[3/2] w-full overflow-hidden rounded-xl bg-black">
+              <img
+                src={gift.image_url}
+                alt={gift?.name ?? "Free Hammerex knife"}
+                className="h-full w-full object-contain"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col-reverse gap-2 border-t border-brand-line bg-brand-surface p-3 sm:flex-row">
           <button
             type="button"
             onClick={close}
-            className="h-11 flex-1 rounded-full border border-brand-line bg-black text-xs font-semibold text-brand-muted hover:text-brand-text"
+            className="h-14 flex-1 rounded-full border border-brand-line bg-black text-sm font-semibold text-brand-muted hover:text-brand-text"
           >
             Maybe later
           </button>
@@ -162,7 +169,7 @@ export function WelcomePopup() {
             type="button"
             onClick={claim}
             disabled={!gift || added}
-            className="h-11 flex-1 rounded-full bg-brand-accent px-4 text-xs font-bold uppercase tracking-widest text-black transition active:scale-95 hover:opacity-90 disabled:opacity-60"
+            className="h-14 flex-1 rounded-full bg-brand-accent px-4 text-sm font-bold uppercase tracking-widest text-black transition active:scale-95 hover:opacity-90 disabled:opacity-60"
           >
             {added ? "Added to cart ✓" : "Add my free knife"}
           </button>
