@@ -58,6 +58,16 @@ export async function ProPicks() {
             customCtaLabel: "Browse electrical"
           }
         : p
+    )
+    // Plastering + drywall picks act as category teasers — keep their PDP
+    // banner art but route the card to the trade grid so the buyer sees
+    // the full range instead of the single anchor product.
+    .map((p) =>
+      p.slug === "plastering-pro-bag"
+        ? { ...p, customHref: "/c/plastering", customCtaLabel: "Browse plastering" }
+        : p.slug === "drywall-pro-kit"
+          ? { ...p, customHref: "/c/drywall", customCtaLabel: "Browse drywall" }
+          : p
     );
   if (products.length === 0) return null;
   return <ProductRow items={products} title="Pro Picks" viewAllHref="/products" layout="landscape" />;

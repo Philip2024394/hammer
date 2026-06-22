@@ -23,25 +23,12 @@ export function Header() {
           scrolled ? "shadow-[0_8px_24px_-12px_rgba(255,179,0,0.25)]" : ""
         }`}
       >
-        <div className="mx-auto flex h-20 max-w-6xl items-center gap-2 px-3 sm:h-24 sm:gap-3 sm:px-4">
-          <button
-            type="button"
-            onClick={() => setDrawer(true)}
-            aria-label="Open menu"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-surface text-brand-text transition hover:border-brand-accent hover:text-brand-accent active:scale-95"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="3" y1="6"  x2="21" y2="6"  />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
-
+        <div className="mx-auto flex h-32 max-w-6xl items-center gap-2 px-3 sm:h-40 sm:gap-3 sm:px-4">
           <a href="/" aria-label="Hammerex home" className="block shrink-0 p-0">
             <img
               src="https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/85e5e067cf0cb299.png"
               alt="Hammerex"
-              className="block h-16 w-auto p-0 sm:h-20"
+              className="block h-32 w-auto p-0 sm:h-36"
               style={{ background: "transparent" }}
             />
           </a>
@@ -73,6 +60,19 @@ export function Header() {
             </svg>
             <CartCount />
           </a>
+
+          <button
+            type="button"
+            onClick={() => setDrawer(true)}
+            aria-label="Open menu"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-surface text-brand-text transition hover:border-brand-accent hover:text-brand-accent active:scale-95"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="3" y1="6"  x2="21" y2="6"  />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
         </div>
 
         <form action="/search" method="get" className="border-t border-brand-line bg-brand-bg/95 px-3 py-2 sm:hidden">
