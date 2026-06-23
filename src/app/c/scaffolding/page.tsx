@@ -34,6 +34,7 @@ export const dynamic = "force-dynamic";
 const SCAFFOLDING_BELT_SLUGS = new Set([
   "forgex-7-station-scaffolders-belt",
   "scaffolders-apex-7-station-tool-belt",
+  "scaffolders-belt-trox",
   "scaffolders-tool-belt",
   "leather-scaffolding-belt-tilted-ratchet-frog-holder",
   "heavy-duty-leather-tool-belt",
@@ -50,6 +51,7 @@ const BELTS_TAB_ORDER: string[] = [
   // Individual scaffolding belt bodies
   "forgex-7-station-scaffolders-belt",
   "scaffolders-apex-7-station-tool-belt",
+  "scaffolders-belt-trox",
   "scaffolders-tool-belt",
   "leather-scaffolding-belt-tilted-ratchet-frog-holder",
   // Individual standalone belts + supports
