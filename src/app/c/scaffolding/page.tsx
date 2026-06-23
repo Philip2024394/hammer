@@ -35,6 +35,7 @@ const SCAFFOLDING_BELT_SLUGS = new Set([
   "forgex-7-station-scaffolders-belt",
   "scaffolders-apex-7-station-tool-belt",
   "scaffolders-belt-trox",
+  "scaffolders-belt-tower",
   "scaffolders-tool-belt",
   "leather-scaffolding-belt-tilted-ratchet-frog-holder",
   "heavy-duty-leather-tool-belt",
@@ -52,6 +53,7 @@ const BELTS_TAB_ORDER: string[] = [
   "forgex-7-station-scaffolders-belt",
   "scaffolders-apex-7-station-tool-belt",
   "scaffolders-belt-trox",
+  "scaffolders-belt-tower",
   "scaffolders-tool-belt",
   "leather-scaffolding-belt-tilted-ratchet-frog-holder",
   // Individual standalone belts + supports
