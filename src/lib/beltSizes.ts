@@ -40,6 +40,10 @@ export const BELT_SIZING_BY_SLUG: Record<string, BeltSizingConfig> = {
   "leather-scaffolding-belt-tilted-ratchet-frog-holder": {
     sizes: STANDARD_BELT_WAIST_SIZES,
     guideUrl: STANDARD_BELT_GUIDE_URL
+  },
+  "scaffolders-belt-trox": {
+    sizes: STANDARD_BELT_WAIST_SIZES,
+    guideUrl: STANDARD_BELT_GUIDE_URL
   }
 };
 
