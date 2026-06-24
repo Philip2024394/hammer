@@ -48,9 +48,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const g = res.data;
   if (!g) return { title: "Guide not found" };
 
-  const image = g.hero_image_url ?? BRAND.logo;
   const url = absolute(`/guides/${g.slug}`);
 
+  // og:image / twitter:image are populated by ./opengraph-image.tsx, which
+  // composites the full hero onto a 1200x630 canvas so FB/IG/WA shares show
+  // the entire image uncropped regardless of native aspect.
   return {
     title: `${g.title} — Hammerex`,
     description: g.meta_description,
@@ -60,14 +62,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: g.title,
       description: g.meta_description,
       url,
-      siteName: BRAND.name,
-      images: [{ url: image, width: 1200, height: 630, alt: g.title }]
+      siteName: BRAND.name
     },
     twitter: {
       card: "summary_large_image",
       title: g.title,
-      description: g.meta_description,
-      images: [{ url: image, width: 1200, height: 630, alt: g.title }]
+      description: g.meta_description
     }
   };
 }
@@ -132,12 +132,9 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
 
         {guide.hero_image_url && (
           <figure className="mt-6 overflow-hidden rounded-2xl border border-brand-line bg-black">
-            {/* 1.91:1 frame matches the Facebook / LinkedIn / WhatsApp social-card
-                crop. `object-contain` keeps the entire banner visible inside the
-                frame — wider or taller artwork letterboxes against the black
-                background instead of getting cropped. For social shares, IG
-                (1:1, 4:5) and TikTok (9:16) crop centrally; keep the subject in
-                the middle 60% of the image to survive those crops. */}
+            {/* Fill the 1.91:1 frame edge-to-edge — non-1.91 artwork is centre-cropped.
+                For social shares the full image survives uncropped via the
+                opengraph-image.tsx route which composites onto a 1200x630 canvas. */}
             <img
               src={guide.hero_image_url}
               alt={guide.title}
@@ -145,7 +142,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
               decoding="async"
               width={1200}
               height={630}
-              className="block aspect-[1.91/1] h-auto w-full object-contain"
+              className="block aspect-[1.91/1] h-auto w-full object-cover"
             />
           </figure>
         )}
