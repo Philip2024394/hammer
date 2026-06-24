@@ -100,16 +100,21 @@ function buildDisplayList(
 }
 
 export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
-  // Shuffle/weight once per mount — useMemo with a stable dep so React doesn't
-  // re-roll the order on every render and create a flicker.
-  const display = useMemo(
-    () => buildDisplayList(jobs, userCountry),
-    // We intentionally key only on the job ids + the country so re-renders
-    // from setIndex don't reshuffle. jobs comes from a server fetch, so the
-    // list reference is stable across the component's lifetime in practice.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [jobs.map((j) => j.id).join(","), userCountry]
+  // SSR-stable initial order — first DISPLAY_TARGET jobs in DB order. Avoids
+  // a hydration mismatch from `Math.random()` returning a different sequence
+  // on the server vs. the client. After mount we swap in the country-weighted
+  // shuffle below.
+  const ssrInitial = useMemo(
+    () => jobs.slice(0, DISPLAY_TARGET),
+    [jobs.map((j) => j.id).join(",")]
   );
+  const [display, setDisplay] = useState<HammerexXratedJob[]>(ssrInitial);
+
+  // Run the 70/30 country-weighted shuffle only on the client, after hydration.
+  useEffect(() => {
+    setDisplay(buildDisplayList(jobs, userCountry));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobs.map((j) => j.id).join(","), userCountry]);
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
