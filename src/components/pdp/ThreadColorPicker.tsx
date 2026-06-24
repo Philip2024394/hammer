@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import {
   THREAD_COLOR_IMAGES,
   isFreeThreadColor,
@@ -27,6 +28,7 @@ export function ThreadColorPicker({
   threadDeltaIdr: number;
   currency: Currency;
 }) {
+  const country = useCountry();
   const palette = threadColorsFor(productSlug);
   const [zoom, setZoom] = useState<ThreadColor | null>(null);
 
@@ -53,7 +55,7 @@ export function ThreadColorPicker({
           Thread colour {value && `· ${palette.find((c) => c.value === value)?.label ?? ""}`}
         </span>
         <span className="text-xs text-brand-muted">
-          Black free · others +{formatPrice(threadDeltaIdr, currency)} · +2 working days
+          Black free · others +{formatPriceForRegion(threadDeltaIdr, currency, country)} · +2 working days
         </span>
       </div>
 
@@ -110,7 +112,7 @@ export function ThreadColorPicker({
               </button>
               <span className="text-xs font-semibold text-brand-text">{c.label}</span>
               <span className={`text-xs font-semibold ${free ? "text-brand-muted" : "text-brand-accent"}`}>
-                {free ? "Standard · free" : `+${formatPrice(threadDeltaIdr, currency)}`}
+                {free ? "Standard · free" : `+${formatPriceForRegion(threadDeltaIdr, currency, country)}`}
               </span>
             </li>
           );
@@ -161,14 +163,14 @@ export function ThreadColorPicker({
                     ? "bg-brand-line text-brand-muted"
                     : "bg-brand-accent/15 text-brand-accent"
                 }`}>
-                  {zoomFree ? "Standard · no cost" : `+${formatPrice(threadDeltaIdr, currency)} · +2 working days`}
+                  {zoomFree ? "Standard · no cost" : `+${formatPriceForRegion(threadDeltaIdr, currency, country)} · +2 working days`}
                 </span>
               </div>
 
               <p className="text-xs leading-relaxed text-brand-muted">
                 {zoomFree
                   ? "Black is our house thread. Selected by default — dispatches within the standard lead time."
-                  : `Custom colour-matched thread for your belt. Adds ${formatPrice(threadDeltaIdr, currency)} to the unit price and 2 working days to dispatch while we stitch your order to spec.`}
+                  : `Custom colour-matched thread for your belt. Adds ${formatPriceForRegion(threadDeltaIdr, currency, country)} to the unit price and 2 working days to dispatch while we stitch your order to spec.`}
               </p>
 
               <div className="mt-2 grid grid-cols-2 gap-2">

@@ -21,6 +21,8 @@ import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/sup
 import { absolute, breadcrumbJsonLd, BRAND } from "@/lib/seo";
 import { ScaffoldingTabs } from "./Tabs";
 import { SCAFFOLDING_TABS, resolveScaffoldingTab, type ScaffoldingTabId } from "./tabsConfig";
+import { cookies, headers } from "next/headers";
+import { getCountryFromRequest } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
 
@@ -197,7 +199,7 @@ export async function generateMetadata({
   const active = resolveScaffoldingTab(tab);
   const t = SCAFFOLDING_TABS.find((x) => x.id === active)!;
   const title = `Scaffolding · ${t.label}`;
-  const description = `${t.hint} — from ${BRAND.name}. Free UK delivery on belts; flat £20 elsewhere via EMS Air Mail.`;
+  const description = `${t.hint} — from ${BRAND.name}. Delivery quoted by the Hammerex team within 24 hours of checkout.`;
   // Canonical to the base URL (no ?tab) so search engines don't fragment ranking.
   return {
     title,
@@ -232,6 +234,7 @@ export default async function ScaffoldingShopPage({
   if (!category) notFound();
 
   const products = await loadProductsForTab(active);
+  const country = getCountryFromRequest(await headers(), await cookies());
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: "/" },
     { name: category.name, url: "/c/scaffolding" }
@@ -268,7 +271,7 @@ export default async function ScaffoldingShopPage({
           </p>
         </section>
       ) : (
-        <ProductRow items={products} hideHeader layout="landscape" />
+        <ProductRow items={products} hideHeader layout="landscape" country={country} />
       )}
 
       <DeliveryFooter />

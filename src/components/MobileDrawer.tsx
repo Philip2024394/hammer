@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { LocaleSwitcher } from "./LocaleSwitcher";
+import { useT } from "./LocaleProvider";
 
 const TRADES: { slug: string; label: string }[] = [
   { slug: "plastering", label: "Plastering" },
@@ -29,6 +31,7 @@ const UTILITY: { href: string; label: string }[] = [
 ];
 
 export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useT();
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -86,6 +89,11 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
               </li>
             ))}
           </ul>
+
+          <p className="mt-6 text-xs font-bold uppercase tracking-widest text-brand-accent">{t("common.languageSwitcherLabel")}</p>
+          <div className="mt-3">
+            <LocaleSwitcher compact />
+          </div>
 
           <p className="mt-6 text-xs font-bold uppercase tracking-widest text-brand-accent">About</p>
           <ul className="mt-3 flex flex-col gap-1">

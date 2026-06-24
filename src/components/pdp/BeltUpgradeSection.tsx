@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import type { BeltUpgradeConfig, BeltUpgradeOption, BeltUpgradeOptionId } from "@/lib/beltUpgrade";
 import { CollapsibleSection } from "./CollapsibleSection";
 
@@ -21,6 +22,7 @@ export function BeltUpgradeSection({
   onSelect: (next: BeltUpgradeOptionId | null) => void;
   currency: Currency;
 }) {
+  const country = useCountry();
   const [openDetails, setOpenDetails] = useState<BeltUpgradeOption | null>(null);
 
   // Esc-to-close + body scroll lock while the popup is open.
@@ -48,7 +50,7 @@ export function BeltUpgradeSection({
       title={config.title}
       selectedLabel={
         activeLabel
-          ? `Selected: ${activeLabel} · +${formatPrice(activePrice, currency)}`
+          ? `Selected: ${activeLabel} · +${formatPriceForRegion(activePrice, currency, country)}`
           : "Optional · standard belt included by default"
       }
       closeOnSelection={selected}
@@ -99,7 +101,7 @@ export function BeltUpgradeSection({
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-sm font-semibold text-brand-text">{opt.label}</span>
                   <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold text-brand-accent">
-                    +{formatPrice(opt.priceIdr, currency)}
+                    +{formatPriceForRegion(opt.priceIdr, currency, country)}
                   </span>
                 </div>
                 <p className="text-xs leading-relaxed text-brand-muted">{opt.oneLine}</p>
@@ -180,7 +182,7 @@ export function BeltUpgradeSection({
 
             <footer className="flex items-center justify-between gap-3 border-t border-brand-line bg-brand-surface px-5 py-3">
               <span className="text-sm font-bold text-brand-text">
-                +{formatPrice(openDetails.priceIdr, currency)} <span className="text-xs font-medium text-brand-muted">upgrade</span>
+                +{formatPriceForRegion(openDetails.priceIdr, currency, country)} <span className="text-xs font-medium text-brand-muted">upgrade</span>
               </span>
               <button
                 type="button"

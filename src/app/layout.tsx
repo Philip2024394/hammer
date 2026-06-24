@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { cookies, headers } from "next/headers";
 import "./globals.css";
 import { BRAND, SEO_KEYWORDS, siteUrl, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { CompareDock } from "@/components/CompareDock";
 import { TradeTipFooter } from "@/components/TradeTipFooter";
 import { WelcomePopup } from "@/components/WelcomePopup";
 import { GeoBridge } from "@/components/GeoBridge";
+import { CountryProvider } from "@/components/CountryProvider";
+import { LocaleProvider } from "@/components/LocaleProvider";
+import { getCountryFromRequest } from "@/lib/geo";
+import { getLocale } from "@/lib/i18n/server";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -66,9 +71,11 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const country = getCountryFromRequest(await headers(), await cookies());
+  const locale = await getLocale();
   return (
-    <html lang="en-GB">
+    <html lang={locale}>
       <body className="min-h-screen bg-brand-bg pb-[calc(56px+env(safe-area-inset-bottom))] text-brand-text antialiased md:pb-0">
         <script
           type="application/ld+json"
@@ -78,11 +85,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
         />
-        {children}
-        <GeoBridge />
-        <TradeTipFooter />
-        <CompareDock />
-        <WelcomePopup />
+        <CountryProvider country={country}>
+          <LocaleProvider locale={locale}>
+            {children}
+            <GeoBridge />
+            <TradeTipFooter />
+            <CompareDock />
+            <WelcomePopup />
+          </LocaleProvider>
+        </CountryProvider>
       </body>
     </html>
   );

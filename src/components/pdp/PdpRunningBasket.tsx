@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { cart, type CartLine } from "@/lib/cart";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { threadColorLabel } from "@/lib/threadColor";
 import type { HammerexProduct } from "@/lib/supabase";
 
@@ -30,6 +31,7 @@ export function PdpRunningBasket({
   // Upper bound for the standard row's qty. Falls back to 99 when not set.
   stockCap?: number | null;
 }) {
+  const country = useCountry();
   const [lines, setLines] = useState<CartLine[]>([]);
   // Local-only flag: lets the buyer dismiss the standard "current product"
   // row without affecting the actual cart. Resets on a fresh page load.
@@ -79,7 +81,7 @@ export function PdpRunningBasket({
               <span className="text-xs text-brand-muted">Standard · this page</span>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-bold text-brand-text">
-                  {formatPrice(unitPriceIdr * qty, currency)}
+                  {formatPriceForRegion(unitPriceIdr * qty, currency, country)}
                 </span>
                 <div className="inline-flex items-center gap-1.5">
                   <button
@@ -145,7 +147,7 @@ export function PdpRunningBasket({
                 )}
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs font-bold text-brand-text">
-                    {formatPrice(l.unitPriceIdr * l.qty, lineCurrency)}
+                    {formatPriceForRegion(l.unitPriceIdr * l.qty, lineCurrency, country)}
                   </span>
                   <div className="inline-flex items-center gap-1.5">
                     <button
@@ -217,7 +219,7 @@ export function PdpRunningBasket({
       <div className="mt-4 flex flex-col gap-3 border-t border-brand-line pt-3">
         <div className="flex items-baseline justify-between">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-muted">Total</span>
-          <span className="text-base font-bold text-brand-text">{formatPrice(subtotal, currency)}</span>
+          <span className="text-base font-bold text-brand-text">{formatPriceForRegion(subtotal, currency, country)}</span>
         </div>
         <p className="text-xs text-brand-muted">
           Dispatch / shipping confirmed by email or phone after checkout

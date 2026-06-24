@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { bundlePricing } from "@/lib/pricing";
 import { beltSizingFor } from "@/lib/beltSizes";
 import { cart } from "@/lib/cart";
@@ -20,6 +21,7 @@ export function BundleBlock({
   // so the block can live inside a narrower column (e.g. the PDP BuyColumn).
   inline?: boolean;
 }) {
+  const country = useCountry();
   if (!bundle?.items.length) return null;
   // Belt sizing is keyed by the anchor slug — only certain belt-set anchors
   // surface waist sizes (scaffolders-setup-kit etc.). When absent, the size
@@ -106,7 +108,7 @@ export function BundleBlock({
                 </span>
               </span>
               <span className="text-xs font-semibold uppercase tracking-widest opacity-80">
-                {bundle.items.length} products · bundle price {formatPrice(final, currency)}
+                {bundle.items.length} products · bundle price {formatPriceForRegion(final, currency, country)}
               </span>
             </span>
 
@@ -212,7 +214,7 @@ export function BundleBlock({
                         </div>
                         <div>
                           <div className="text-xs font-semibold text-brand-text">{item.product.name}</div>
-                          <div className="text-xs text-brand-muted">{formatPrice(item.product.price_idr, currency)}</div>
+                          <div className="text-xs text-brand-muted">{formatPriceForRegion(item.product.price_idr, currency, country)}</div>
                         </div>
                       </label>
                     </li>
@@ -220,13 +222,19 @@ export function BundleBlock({
                 </ul>
 
                 <aside className="flex flex-col gap-2 rounded-2xl border border-brand-line bg-brand-bg p-5">
-                  <div className="text-xs text-brand-muted">Original</div>
-                  <div className="text-sm text-brand-muted line-through">{formatPrice(original, currency)}</div>
+                  {shouldShowPrice(country) && (
+                    <>
+                      <div className="text-xs text-brand-muted">Original</div>
+                      <div className="text-sm text-brand-muted line-through">{formatPriceForRegion(original, currency, country)}</div>
+                    </>
+                  )}
                   <div className="mt-2 text-xs text-brand-muted">Bundle price</div>
-                  <div className="text-2xl font-bold text-brand-text">{formatPrice(final, currency)}</div>
-                  <div className="mt-1 inline-block rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">
-                    You save {formatPrice(savings, currency)}
-                  </div>
+                  <div className="text-2xl font-bold text-brand-text">{formatPriceForRegion(final, currency, country)}</div>
+                  {shouldShowPrice(country) && (
+                    <div className="mt-1 inline-block rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">
+                      You save {formatPriceForRegion(savings, currency, country)}
+                    </div>
+                  )}
                 </aside>
               </div>
             </div>
@@ -240,14 +248,18 @@ export function BundleBlock({
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="text-2xl font-bold text-brand-text sm:text-3xl">
-                {formatPrice(final * bundleQty, currency)}
+                {formatPriceForRegion(final * bundleQty, currency, country)}
               </span>
-              <span className="text-sm text-brand-muted line-through">
-                {formatPrice(original * bundleQty, currency)}
-              </span>
-              <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold text-brand-accent">
-                −{bundle.discount_pct}%
-              </span>
+              {shouldShowPrice(country) && (
+                <>
+                  <span className="text-sm text-brand-muted line-through">
+                    {formatPriceForRegion(original * bundleQty, currency, country)}
+                  </span>
+                  <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold text-brand-accent">
+                    −{bundle.discount_pct}%
+                  </span>
+                </>
+              )}
               {bundleQty > 1 && (
                 <span className="text-xs text-brand-muted">· bundle × {bundleQty}</span>
               )}

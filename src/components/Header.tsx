@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { CartCount } from "./CartCount";
 import { MobileDrawer } from "./MobileDrawer";
 import { SearchBar } from "./SearchBar";
+import { LocaleSwitcher } from "./LocaleSwitcher";
+import { useT } from "./LocaleProvider";
 
 export function Header() {
+  const t = useT();
   const [drawer, setDrawer] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -35,13 +38,23 @@ export function Header() {
 
           <div className="hidden flex-1 sm:block">
             <SearchBar id="search" />
+            <div className="mt-1 flex items-center gap-3 text-[13px] text-brand-muted">
+              <a href="/guides" className="font-semibold text-brand-accent hover:underline">
+                Guides →
+              </a>
+              <span className="text-brand-muted/70">Trade reads from the workshop</span>
+            </div>
           </div>
 
           <div className="flex-1 sm:hidden" />
 
+          <div className="hidden shrink-0 sm:block">
+            <LocaleSwitcher />
+          </div>
+
           <a
             href="/cart"
-            aria-label="Cart"
+            aria-label={t("nav.cart")}
             className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-surface text-brand-text transition hover:border-brand-accent active:scale-95"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -55,7 +68,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setDrawer(true)}
-            aria-label="Open menu"
+            aria-label={t("nav.openMenu")}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-surface text-brand-text transition hover:border-brand-accent hover:text-brand-accent active:scale-95"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -68,6 +81,12 @@ export function Header() {
 
         <div className="border-t border-brand-line bg-brand-bg/95 px-3 py-2 sm:hidden">
           <SearchBar id="search-m" mobile />
+          <div className="mt-1 flex items-center gap-3 text-[13px] text-brand-muted">
+            <a href="/guides" className="font-semibold text-brand-accent hover:underline">
+              Guides →
+            </a>
+            <span className="text-brand-muted/70">Trade reads from the workshop</span>
+          </div>
         </div>
       </header>
 

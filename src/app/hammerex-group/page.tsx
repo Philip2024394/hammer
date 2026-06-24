@@ -119,9 +119,10 @@ export default function HammerexGroupPage() {
             Our retail range covers more than thirty trade categories — from scaffolding,
             plastering and carpentry to electrical, metal fabrication and joinery. We are
             actively building out international wholesale partnerships in protected
-            territories. Direct retail orders to UK, USA and Australia ship via EMS Air
-            Mail (£28 on £30–£49 carts · £20 flat once you reach £50 · 4–5 working days dispatch · ~5–7 days air freight transit · sea freight ~3–4 weeks, varies by country).
-            Other destinations are quoted by the Hammerex team by email or phone after checkout.
+            territories. Delivery on every order is quoted by the Hammerex team within
+            24 hours of checkout — one combined rate for the whole order, never per
+            item (4–5 working days dispatch · ~5–7 days air freight transit · sea
+            freight ~3–4 weeks, varies by country).
           </Block>
 
           <Block title="Our aim" eyebrow="What we are building toward">

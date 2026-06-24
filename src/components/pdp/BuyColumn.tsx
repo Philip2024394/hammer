@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CURRENCIES, CURRENCY_FLAGS, formatPrice, formatPriceOrQuote, type Currency } from "@/lib/fx";
+import { CURRENCIES, CURRENCY_FLAGS, formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { effectivePricePerUnit } from "@/lib/pricing";
 import { cart } from "@/lib/cart";
 import { sparkBurst } from "@/lib/sparks";
@@ -61,6 +62,7 @@ export function BuyColumn({
   beltAddOns?: HammerexProduct[] | null;
 }) {
   const [overviewView, setOverviewView] = useState<"description" | "specs" | "features">("description");
+  const country = useCountry();
   const variantCtx = useVariant();
   const dealCtx = useDeal();
   const activeVariant = variantCtx?.active ?? null;
@@ -91,7 +93,7 @@ export function BuyColumn({
   // The shipping panel & locale-flavoured copy follow the *selected* currency,
   // not raw geo — buyers viewing in GBP shouldn't see Indonesia copy, etc.
   const CURRENCY_TO_COUNTRY: Record<Currency, string> = {
-    GBP: "GB", USD: "US", EUR: "DE", AUD: "AU", SGD: "SG", IDR: "ID"
+    GBP: "GB", USD: "US", EUR: "DE", AUD: "AU", SGD: "SG", IDR: "ID", MYR: "MY", VND: "VN"
   };
   const effectiveLocale: CountryLocaleHint = useMemo(
     () => localeHintFor(CURRENCY_TO_COUNTRY[currency]),
@@ -342,10 +344,10 @@ export function BuyColumn({
               upgrades (belt swap, thread colour, branding, trade cover) or
               picks a multi-buy deal. unitPrice already folds the deal /
               tier discounts in via basePrice. */}
-          <span className="text-xl font-bold text-brand-text">{formatPriceOrQuote(unitPrice, currency)}</span>
-          {activeDeal && dealPct > 0 && (
+          <span className="text-xl font-bold text-brand-text">{formatPriceForRegion(unitPrice, currency, country)}</span>
+          {activeDeal && dealPct > 0 && shouldShowPrice(country) && (
             <>
-              <span className="text-sm text-brand-muted line-through">{formatPrice(variantBaseIdr * activeDeal.qty, currency)}</span>
+              <span className="text-sm text-brand-muted line-through">{formatPriceForRegion(variantBaseIdr * activeDeal.qty, currency, country)}</span>
               <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{dealPct}%</span>
             </>
           )}
@@ -527,8 +529,8 @@ export function BuyColumn({
           ? palette.find((c) => c.value === threadColor)?.label ?? null
           : null;
         const selectedLabel = activeLabel
-          ? `Selected: ${activeLabel}${threadCharged ? ` · +${formatPrice(threadDelta, currency)}` : " · standard"}`
-          : `Black free · others +${formatPrice(threadDelta, currency)}`;
+          ? `Selected: ${activeLabel}${threadCharged ? ` · +${formatPriceForRegion(threadDelta, currency, country)}` : " · standard"}`
+          : `Black free · others +${formatPriceForRegion(threadDelta, currency, country)}`;
         return (
           <CollapsibleSection title="Thread colour" selectedLabel={selectedLabel} closeOnSelection={threadColor}>
             <ThreadColorPicker
@@ -547,8 +549,8 @@ export function BuyColumn({
           title="Your company brand name"
           selectedLabel={
             brandingActive
-              ? `Selected: "${brandingName.trim()}" · +${formatPrice(brandingConfig.priceIdr, currency)}`
-              : `Optional · +${formatPrice(brandingConfig.priceIdr, currency)} each`
+              ? `Selected: "${brandingName.trim()}" · +${formatPriceForRegion(brandingConfig.priceIdr, currency, country)}`
+              : `Optional · +${formatPriceForRegion(brandingConfig.priceIdr, currency, country)} each`
           }
           // Do NOT auto-close once branding is enabled — the buyer still
           // needs the company-name input visible to type their brand name.
@@ -571,8 +573,8 @@ export function BuyColumn({
           title="Hammerex Pro Trade Cover"
           selectedLabel={
             repairCoverActive
-              ? `Added: 3 years of trade-grade servicing · +${formatPrice(repairCoverConfig.priceIdr, currency)}`
-              : `Optional · +${formatPrice(repairCoverConfig.priceIdr, currency)} one-off · 3 years`
+              ? `Added: 3 years of trade-grade servicing · +${formatPriceForRegion(repairCoverConfig.priceIdr, currency, country)}`
+              : `Optional · +${formatPriceForRegion(repairCoverConfig.priceIdr, currency, country)} one-off · 3 years`
           }
           closeOnSelection={repairCover}
         >
@@ -653,16 +655,18 @@ export function BuyColumn({
                 grows as the buyer adds quantity — the number they're about
                 to actually pay, not a static per-unit anchor. The per-unit
                 price moves to a smaller line below. */}
-            <span className="text-2xl font-bold text-brand-text">{formatPriceOrQuote(lineTotal, currency)}</span>
+            <span className="text-2xl font-bold text-brand-text">{formatPriceForRegion(lineTotal, currency, country)}</span>
             {activeDeal && dealPct > 0 ? (
               <>
-                <span className="text-sm text-brand-muted line-through">{formatPrice(variantBaseIdr * activeDeal.qty * qty, currency)}</span>
+                {shouldShowPrice(country) && (
+                  <span className="text-sm text-brand-muted line-through">{formatPriceForRegion(variantBaseIdr * activeDeal.qty * qty, currency, country)}</span>
+                )}
                 <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{dealPct}%</span>
               </>
             ) : (
               <>
-                {product.compare_at_idr && product.compare_at_idr > unitPrice && (
-                  <span className="text-sm text-brand-muted line-through">{formatPrice(product.compare_at_idr * qty, currency)}</span>
+                {shouldShowPrice(country) && product.compare_at_idr && product.compare_at_idr > unitPrice && (
+                  <span className="text-sm text-brand-muted line-through">{formatPriceForRegion(product.compare_at_idr * qty, currency, country)}</span>
                 )}
                 {savedPct > 0 && (
                   <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">−{savedPct}%</span>
@@ -675,11 +679,11 @@ export function BuyColumn({
           <div className="text-xs text-brand-muted">
             {qty > 1 ? (
               <>
-                {qty} × <span className="font-semibold text-brand-text">{formatPriceOrQuote(unitPrice, currency)}</span> per unit
+                {qty} × <span className="font-semibold text-brand-text">{formatPriceForRegion(unitPrice, currency, country)}</span> per unit
               </>
             ) : (
               <>
-                Per unit · <span className="font-semibold text-brand-text">{formatPriceOrQuote(unitPrice, currency)}</span>
+                Per unit · <span className="font-semibold text-brand-text">{formatPriceForRegion(unitPrice, currency, country)}</span>
               </>
             )}
           </div>
@@ -729,7 +733,7 @@ export function BuyColumn({
                   Shipping to {effectiveLocale.countryName || effectiveLocale.country}
                 </span>
                 <span className="text-xs text-brand-text">
-                  <span className="font-semibold">+{formatPrice(238270, currency)} air freight via EMS</span> · free for UK · 4–5 day dispatch · ~5–7 days air freight
+                  <span className="font-semibold">+{formatPriceForRegion(238270, currency, country)} air freight via EMS</span> · free for UK · 4–5 day dispatch · ~5–7 days air freight
                 </span>
               </div>
             </div>
@@ -774,7 +778,7 @@ export function BuyColumn({
               Backpack straps
             </span>
             <span className="text-xs text-brand-muted">
-              Standard carry free · add straps +{formatPrice(strapDelta, currency)}
+              Standard carry free · add straps +{formatPriceForRegion(strapDelta, currency, country)}
             </span>
           </div>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Backpack straps option">
@@ -799,7 +803,7 @@ export function BuyColumn({
               }`}
             >
               Add backpack straps
-              <span className="text-xs font-semibold text-brand-accent">+{formatPrice(strapDelta, currency)}</span>
+              <span className="text-xs font-semibold text-brand-accent">+{formatPriceForRegion(strapDelta, currency, country)}</span>
             </button>
           </div>
         </div>

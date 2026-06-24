@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { imageUrl } from "@/lib/imageUrl";
+import { useT } from "./LocaleProvider";
 
 type Suggestion = {
   id: string;
@@ -19,6 +20,7 @@ const MIN_CHARS = 2;
 
 export function SearchBar({ id, mobile = false }: { id: string; mobile?: boolean }) {
   const router = useRouter();
+  const t = useT();
   const [q, setQ] = useState("");
   const [items, setItems] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -109,25 +111,37 @@ export function SearchBar({ id, mobile = false }: { id: string; mobile?: boolean
         role="search"
       >
         <label className="sr-only" htmlFor={id}>Search products</label>
-        <input
-          id={id}
-          name="q"
-          type="search"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={onKeyDown}
-          placeholder="Search products…"
-          autoComplete="off"
-          aria-autocomplete="list"
-          aria-controls={`${id}-suggest`}
-          aria-expanded={showDropdown}
-          aria-activedescendant={highlight >= 0 ? `${id}-opt-${highlight}` : undefined}
-          className="h-11 w-full rounded-full border border-brand-line bg-brand-surface px-4 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
-        />
+        <div className="relative">
+          <input
+            id={id}
+            name="q"
+            type="search"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={onKeyDown}
+            placeholder={t("nav.searchPlaceholder")}
+            autoComplete="off"
+            aria-autocomplete="list"
+            aria-controls={`${id}-suggest`}
+            aria-expanded={showDropdown}
+            aria-activedescendant={highlight >= 0 ? `${id}-opt-${highlight}` : undefined}
+            className="h-11 w-full rounded-full border border-brand-line bg-brand-surface pl-4 pr-12 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+          />
+          <button
+            type="submit"
+            aria-label="Search"
+            className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-full bg-brand-accent text-black transition hover:opacity-90 active:scale-95"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
+        </div>
       </form>
 
       {showDropdown && (

@@ -5,7 +5,7 @@ import { ProductRow } from "@/components/ProductRow";
 import { supabase, type HammerexProduct, type HammerexCategory } from "@/lib/supabase";
 import { logSearchQuery } from "@/lib/track";
 import { cookies, headers } from "next/headers";
-import { HX_COUNTRY_COOKIE } from "@/lib/geo";
+import { HX_COUNTRY_COOKIE, getCountryFromRequest } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +85,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     category: p.category_id ? cats.get(p.category_id) ?? null : null
   })) as HammerexProduct[];
 
+  const country = getCountryFromRequest(await headers(), await cookies());
+
   return (
     <main className="pb-12">
       <Header />
@@ -107,7 +109,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       </section>
 
       {query && items.length > 0 && (
-        <ProductRow items={items} title="" hideHeader />
+        <ProductRow items={items} title="" hideHeader country={country} />
       )}
 
       {query && items.length === 0 && (

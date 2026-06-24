@@ -1,6 +1,7 @@
 "use client";
 
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { imageUrl } from "@/lib/imageUrl";
 import type { HammerexProduct } from "@/lib/supabase";
 import { CollapsibleSection } from "./CollapsibleSection";
@@ -21,6 +22,7 @@ export function BeltAddOnSection({
   onToggle: (id: string, next: boolean) => void;
   currency: Currency;
 }) {
+  const country = useCountry();
   if (options.length === 0) return null;
 
   const summary = options.filter((o) => selected.has(o.id));
@@ -63,7 +65,7 @@ export function BeltAddOnSection({
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="text-sm font-bold text-brand-text">{belt.name}</span>
                     <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">
-                      +{formatPrice(belt.price_idr, currency)}
+                      +{formatPriceForRegion(belt.price_idr, currency, country)}
                     </span>
                   </div>
                   {belt.sku && (

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import type { CustomBrandingConfig } from "@/lib/customBranding";
 
 // Renders the "Your Company Brand Name" upsell in the BuyColumn — sits next
@@ -24,6 +25,7 @@ export function CustomBrandingSection({
   onNameChange: (next: string) => void;
   currency: Currency;
 }) {
+  const country = useCountry();
   const [zoom, setZoom] = useState(false);
   // Whether the company-name input has received focus yet. Used to flash
   // the input with the rim-flash animation until the buyer taps it.
@@ -76,7 +78,7 @@ export function CustomBrandingSection({
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <span className="text-sm font-bold text-brand-text">Your company brand name</span>
           <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">
-            +{formatPrice(config.priceIdr, currency)} each · artwork included
+            +{formatPriceForRegion(config.priceIdr, currency, country)} each · artwork included
           </span>
         </div>
         <p className="text-xs leading-relaxed text-brand-muted">

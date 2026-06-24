@@ -15,7 +15,7 @@ export const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   US: "USD", CA: "USD",
   AU: "AUD", NZ: "AUD",
   SG: "SGD",
-  ID: "IDR",
+  ID: "IDR", MY: "MYR", VN: "VND",
   // Eurozone — everyone else falls through to GBP default below
   DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", NL: "EUR", BE: "EUR",
   PT: "EUR", AT: "EUR", FI: "EUR", GR: "EUR", LU: "EUR",
@@ -103,7 +103,8 @@ export function localeHintFor(country: string | null | undefined): CountryLocale
 
 const COUNTRY_FLAGS: Record<string, string> = {
   GB: "\u{1F1EC}\u{1F1E7}", US: "\u{1F1FA}\u{1F1F8}", AU: "\u{1F1E6}\u{1F1FA}",
-  SG: "\u{1F1F8}\u{1F1EC}", ID: "\u{1F1EE}\u{1F1E9}", DE: "\u{1F1E9}\u{1F1EA}",
+  SG: "\u{1F1F8}\u{1F1EC}", ID: "\u{1F1EE}\u{1F1E9}", MY: "\u{1F1F2}\u{1F1FE}",
+  VN: "\u{1F1FB}\u{1F1F3}", DE: "\u{1F1E9}\u{1F1EA}",
   FR: "\u{1F1EB}\u{1F1F7}", IT: "\u{1F1EE}\u{1F1F9}", ES: "\u{1F1EA}\u{1F1F8}",
   NL: "\u{1F1F3}\u{1F1F1}", IE: "\u{1F1EE}\u{1F1EA}", CA: "\u{1F1E8}\u{1F1E6}",
   NZ: "\u{1F1F3}\u{1F1FF}", BE: "\u{1F1E7}\u{1F1EA}", PT: "\u{1F1F5}\u{1F1F9}",
@@ -113,7 +114,8 @@ const COUNTRY_FLAGS: Record<string, string> = {
 
 const COUNTRY_NAMES: Record<string, string> = {
   GB: "United Kingdom", US: "United States", AU: "Australia",
-  SG: "Singapore", ID: "Indonesia", DE: "Germany", FR: "France",
+  SG: "Singapore", ID: "Indonesia", MY: "Malaysia", VN: "Vietnam",
+  DE: "Germany", FR: "France",
   IT: "Italy", ES: "Spain", NL: "Netherlands", IE: "Ireland",
   CA: "Canada", NZ: "New Zealand", BE: "Belgium", PT: "Portugal",
   AT: "Austria", FI: "Finland", GR: "Greece", LU: "Luxembourg",

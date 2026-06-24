@@ -1,6 +1,7 @@
 "use client";
 
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import type { RepairCoverConfig } from "@/lib/repairCover";
 
 // Hammerex Pro Trade Cover toggle. Sits next to the custom-branding upsell
@@ -17,6 +18,7 @@ export function RepairCoverSection({
   onToggle: (next: boolean) => void;
   currency: Currency;
 }) {
+  const country = useCountry();
   return (
     <div className="rounded-xl border border-brand-line bg-black/40 p-3">
       <label className="flex cursor-pointer items-start gap-3">
@@ -31,7 +33,7 @@ export function RepairCoverSection({
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-sm font-bold text-brand-text">Hammerex Pro Trade Cover</span>
             <span className="rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-semibold text-brand-accent">
-              +{formatPrice(config.priceIdr, currency)} · one-off
+              +{formatPriceForRegion(config.priceIdr, currency, country)} · one-off
             </span>
           </div>
           <p className="text-xs leading-relaxed text-brand-muted">

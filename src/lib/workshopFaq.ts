@@ -29,7 +29,7 @@ export const WORKSHOP_FAQ: WorkshopFaqItem[] = [
   },
   {
     q: "Does Hammerex offer custom company branding on belts?",
-    a: "Yes — most leather belts and tool pouches can be laser-printed with your company name and logo for +£10 per item. Open the \"Your company brand name\" slider on the product page; our admin confirms artwork with you by email or phone and sends a mock-up for approval before production starts."
+    a: "Yes — most leather belts and tool pouches can be laser-printed with your company name and logo for a small per-item branding charge. Open the \"Your company brand name\" slider on the product page; our admin confirms the upcharge and the artwork with you by email or phone and sends a mock-up for approval before production starts."
   },
   {
     q: "What is the Hammerex Pro Trade Cover?",

@@ -21,7 +21,8 @@ const TABLES = [
   { table: 'hammerex_categories',       col: 'image_url' },
   { table: 'hammerex_categories',       col: 'card_image_url' },
   { table: 'hammerex_what_in_box',      col: 'image_url' },
-  { table: 'hammerex_product_deals',    col: 'banner_url' }
+  { table: 'hammerex_product_deals',    col: 'banner_url' },
+  { table: 'hammerex_guides',           col: 'hero_image_url' }
 ];
 
 // 1. Collect every distinct ImageKit URL across all tables on the new project.

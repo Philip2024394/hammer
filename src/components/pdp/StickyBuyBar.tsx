@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatPrice } from "@/lib/fx";
+import { formatPriceForRegion } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import type { HammerexProduct } from "@/lib/supabase";
 import { useVariant } from "./VariantContext";
 import { cart } from "@/lib/cart";
 
 export function StickyBuyBar({ product, image }: { product: HammerexProduct; image: string | null }) {
+  const country = useCountry();
   const variantCtx = useVariant();
   const activeVariant = variantCtx?.active ?? null;
   const displayImage = activeVariant?.image_url ?? image;
@@ -68,7 +70,7 @@ export function StickyBuyBar({ product, image }: { product: HammerexProduct; ima
           </span>
           <span className="truncate text-xs text-brand-muted">
             {displaySku && <span className="font-semibold text-brand-accent">Ref: {displaySku} · </span>}
-            {formatPrice(displayPriceIdr, "IDR")}
+            {formatPriceForRegion(displayPriceIdr, "IDR", country)}
           </span>
         </div>
         <button

@@ -4,14 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { cart, type CartLine } from "@/lib/cart";
-import { formatPrice } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, QUOTE_AT_CHECKOUT_LABEL } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { threadColorLabel } from "@/lib/threadColor";
 import { WelcomeExitIntent } from "@/components/WelcomeExitIntent";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
 import { PreCheckoutModal } from "@/components/cart/PreCheckoutModal";
+import { useT } from "@/components/LocaleProvider";
 
 export default function CartPage() {
   const router = useRouter();
+  const country = useCountry();
+  const t = useT();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -33,7 +37,7 @@ export default function CartPage() {
       <Header />
       <TrackPageEvent eventType="cart_view" />
       <section className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-3 text-2xl font-bold text-brand-text">Your cart</h1>
+        <h1 className="mb-3 text-2xl font-bold text-brand-text">{t("cart.title")}</h1>
 
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
           <span aria-hidden className="text-base">🚚</span>
@@ -52,11 +56,11 @@ export default function CartPage() {
 
         {!ready ? null : lines.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-brand-line bg-brand-surface p-12 text-center">
-            <p className="text-sm text-brand-text">Your cart is empty.</p>
+            <p className="text-sm text-brand-text">{t("cart.empty")}</p>
             <a
               href="/"
               className="mt-4 inline-flex h-11 items-center rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90"
-            >Continue shopping</a>
+            >{t("cart.emptyCta")}</a>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
@@ -118,15 +122,15 @@ export default function CartPage() {
                         <div className="text-sm font-bold text-brand-text">
                           {l.unitPriceIdr === 0
                             ? l.variantLabel === "WELCOME GIFT"
-                              ? <span className="text-brand-accent">FREE</span>
-                              : <span className="text-brand-accent">Quoted at checkout</span>
+                              ? <span className="text-brand-accent">{t("common.free")}</span>
+                              : <span className="text-brand-accent">{QUOTE_AT_CHECKOUT_LABEL}</span>
                             : l.baseCurrency && l.baseCurrency !== "IDR"
-                              ? formatPrice(l.unitPriceIdr * l.qty, l.baseCurrency as any)
-                              : formatPrice(l.unitPriceIdr * l.qty, "IDR")}
+                              ? formatPriceForRegion(l.unitPriceIdr * l.qty, l.baseCurrency as any, country)
+                              : formatPriceForRegion(l.unitPriceIdr * l.qty, "IDR", country)}
                         </div>
-                        {l.qty > 1 && l.unitPriceIdr > 0 && (
+                        {l.qty > 1 && l.unitPriceIdr > 0 && shouldShowPrice(country) && (
                           <div className="text-xs text-brand-muted">
-                            {l.qty} × {formatPrice(l.unitPriceIdr, "IDR")}
+                            {l.qty} × {formatPriceForRegion(l.unitPriceIdr, "IDR", country)}
                           </div>
                         )}
                       </div>
@@ -140,17 +144,17 @@ export default function CartPage() {
               <h2 className="text-sm font-semibold text-brand-text">Summary</h2>
               <dl className="mt-4 space-y-2">
                 <div className="flex justify-between text-xs text-brand-muted">
-                  <dt>Items subtotal ({lines.reduce((s, l) => s + l.qty, 0)})</dt>
-                  <dd className="text-brand-text">{formatPrice(subtotal, "IDR")}</dd>
+                  <dt>{t("cart.itemsSubtotal")} ({lines.reduce((s, l) => s + l.qty, 0)})</dt>
+                  <dd className="text-brand-text">{shouldShowPrice(country) ? formatPriceForRegion(subtotal, "IDR", country) : <span className="text-brand-accent">{t("cart.quoteRequestedAtCheckout")}</span>}</dd>
                 </div>
                 <div className="flex justify-between text-xs text-brand-muted">
-                  <dt>Delivery</dt>
-                  <dd className="text-brand-accent">Quoted within 24h</dd>
+                  <dt>{t("cart.delivery")}</dt>
+                  <dd className="text-brand-accent">{t("cart.deliveryQuoted")}</dd>
                 </div>
-                {dominantCurrency !== "IDR" && (
+                {shouldShowPrice(country) && dominantCurrency !== "IDR" && (
                   <div className="flex justify-between text-xs text-brand-muted">
-                    <dt>Indicative items total</dt>
-                    <dd className="text-brand-accent">{formatPrice(subtotal, dominantCurrency)}</dd>
+                    <dt>{t("cart.indicativeTotal")}</dt>
+                    <dd className="text-brand-accent">{formatPriceForRegion(subtotal, dominantCurrency, country)}</dd>
                   </div>
                 )}
               </dl>
@@ -165,11 +169,11 @@ export default function CartPage() {
                 type="button"
                 onClick={() => setShowPreCheckout(true)}
                 className="grid h-12 w-full place-items-center rounded-full bg-brand-accent text-sm font-semibold text-black hover:opacity-90"
-              >Proceed to checkout</button>
+              >{t("cart.proceedToCheckout")}</button>
               <a
                 href="/"
                 className="mt-2 grid h-11 place-items-center rounded-full border border-brand-line bg-black text-xs font-semibold text-brand-text hover:border-brand-accent"
-              >Continue shopping</a>
+              >{t("cart.emptyCta")}</a>
               {confirmClear ? (
                 <div className="mt-2 rounded-full border border-brand-line bg-black/40 p-1.5">
                   <div className="grid grid-cols-2 gap-1.5">
@@ -177,12 +181,12 @@ export default function CartPage() {
                       type="button"
                       onClick={() => setConfirmClear(false)}
                       className="grid h-10 place-items-center rounded-full text-xs font-semibold text-brand-muted hover:text-brand-text"
-                    >Cancel</button>
+                    >{t("cart.cancel")}</button>
                     <button
                       type="button"
                       onClick={() => { cart.clear(); setConfirmClear(false); }}
                       className="grid h-10 place-items-center rounded-full bg-red-500/80 text-xs font-bold uppercase tracking-widest text-white hover:opacity-90"
-                    >Confirm clear</button>
+                    >{t("cart.confirmClear")}</button>
                   </div>
                 </div>
               ) : (
@@ -190,7 +194,7 @@ export default function CartPage() {
                   type="button"
                   onClick={() => setConfirmClear(true)}
                   className="mt-2 grid h-11 w-full place-items-center rounded-full border border-brand-line text-xs font-semibold text-brand-muted hover:border-red-500/60 hover:text-red-300"
-                >Clear cart</button>
+                >{t("cart.clearCart")}</button>
               )}
             </aside>
           </div>
@@ -201,9 +205,11 @@ export default function CartPage() {
         <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-40 border-t border-brand-line bg-brand-bg/95 px-3 py-2 backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-4xl items-center gap-3">
             <div className="flex min-w-0 flex-1 flex-col">
-              <span className="text-xs text-brand-muted">{lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}</span>
+              <span className="text-xs text-brand-muted">{lines.reduce((s, l) => s + l.qty, 0)} {lines.reduce((s, l) => s + l.qty, 0) === 1 ? t("cart.item") : t("cart.items")}</span>
               <span className="truncate text-sm font-bold text-brand-text">
-                {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
+                {shouldShowPrice(country)
+                  ? (dominantCurrency !== "IDR" ? formatPriceForRegion(subtotal, dominantCurrency, country) : formatPriceForRegion(subtotal, "IDR", country))
+                  : <span className="text-brand-accent">{t("cart.quoteRequestedAtCheckout")}</span>}
               </span>
             </div>
             <button

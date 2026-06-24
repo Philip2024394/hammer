@@ -8,6 +8,8 @@ import { WelcomeTrigger } from "@/components/WelcomeTrigger";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
 import { absolute, breadcrumbJsonLd, categoryDescription, categoryTitle, collectionJsonLd, BRAND, SEO_KEYWORDS } from "@/lib/seo";
+import { cookies, headers } from "next/headers";
+import { getCountryFromRequest } from "@/lib/geo";
 
 // Category listing is ISR — bumps every 60s for catalogue edits.
 export const revalidate = 60;
@@ -144,6 +146,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   if (!data) notFound();
 
   const { category, products } = data;
+  const country = getCountryFromRequest(await headers(), await cookies());
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: "/" },
     { name: category.name, url: `/c/${category.slug}` }
@@ -177,7 +180,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         </nav>
       </section>
 
-      {products.length > 0 && <ProductRow items={products} hideHeader />}
+      {products.length > 0 && <ProductRow items={products} hideHeader country={country} />}
 
       <DeliveryFooter />
     </main>

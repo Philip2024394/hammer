@@ -41,6 +41,8 @@ function mockProduct(over: Partial<HammerexProduct>): HammerexProduct {
     backpack_straps_option_idr: null,
     is_universal: null,
     shipping_per_unit_idr: null,
+    price_idr_sea: 0,
+    free_shipping_sea: false,
     faq: null,
     ...over
   };

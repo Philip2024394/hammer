@@ -1,8 +1,11 @@
 "use client";
 
 import { HeaderIcon, Truck } from "./Icons";
-import { FLAT_SHIPPING_REGIONS } from "@/lib/shipping";
 
+// Owner rule (2026-06-23): no £-pegged shipping tiers shown to customers
+// — delivery is always quoted by the team after checkout for the whole
+// order as a single package. Stripe / upfront freight rules removed with
+// the same change.
 export function FreightSelector() {
   return (
     <fieldset>
@@ -11,18 +14,12 @@ export function FreightSelector() {
         Shipping method
       </legend>
       <div className="rounded-2xl border border-brand-accent bg-brand-accent/10 p-5">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full bg-brand-accent/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-accent">
-            {FLAT_SHIPPING_REGIONS}
-          </span>
-          <span className="text-sm font-bold text-brand-accent">EMS Air Mail</span>
-        </div>
-        <h3 className="mt-2 text-sm font-semibold text-brand-text">Two-tier shipping</h3>
+        <h3 className="text-sm font-semibold text-brand-text">Delivery quoted within 24 hours</h3>
         <ul className="mt-2 flex flex-col gap-1 text-xs text-brand-muted">
-          <li>· £28 shipping under £50</li>
-          <li>· £20 flat shipping once you reach £50</li>
-          <li>· Dispatch in 4–5 working days · ~5–7 days air freight · sea freight ~3–4 weeks</li>
-          <li>· Tracked end-to-end · other countries quoted by email or phone</li>
+          <li>· The Hammerex team calculates the best combined rate for your whole order as a single package — never per item.</li>
+          <li>· We reply by email or phone, usually within 24 hours.</li>
+          <li>· You only pay once you have seen and accepted the delivery quote.</li>
+          <li>· Dispatch in 4–5 working days from payment · tracked end-to-end.</li>
         </ul>
       </div>
     </fieldset>

@@ -1,7 +1,11 @@
-import { formatPrice } from "@/lib/fx";
+"use client";
+
+import { formatPriceForRegion } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import type { HammerexPairWith } from "@/lib/supabase";
 
 export function PairsWith({ pairs }: { pairs: HammerexPairWith[] }) {
+  const country = useCountry();
   if (!pairs.length) return null;
   return (
     <section id="pairs-with" className="border-t border-brand-line py-10">
@@ -26,7 +30,7 @@ export function PairsWith({ pairs }: { pairs: HammerexPairWith[] }) {
                 </a>
                 {p.reason && <p className="text-xs text-brand-muted">{p.reason}</p>}
                 <div className="mt-1 flex items-center justify-between">
-                  <span className="text-sm font-bold text-brand-text">{formatPrice(p.accessory.price_idr, "IDR")}</span>
+                  <span className="text-sm font-bold text-brand-text">{formatPriceForRegion(p.accessory.price_idr, "IDR", country)}</span>
                   <button
                     type="button"
                     className="h-10 rounded-full border border-brand-line bg-black px-4 text-xs font-semibold text-brand-text hover:border-brand-accent hover:text-brand-accent"

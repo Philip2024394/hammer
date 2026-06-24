@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { cart } from "@/lib/cart";
 import type { HammerexDealBreaker } from "@/lib/supabase";
 
@@ -39,6 +40,7 @@ export function DealBreakerDetailModal({
   onClose: () => void;
 }) {
   const variants = deal.variants;
+  const country = useCountry();
 
   const [activeVariantId, setActiveVariantId] = useState<string | null>(
     variants.find((v) => v.is_default)?.id ?? variants[0]?.id ?? null
@@ -179,12 +181,12 @@ export function DealBreakerDetailModal({
           <div className="mt-5 flex items-end justify-between gap-3">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-brand-text">{formatPrice(dealPrice, currency)}</span>
-                {rrp > dealPrice && (
-                  <span className="text-xs text-brand-muted line-through">{formatPrice(rrp, currency)}</span>
+                <span className="text-2xl font-bold text-brand-text">{formatPriceForRegion(dealPrice, currency, country)}</span>
+                {shouldShowPrice(country) && rrp > dealPrice && (
+                  <span className="text-xs text-brand-muted line-through">{formatPriceForRegion(rrp, currency, country)}</span>
                 )}
               </div>
-              {savedPct > 0 && (
+              {shouldShowPrice(country) && savedPct > 0 && (
                 <span className="mt-1 inline-block rounded-full bg-brand-accent/20 px-2 py-0.5 text-xs font-semibold text-brand-accent">
                   Save {savedPct}%
                 </span>
@@ -213,7 +215,7 @@ export function DealBreakerDetailModal({
             disabled={added || (variants.length > 0 && !activeVariant)}
             className="mt-5 grid h-12 w-full place-items-center rounded-full bg-brand-accent text-xs font-bold uppercase tracking-widest text-black hover:opacity-90 disabled:opacity-40"
           >
-            {added ? "Added to cart ✓" : `Add ${qty} to cart · ${formatPrice(dealPrice * qty, currency)}`}
+            {added ? "Added to cart ✓" : `Add ${qty} to cart · ${formatPriceForRegion(dealPrice * qty, currency, country)}`}
           </button>
         </div>
       </div>

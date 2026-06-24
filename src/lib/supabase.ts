@@ -57,6 +57,12 @@ export type HammerexProduct = {
   backpack_straps_option_idr: number | null;
   is_universal: boolean | null;
   shipping_per_unit_idr: number | null;
+  // SEA-only override price in IDR. Shown to ID/MY/VN visitors (with FX
+  // for MY/VN). 0 means "Quoted at checkout" — admin sets per product.
+  price_idr_sea: number;
+  // Display-only flag: when true, ID/MY/VN visitors see Rp 0 shipping
+  // (the FX-converted equivalent for MY/VN). Does not affect UK shipping.
+  free_shipping_sea: boolean;
   hide_from_upsell?: boolean;
   upsell_image_url?: string | null;
   compare_with?: string[] | null;
@@ -95,6 +101,8 @@ export type HammerexProductVariant = {
   label: string;
   sku: string | null;
   price_idr: number;
+  // SEA-only variant override. 0 = inherit parent's price_idr_sea.
+  price_idr_sea: number;
   image_url: string | null;
   model_number: string | null;
   stock_count: number | null;

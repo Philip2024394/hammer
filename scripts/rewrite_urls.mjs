@@ -17,7 +17,8 @@ const TABLES = [
   { table: 'hammerex_categories',       col: 'image_url' },
   { table: 'hammerex_categories',       col: 'card_image_url' },
   { table: 'hammerex_what_in_box',      col: 'image_url' },
-  { table: 'hammerex_product_deals',    col: 'banner_url' }
+  { table: 'hammerex_product_deals',    col: 'banner_url' },
+  { table: 'hammerex_guides',           col: 'hero_image_url' }
 ];
 
 let totalUpdated = 0;

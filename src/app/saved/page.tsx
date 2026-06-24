@@ -5,11 +5,13 @@ import { Header } from "@/components/Header";
 import { wishlist } from "@/lib/wishlist";
 import { supabase, type HammerexProduct, type HammerexCategory } from "@/lib/supabase";
 import { ProductRow } from "@/components/ProductRow";
+import { useCountry } from "@/components/CountryProvider";
 
 export default function SavedPage() {
   const [slugs, setSlugs] = useState<string[]>([]);
   const [products, setProducts] = useState<HammerexProduct[]>([]);
   const [ready, setReady] = useState(false);
+  const country = useCountry();
 
   useEffect(() => {
     const sync = () => setSlugs(wishlist.read());
@@ -64,7 +66,7 @@ export default function SavedPage() {
         )}
       </section>
 
-      {products.length > 0 && <ProductRow items={products} hideHeader />}
+      {products.length > 0 && <ProductRow items={products} hideHeader country={country} />}
     </main>
   );
 }

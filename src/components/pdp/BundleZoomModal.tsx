@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { HammerexProduct } from "@/lib/supabase";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { imageUrl } from "@/lib/imageUrl";
 
 // Returns the next Sunday 23:59:59 UTC as a JS Date. This is the brand-wide
@@ -55,6 +56,7 @@ export function BundleZoomModal({
   const [remaining, setRemaining] = useState<string>("");
   const [endsLocal, setEndsLocal] = useState<string>("");
   const closeRef = useRef<HTMLButtonElement>(null);
+  const country = useCountry();
 
   // Live countdown — recomputes every second from a single fixed
   // anchor (next Sunday midnight UTC). No randomness, no reset trickery.
@@ -154,12 +156,16 @@ export function BundleZoomModal({
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-black">{formatPrice(discounted, currency)}</span>
-            <span className="text-sm text-neutral-500 line-through">{formatPrice(product.price_idr, currency)}</span>
-            {discountPct > 0 && (
-              <span className="rounded-full bg-brand-accent px-2 py-0.5 text-xs font-bold text-black">
-                −{discountPct}%
-              </span>
+            <span className="text-2xl font-bold text-black">{formatPriceForRegion(discounted, currency, country)}</span>
+            {shouldShowPrice(country) && (
+              <>
+                <span className="text-sm text-neutral-500 line-through">{formatPriceForRegion(product.price_idr, currency, country)}</span>
+                {discountPct > 0 && (
+                  <span className="rounded-full bg-brand-accent px-2 py-0.5 text-xs font-bold text-black">
+                    −{discountPct}%
+                  </span>
+                )}
+              </>
             )}
           </div>
 

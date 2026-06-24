@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { GuideShareBar } from "@/components/guides/GuideShareBar";
 import { supabase, type HammerexGuide, type HammerexProduct } from "@/lib/supabase";
 import { absolute, articleJsonLd, breadcrumbJsonLd, BRAND, faqJsonLd } from "@/lib/seo";
 import { renderMarkdown } from "@/lib/mdRender";
-import { formatPrice } from "@/lib/fx";
+import { formatPriceForRegion } from "@/lib/fx";
+import { cookies, headers } from "next/headers";
+import { getCountryFromRequest } from "@/lib/geo";
 
 export const revalidate = 300;
 
@@ -58,13 +61,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: g.meta_description,
       url,
       siteName: BRAND.name,
-      images: [{ url: image, alt: g.title }]
+      images: [{ url: image, width: 1200, height: 630, alt: g.title }]
     },
     twitter: {
       card: "summary_large_image",
       title: g.title,
       description: g.meta_description,
-      images: [image]
+      images: [{ url: image, width: 1200, height: 630, alt: g.title }]
     }
   };
 }
@@ -74,6 +77,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
   const data = await loadGuide(slug);
   if (!data) notFound();
   const { guide, related } = data;
+  const country = getCountryFromRequest(await headers(), await cookies());
 
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: "/" },
@@ -110,9 +114,17 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
       </nav>
 
       <article className="mx-auto max-w-3xl px-4 pt-6 pb-10">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
-          Hammerex Guide
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+            Hammerex Guide
+          </p>
+          <a
+            href="/guides"
+            className="text-[13px] font-semibold text-brand-accent hover:underline"
+          >
+            Read more guides →
+          </a>
+        </div>
         <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
           {guide.title}
         </h1>
@@ -120,19 +132,27 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
 
         {guide.hero_image_url && (
           <figure className="mt-6 overflow-hidden rounded-2xl border border-brand-line bg-black">
-            {/* Natural aspect, full height — no forced 16:9 crop so portrait
-                or square artwork shows in full, not letterboxed. */}
+            {/* 1.91:1 frame matches the Facebook / LinkedIn / WhatsApp social-card
+                crop. `object-contain` keeps the entire banner visible inside the
+                frame — wider or taller artwork letterboxes against the black
+                background instead of getting cropped. For social shares, IG
+                (1:1, 4:5) and TikTok (9:16) crop centrally; keep the subject in
+                the middle 60% of the image to survive those crops. */}
             <img
               src={guide.hero_image_url}
               alt={guide.title}
               loading="lazy"
               decoding="async"
-              className="block h-auto w-full"
+              width={1200}
+              height={630}
+              className="block aspect-[1.91/1] h-auto w-full object-contain"
             />
           </figure>
         )}
 
         <div className="mt-2">{renderMarkdown(guide.body_md)}</div>
+
+        <GuideShareBar url={absolute(`/guides/${guide.slug}`)} title={guide.title} />
       </article>
 
       {related.length > 0 && (
@@ -166,7 +186,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
                           {p.name}
                         </span>
                         <span className="mt-auto pt-2 text-sm font-bold text-brand-accent">
-                          {formatPrice(p.price_idr, cur)}
+                          {formatPriceForRegion(p.price_idr, cur, country)}
                         </span>
                       </div>
                     </a>

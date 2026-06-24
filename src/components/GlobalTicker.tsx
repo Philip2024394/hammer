@@ -10,10 +10,9 @@ const DEFAULT_MESSAGES: { icon: string; text: string }[] = [
   { icon: "🚚", text: "FREE UK delivery via EMS on every order — typical 5–6 day transit." },
   { icon: "🌍", text: "Shipping worldwide — quote confirmed by the Hammerex team by email or phone after checkout." },
   { icon: "⚠",  text: "Higher order volume this week — admin will confirm exact dispatch times by email or phone." },
-  { icon: "🏭", text: "6 years of UK trade · now direct from the Yogyakarta factory — no middleman markup." },
+  { icon: "🏭", text: "15 years servicing trades across the UK · today the brand is in your hand." },
   { icon: "📦", text: "Buy 2 save 10% · Buy 3 save 15% — applied automatically at the quantity step." },
   { icon: "✍",  text: "Custom company branding on belt holders — artwork support included." },
-  { icon: "🛠", text: "Hammerex Pro Trade Cover — 3 years of repair service by the makers." },
   { icon: "🇬🇧", text: "Trade & bulk pricing — contact us via the Partners page for territory-protected wholesale." },
   { icon: "⚡", text: "Dispatched within 48 hours to the postal service · EMS air freight." },
   { icon: "🔧", text: "Designed in-house · stitched in-house · CCTV-recorded QC on every unit." }

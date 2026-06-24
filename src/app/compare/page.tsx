@@ -8,11 +8,13 @@ import {
   type HammerexProduct,
   type HammerexProductSpec
 } from "@/lib/supabase";
-import { formatPrice } from "@/lib/fx";
+import { formatPriceForRegion } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 
 type Loaded = { product: HammerexProduct; specs: HammerexProductSpec[] };
 
 export default function ComparePage() {
+  const country = useCountry();
   const [slugs, setSlugs] = useState<string[]>([]);
   const [rows, setRows] = useState<Loaded[]>([]);
   const [ready, setReady] = useState(false);
@@ -108,7 +110,7 @@ export default function ComparePage() {
                           )}
                         </div>
                         <div className="mt-2 text-sm font-bold text-brand-text hover:text-brand-accent">{r.product.name}</div>
-                        <div className="text-brand-accent">{formatPrice(r.product.price_idr, (r.product.base_currency as any) ?? "IDR")}</div>
+                        <div className="text-brand-accent">{formatPriceForRegion(r.product.price_idr, (r.product.base_currency as any) ?? "IDR", country)}</div>
                       </a>
                     </th>
                   ))}

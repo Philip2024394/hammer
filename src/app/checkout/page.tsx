@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { FieldIcon as _FieldIcon, Globe, HeaderIcon, Mail, MapPin, Phone, Receipt, Truck, User } from "@/components/checkout/Icons";
 import { cart, type CartLine } from "@/lib/cart";
-import { formatPrice } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, QUOTE_AT_CHECKOUT_LABEL } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { threadColorLabel } from "@/lib/threadColor";
 import { logQuoteClick } from "@/lib/quoteSignals";
 import { TrackPageEvent } from "@/components/TrackPageEvent";
+import { useT } from "@/components/LocaleProvider";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const t = useT();
+  const visitorCountry = useCountry();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
   const [name, setName] = useState("");
@@ -90,10 +94,10 @@ export default function CheckoutPage() {
       <main>
         <Header />
         <section className="mx-auto max-w-4xl px-4 py-8">
-          <h1 className="mb-6 text-2xl font-bold text-brand-text">Checkout</h1>
+          <h1 className="mb-6 text-2xl font-bold text-brand-text">{t("checkout.title")}</h1>
           <div className="rounded-2xl border border-dashed border-brand-line bg-brand-surface p-12 text-center">
-            <p className="text-sm text-brand-text">Your cart is empty.</p>
-            <a href="/" className="mt-4 inline-flex h-11 items-center rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90">Continue shopping</a>
+            <p className="text-sm text-brand-text">{t("cart.empty")}</p>
+            <a href="/" className="mt-4 inline-flex h-11 items-center rounded-full bg-brand-accent px-5 text-sm font-semibold text-black hover:opacity-90">{t("cart.emptyCta")}</a>
           </div>
         </section>
       </main>
@@ -107,20 +111,15 @@ export default function CheckoutPage() {
       <Header />
       <TrackPageEvent eventType="checkout_view" />
       <section className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="mb-2 text-2xl font-bold text-brand-text">Checkout</h1>
+        <h1 className="mb-2 text-2xl font-bold text-brand-text">{t("checkout.title")}</h1>
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand-accent/40 bg-brand-accent/5 p-4">
           <HeaderIcon icon={<Truck size={18} />} />
           <div>
             <p className="text-sm font-semibold text-brand-text">
-              Delivery is quoted by the Hammerex team — within 24 hours.
+              {t("checkout.banner")}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-              Fill in your details and press Quote me delivery — your order is submitted
-              straight to a team member at Hammerex. We calculate the
-              <span className="font-semibold text-brand-text"> best combined rate</span> for your whole
-              order as a single package — never per item — and reply by email or phone. You
-              only pay once you&rsquo;ve seen and accepted the delivery quote. Dispatch follows
-              3–5 working days after payment.
+              {t("checkout.bannerBody")}
             </p>
           </div>
         </div>
@@ -133,13 +132,13 @@ export default function CheckoutPage() {
             <fieldset className="flex flex-col gap-3">
               <legend className="mb-1 flex items-center gap-2 text-sm font-semibold text-brand-text">
                 <HeaderIcon icon={<User size={16} />} />
-                Your details
+                {t("checkout.yourDetails")}
               </legend>
-              <Field label="Full name"        icon={<User size={14} />}   value={name}     onChange={setName}     placeholder="John Smith" autoComplete="name" name="name" />
-              <Field label="Email"             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
-              <Field label="Phone number"     icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="phone" />
-              <Field label="Country"           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
-              <Field label="Delivery address" icon={<MapPin size={14} />} value={address} onChange={setAddress} placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
+              <Field label={t("checkout.fullName")}        icon={<User size={14} />}   value={name}     onChange={setName}     placeholder="John Smith" autoComplete="name" name="name" />
+              <Field label={t("checkout.email")}             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
+              <Field label={t("checkout.phone")}     icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="phone" />
+              <Field label={t("checkout.country")}           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
+              <Field label={t("checkout.deliveryAddress")} icon={<MapPin size={14} />} value={address} onChange={setAddress} placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
             </fieldset>
 
             {err && (
@@ -155,11 +154,11 @@ export default function CheckoutPage() {
                 formValid && !submitting ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
               }`}
             >
-              {submitting ? "Sending…" : "Quote me delivery →"}
+              {submitting ? t("checkout.sending") : t("checkout.quoteMeDelivery") + " →"}
             </button>
             {!formValid && lines.length > 0 && hasPaidLine && !submitting && (
               <p className="-mt-3 text-xs text-brand-muted">
-                Fill in every field above to enable the button.
+                {t("checkout.fillEveryField")}
               </p>
             )}
           </div>
@@ -167,7 +166,7 @@ export default function CheckoutPage() {
           <aside className="h-fit rounded-2xl border border-brand-line bg-brand-surface p-5">
             <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-brand-text">
               <HeaderIcon icon={<Receipt size={16} />} />
-              Order summary
+              {t("checkout.orderSummary")}
             </h2>
             <ul className="mb-4 flex flex-col gap-3">
               {lines.map((l) => (
@@ -181,25 +180,25 @@ export default function CheckoutPage() {
                     {l.threadColor && <div className="text-brand-muted">Thread: {threadColorLabel(l.threadColor)}</div>}
                     {l.backpackStraps && <div className="text-brand-accent">+ Backpack straps add-on</div>}
                     {l.variantLabel === "WELCOME GIFT" && <div className="font-bold uppercase tracking-widest text-brand-accent">🎁 Welcome gift</div>}
-                    <div className="text-brand-muted">{l.size ? `${l.size} · ` : ""}{l.qty}× {l.unitPriceIdr === 0 ? (l.variantLabel === "WELCOME GIFT" ? "FREE" : "Quoted at checkout") : formatPrice(l.unitPriceIdr, "IDR")}</div>
+                    <div className="text-brand-muted">{l.size ? `${l.size} · ` : ""}{l.qty}× {l.unitPriceIdr === 0 ? (l.variantLabel === "WELCOME GIFT" ? t("common.free") : QUOTE_AT_CHECKOUT_LABEL) : formatPriceForRegion(l.unitPriceIdr, "IDR", visitorCountry)}</div>
                   </div>
-                  <div className="text-xs font-semibold text-brand-text">{l.unitPriceIdr === 0 ? (l.variantLabel === "WELCOME GIFT" ? <span className="text-brand-accent">FREE</span> : <span className="text-brand-accent">Quoted at checkout</span>) : formatPrice(l.unitPriceIdr * l.qty, "IDR")}</div>
+                  <div className="text-xs font-semibold text-brand-text">{l.unitPriceIdr === 0 ? (l.variantLabel === "WELCOME GIFT" ? <span className="text-brand-accent">{t("common.free")}</span> : <span className="text-brand-accent">{QUOTE_AT_CHECKOUT_LABEL}</span>) : formatPriceForRegion(l.unitPriceIdr * l.qty, "IDR", visitorCountry)}</div>
                 </li>
               ))}
             </ul>
             <div className="border-t border-brand-line pt-3 text-xs">
               <div className="flex justify-between text-brand-muted">
                 <span>Items subtotal</span>
-                <span className="text-brand-text">{formatPrice(subtotal, "IDR")}</span>
+                <span className="text-brand-text">{shouldShowPrice(visitorCountry) ? formatPriceForRegion(subtotal, "IDR", visitorCountry) : <span className="text-brand-accent">Quote requested at checkout</span>}</span>
               </div>
               <div className="mt-1 flex justify-between text-brand-muted">
                 <span>Delivery</span>
                 <span className="text-brand-accent">Quoted within 24h</span>
               </div>
-              {dominantCurrency !== "IDR" && (
+              {shouldShowPrice(visitorCountry) && dominantCurrency !== "IDR" && (
                 <div className="mt-1 flex justify-between text-brand-muted">
                   <span>Indicative items total</span>
-                  <span className="text-brand-accent">{formatPrice(subtotal, dominantCurrency)}</span>
+                  <span className="text-brand-accent">{formatPriceForRegion(subtotal, dominantCurrency, visitorCountry)}</span>
                 </div>
               )}
             </div>
@@ -211,11 +210,11 @@ export default function CheckoutPage() {
                 formValid && !submitting ? "bg-brand-accent text-black hover:opacity-90" : "bg-brand-surface text-brand-muted border border-brand-line"
               }`}
             >
-              {submitting ? "Sending…" : "Quote me delivery"}
+              {submitting ? t("checkout.sending") : t("checkout.quoteMeDelivery")}
             </button>
             {!hasPaidLine && lines.length > 0 && (
               <p className="mt-2 rounded-xl border border-brand-accent/40 bg-brand-accent/10 p-2 text-xs text-brand-accent">
-                🎁 Your welcome gift comes with your first paid order — add at least one item to claim it.
+                🎁 {t("checkout.welcomeGiftAddPaid")}
               </p>
             )}
             <p className="mt-2 text-xs text-brand-muted">
@@ -229,11 +228,13 @@ export default function CheckoutPage() {
         <div className="mx-auto flex max-w-4xl items-center gap-3">
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-xs text-brand-muted">
-              {lines.reduce((s, l) => s + l.qty, 0)} item{lines.reduce((s, l) => s + l.qty, 0) === 1 ? "" : "s"}
+              {lines.reduce((s, l) => s + l.qty, 0)} {lines.reduce((s, l) => s + l.qty, 0) === 1 ? t("cart.item") : t("cart.items")}
               {" · delivery quoted within 24h"}
             </span>
             <span className="truncate text-sm font-bold text-brand-text">
-              {dominantCurrency !== "IDR" ? formatPrice(subtotal, dominantCurrency) : formatPrice(subtotal, "IDR")}
+              {shouldShowPrice(visitorCountry)
+                ? (dominantCurrency !== "IDR" ? formatPriceForRegion(subtotal, dominantCurrency, visitorCountry) : formatPriceForRegion(subtotal, "IDR", visitorCountry))
+                : <span className="text-brand-accent">Quote requested at checkout</span>}
             </span>
           </div>
           <button
@@ -243,7 +244,7 @@ export default function CheckoutPage() {
             className={`grid h-12 place-items-center rounded-full px-4 text-xs font-bold uppercase tracking-widest transition active:scale-[0.98] ${
               formValid && !submitting ? "bg-brand-accent text-black hover:opacity-90" : "border border-brand-line bg-brand-surface text-brand-muted"
             }`}
-          >{submitting ? "Sending…" : "Quote me delivery"}</button>
+          >{submitting ? t("checkout.sending") : t("checkout.quoteMeDelivery")}</button>
         </div>
       </div>
     </main>

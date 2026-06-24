@@ -18,6 +18,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <NavLink href="/admin">Overview</NavLink>
             <NavLink href="/admin/orders">Orders</NavLink>
             <NavLink href="/admin/product-requests">Projects</NavLink>
+            <NavLink href="/admin/trade-accounts">Trade Accounts</NavLink>
+            <NavLink href="/admin/trade-orders">Trade Orders</NavLink>
             <NavLink href="/admin/pricing">Pricing</NavLink>
             <NavLink href="/admin/reviews">Reviews</NavLink>
             <NavLink href="/admin/world">Live map</NavLink>

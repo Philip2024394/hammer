@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { BundleBlock } from "@/components/pdp/BundleBlock";
@@ -8,7 +9,8 @@ import {
   type HammerexBundle,
   type HammerexProduct
 } from "@/lib/supabase";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { getCountryFromRequest } from "@/lib/geo";
 import { bundlePricing } from "@/lib/pricing";
 import { BundlePageBackButton } from "@/components/pdp/BundlePageBackButton";
 
@@ -97,6 +99,8 @@ export default async function BundlePage({ params }: { params: Promise<{ slug: s
   // Honour the anchor product's base currency so a GBP-priced bundle doesn't
   // surprise the buyer by suddenly displaying in IDR.
   const currency: Currency = (anchor.base_currency as Currency | undefined) ?? "IDR";
+  const country = getCountryFromRequest(await headers(), await cookies());
+  const showPrices = shouldShowPrice(country);
 
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: "/" },
@@ -140,17 +144,21 @@ export default async function BundlePage({ params }: { params: Promise<{ slug: s
                 {bundle.title}
               </h1>
               <p className="mt-2 text-sm text-brand-muted">
-                {bundle.items.length} items · saves {formatPrice(savings, currency)} versus buying separately.{" "}
+                {bundle.items.length} items{showPrices ? ` · saves ${formatPriceForRegion(savings, currency, country)} versus buying separately` : ""}.{" "}
                 <a href={`/product/${anchor.slug ?? anchor.id}`} className="text-brand-accent hover:underline">
                   See the main product →
                 </a>
               </p>
             </div>
             <div className="shrink-0 rounded-xl border border-brand-line bg-brand-surface px-4 py-3 text-right">
-              <div className="text-xs text-brand-muted">Original</div>
-              <div className="text-sm text-brand-muted line-through">{formatPrice(original, currency)}</div>
+              {showPrices && (
+                <>
+                  <div className="text-xs text-brand-muted">Original</div>
+                  <div className="text-sm text-brand-muted line-through">{formatPriceForRegion(original, currency, country)}</div>
+                </>
+              )}
               <div className="mt-1 text-xs text-brand-muted">Bundle price</div>
-              <div className="text-xl font-bold text-brand-text">{formatPrice(final, currency)}</div>
+              <div className="text-xl font-bold text-brand-text">{formatPriceForRegion(final, currency, country)}</div>
             </div>
           </div>
         </div>

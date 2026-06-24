@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase, type HammerexProduct, type HammerexCategory } from "@/lib/supabase";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { imageUrl } from "@/lib/imageUrl";
 import { cart } from "@/lib/cart";
 import { BundleZoomModal } from "./BundleZoomModal";
@@ -38,6 +39,7 @@ export function RelatedUpsell({
   currentCategory: CategoryLite | null;
   categories: CategoryLite[];
 }) {
+  const country = useCountry();
   const [open, setOpen] = useState(false);
   const [zoomed, setZoomed] = useState<HammerexProduct | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string>(currentCategory?.slug ?? categories[0]?.slug ?? "");
@@ -252,8 +254,10 @@ export function RelatedUpsell({
                         <p className="line-clamp-1 text-xs text-neutral-600">{p.subtitle}</p>
                       )}
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-sm font-bold text-black">{formatPrice(discounted, currency)}</span>
-                        <span className="text-xs text-neutral-500 line-through">{formatPrice(p.price_idr, currency)}</span>
+                        <span className="text-sm font-bold text-black">{formatPriceForRegion(discounted, currency, country)}</span>
+                        {shouldShowPrice(country) && (
+                          <span className="text-xs text-neutral-500 line-through">{formatPriceForRegion(p.price_idr, currency, country)}</span>
+                        )}
                       </div>
                       <span className="inline-flex w-fit items-center gap-1 rounded-full bg-brand-accent/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-black">
                         Free shipping

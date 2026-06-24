@@ -52,7 +52,7 @@ export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
       },
       {
         q: "Do you ship tool belts to the UK and USA?",
-        a: "Yes. Flat £20 shipping to UK, USA and Australia with 4–5 working day dispatch and ~5–7 day air freight transit. Other destinations are quoted by email or phone."
+        a: "Yes — direct from our Yogyakarta workshop. Delivery is quoted by the Hammerex team within 24 hours of checkout: one combined rate for the whole order. 4–5 working day dispatch · ~5–7 day air freight transit to most countries."
       },
       {
         q: "How long does a Hammerex tool belt last?",

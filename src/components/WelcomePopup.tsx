@@ -124,7 +124,7 @@ export function WelcomePopup() {
         <div className="space-y-4 p-4">
           <div className="text-sm leading-relaxed text-brand-muted">
             <p className="text-brand-text">
-              First time here? Have a <span className="font-semibold text-brand-accent">free Hammerex Folding Safety Cutter Knife (£9.80 RRP)</span> on us — added straight to your cart with your first paid order, no code needed.
+              First time here? Have a <span className="font-semibold text-brand-accent">free Hammerex Folding Safety Cutter Knife</span> on us — added straight to your cart with your first paid order, no code needed.
             </p>
             <p className="mt-2">
               It's a cool knife — and most upcoming Hammerex products will have a dedicated pocket for this style of knife.

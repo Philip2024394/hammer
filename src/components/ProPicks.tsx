@@ -1,5 +1,7 @@
 import { supabase, type HammerexProduct, type HammerexCategory } from "@/lib/supabase";
 import { ProductRow } from "./ProductRow";
+import { cookies, headers } from "next/headers";
+import { getCountryFromRequest } from "@/lib/geo";
 
 // Surfaces the three flagship Pro Pick products. These are the brand's
 // signature trade-pro purchases — a single home-page row that gives the
@@ -14,21 +16,22 @@ const PRO_PICK_SLUGS = [
   "electrician-pro-pouch"
 ];
 
-// Electrician banner anchored to the Electrician Pro Pouch product. The card
-// shows a category-style banner image and routes to the /c/electrical grid
-// instead of the single-product PDP (the buyer should see the full range).
-const ELECTRICIAN_PICK_BANNER =
-  "https://ik.imagekit.io/9mrgsv2rp/ChatGPT%20Image%20Jun%2022,%202026,%2003_25_34%20AM.png?updatedAt=1782073557369";
+// Electrician banner is read from the `electrical` category's image_url so
+// future swaps are a one-line DB update — no code change, no deploy. The card
+// routes to the /c/electrical grid instead of the single-product PDP (the
+// buyer should see the full range).
 
 export async function ProPicks() {
   const [prodRes, catRes] = await Promise.all([
     supabase.from("hammerex_products").select("*").in("slug", PRO_PICK_SLUGS),
-    supabase.from("hammerex_categories").select("id, slug, name")
+    supabase.from("hammerex_categories").select("id, slug, name, image_url")
   ]);
-  const cats = new Map<string, { slug: string; name: string }>();
+  const cats = new Map<string, { slug: string; name: string; image_url: string | null }>();
   for (const c of (catRes.data ?? []) as HammerexCategory[]) {
-    cats.set(c.id, { slug: c.slug, name: c.name });
+    cats.set(c.id, { slug: c.slug, name: c.name, image_url: c.image_url });
   }
+  const electricianBanner =
+    (catRes.data ?? []).find((c) => c.slug === "electrical")?.image_url ?? null;
   const lookup = new Map<string, HammerexProduct>();
   for (const p of (prodRes.data ?? []) as HammerexProduct[]) {
     lookup.set(p.slug ?? "", { ...p, category: p.category_id ? cats.get(p.category_id) ?? null : null });
@@ -53,7 +56,7 @@ export async function ProPicks() {
       p.slug === "electrician-pro-pouch"
         ? {
             ...p,
-            image_url: ELECTRICIAN_PICK_BANNER,
+            image_url: electricianBanner ?? p.image_url,
             customHref: "/c/electrical",
             customCtaLabel: "Browse electrical"
           }
@@ -70,5 +73,6 @@ export async function ProPicks() {
           : p
     );
   if (products.length === 0) return null;
-  return <ProductRow items={products} title="Pro Picks" viewAllHref="/products" layout="landscape" />;
+  const country = getCountryFromRequest(await headers(), await cookies());
+  return <ProductRow items={products} title="Pro Picks" viewAllHref="/products" layout="landscape" country={country} />;
 }

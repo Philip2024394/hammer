@@ -6,6 +6,8 @@ import { CategoryGrid } from "@/components/CategoryGrid";
 import { SEO_LANDINGS, type SeoLandingConfig } from "@/lib/seoLandings";
 import { absolute, breadcrumbJsonLd, faqJsonLd, BRAND, SEO_KEYWORDS } from "@/lib/seo";
 import { supabase, type HammerexCategory, type HammerexProduct } from "@/lib/supabase";
+import { cookies, headers } from "next/headers";
+import { getCountryFromRequest } from "@/lib/geo";
 
 // Shared SEO landing-page renderer for the alias URLs at /tool-belts,
 // /tool-bags, /construction-tools, etc. Each route file passes a `landingKey`
@@ -21,6 +23,7 @@ export async function SeoLandingPage({ landingKey }: { landingKey: string }) {
   if (!config) notFound();
 
   const { categories, products } = await loadLandingData(config);
+  const country = getCountryFromRequest(await headers(), await cookies());
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: "/" },
     { name: config.h1, url: `/${config.slug}` }
@@ -63,6 +66,7 @@ export async function SeoLandingPage({ landingKey }: { landingKey: string }) {
           items={products}
           title={`Featured ${config.h1.split(" — ")[0]}`}
           viewAllHref={config.ctaCategorySlug ? `/c/${config.ctaCategorySlug}` : `/c/${config.categorySlugs[0]}`}
+          country={country}
         />
       )}
 

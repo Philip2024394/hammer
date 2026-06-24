@@ -1,7 +1,8 @@
 "use client";
 
 import type { HammerexProduct } from "@/lib/supabase";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { imageUrl } from "@/lib/imageUrl";
 
 // Side-by-side comparison rail. Shows the current product plus the products
@@ -15,6 +16,7 @@ export function CompareSection({
   currentProduct: HammerexProduct;
   others: HammerexProduct[];
 }) {
+  const country = useCountry();
   if (others.length === 0) return null;
   const lineup: { p: HammerexProduct; isCurrent: boolean }[] = [
     { p: currentProduct, isCurrent: true },
@@ -69,9 +71,9 @@ export function CompareSection({
                   </a>
 
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-brand-text">{formatPrice(p.price_idr, currency)}</span>
-                    {p.compare_at_idr && p.compare_at_idr > p.price_idr && (
-                      <span className="text-xs text-brand-muted line-through">{formatPrice(p.compare_at_idr, currency)}</span>
+                    <span className="text-lg font-bold text-brand-text">{formatPriceForRegion(p.price_idr, currency, country)}</span>
+                    {shouldShowPrice(country) && p.compare_at_idr && p.compare_at_idr > p.price_idr && (
+                      <span className="text-xs text-brand-muted line-through">{formatPriceForRegion(p.compare_at_idr, currency, country)}</span>
                     )}
                   </div>
 

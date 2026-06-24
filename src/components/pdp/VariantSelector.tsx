@@ -1,9 +1,11 @@
 "use client";
 
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { useVariant } from "./VariantContext";
 
 export function VariantSelector({ currency }: { currency: Currency }) {
+  const country = useCountry();
   const ctx = useVariant();
   if (!ctx || ctx.variants.length === 0) return null;
 
@@ -41,7 +43,7 @@ export function VariantSelector({ currency }: { currency: Currency }) {
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-xs font-semibold leading-tight text-brand-text">{v.label}</span>
                   <span className="text-xs text-brand-muted">
-                    {formatPrice(v.price_idr, currency)}
+                    {formatPriceForRegion(v.price_idr, currency, country)}
                   </span>
                 </span>
               </button>

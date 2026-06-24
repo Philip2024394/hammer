@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase, type HammerexProduct } from "@/lib/supabase";
 import { cart } from "@/lib/cart";
-import { formatPrice } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 
 // Five curated universal add-ons surfaced at checkout and on non-kit PDPs —
 // Hammerex "Deal Breakers". Each is small-ticket and broadly useful so
@@ -26,6 +27,8 @@ const SLUGS = [
 const DISCOUNT_PCT = 15;
 
 export function CheckoutDealBreakers() {
+  const country = useCountry();
+  const showPrices = shouldShowPrice(country);
   const [products, setProducts] = useState<HammerexProduct[]>([]);
   const [added, setAdded] = useState<Record<string, boolean>>({});
   const [previewId, setPreviewId] = useState<string | null>(null);
@@ -128,8 +131,10 @@ export function CheckoutDealBreakers() {
                     {p.name}
                   </button>
                   <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="text-sm font-bold text-brand-accent">{formatPrice(discounted, cur)}</span>
-                    <span className="text-xs text-brand-muted line-through">{formatPrice(p.price_idr, cur)}</span>
+                    <span className="text-sm font-bold text-brand-accent">{formatPriceForRegion(discounted, cur, country)}</span>
+                    {showPrices && (
+                      <span className="text-xs text-brand-muted line-through">{formatPriceForRegion(p.price_idr, cur, country)}</span>
+                    )}
                   </div>
                 </div>
                 <button
@@ -203,6 +208,8 @@ function DealBreakerPreview({
   onClose: () => void;
   onAdd: () => void;
 }) {
+  const country = useCountry();
+  const showPrices = shouldShowPrice(country);
   const discounted = Math.round(product.price_idr * (1 - discountPct / 100));
   const cur = (product.base_currency ?? "IDR") as "IDR" | "USD" | "SGD" | "AUD" | "EUR" | "GBP";
 
@@ -257,11 +264,15 @@ function DealBreakerPreview({
           )}
 
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-brand-accent">{formatPrice(discounted, cur)}</span>
-            <span className="text-sm text-brand-muted line-through">{formatPrice(product.price_idr, cur)}</span>
-            <span className="ml-1 rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold text-brand-accent">
-              −{discountPct}%
-            </span>
+            <span className="text-2xl font-bold text-brand-accent">{formatPriceForRegion(discounted, cur, country)}</span>
+            {showPrices && (
+              <>
+                <span className="text-sm text-brand-muted line-through">{formatPriceForRegion(product.price_idr, cur, country)}</span>
+                <span className="ml-1 rounded-full bg-brand-accent/15 px-2 py-0.5 text-xs font-bold text-brand-accent">
+                  −{discountPct}%
+                </span>
+              </>
+            )}
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row">

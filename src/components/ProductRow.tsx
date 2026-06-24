@@ -2,7 +2,7 @@ import type { HammerexProduct } from "@/lib/supabase";
 import { SectionHeader } from "./SectionHeader";
 import { CardActionOverlay } from "./CardActionOverlay";
 import { imageUrl } from "@/lib/imageUrl";
-import { formatPriceOrQuote, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, type Currency } from "@/lib/fx";
 
 const FALLBACK_EXTRAS = {
   slug: null, sku: null, brand: null, model_number: null, weight_kg: null,
@@ -13,7 +13,7 @@ const FALLBACK_EXTRAS = {
   delivery_quote_only: null, purchase_notes: null, badge_label: null,
   subtitle: null, home_sort_order: null, thread_color_option_idr: null,
   backpack_straps_option_idr: null, is_universal: null,
-  shipping_per_unit_idr: null, faq: null
+  shipping_per_unit_idr: null, price_idr_sea: 0, free_shipping_sea: false, faq: null
 };
 
 const FALLBACK: HammerexProduct[] = [
@@ -25,10 +25,10 @@ const FALLBACK: HammerexProduct[] = [
 // the team by email or phone for sea-freight; that nuance belongs on the PDP,
 // not the grid. Uses the live FX from fx.ts so the displayed amount matches
 // the PDP.
-function formatProductPrice(p: HammerexProduct): string {
-  const cur = (p.base_currency as Currency | null) ?? "IDR";
-  return formatPriceOrQuote(p.price_idr, cur);
-}
+//
+// `country` is the visitor's ISO code: numeric prices render only for
+// ID/MY/VN, everyone else sees the "Quoted at checkout" label (see
+// shouldShowPrice / formatPriceForRegion in @/lib/fx).
 
 function Check() {
   return (
@@ -45,7 +45,7 @@ function Check() {
 // `customCtaLabel` overrides the default CTA copy on the same row.
 type ProductRowItem = HammerexProduct & { customHref?: string; customCtaLabel?: string };
 
-export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product", layout = "portrait" }: { items?: ProductRowItem[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category"; layout?: "portrait" | "landscape" }) {
+export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "product", layout = "portrait", country }: { items?: ProductRowItem[]; title?: string; viewAllHref?: string; hideHeader?: boolean; linkTo?: "product" | "category"; layout?: "portrait" | "landscape"; country?: string | null }) {
   const data: ProductRowItem[] = (items?.length ? items : FALLBACK);
 
   if (layout === "landscape") {
@@ -84,7 +84,7 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
                   <div className="flex items-center justify-between gap-3 border-t border-brand-line p-3 sm:p-4">
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-bold uppercase tracking-wide text-brand-text sm:text-base">{p.name}</div>
-                      <div className="text-base font-bold text-brand-accent sm:text-lg">{formatProductPrice(p)}</div>
+                      <div className="text-base font-bold text-brand-accent sm:text-lg">{formatPriceForRegion(p.price_idr, (p.base_currency as Currency | null) ?? "IDR", country)}</div>
                     </div>
                     <a
                       href={href}
@@ -227,7 +227,7 @@ export function ProductRow({ items, title, viewAllHref, hideHeader, linkTo = "pr
                       </span>
                     )}
                     <div className="rounded-md border-2 border-brand-accent bg-black/40 px-3 py-2 text-center">
-                      <div className="text-base font-bold text-brand-text sm:text-lg">{formatProductPrice(p)}</div>
+                      <div className="text-base font-bold text-brand-text sm:text-lg">{formatPriceForRegion(p.price_idr, (p.base_currency as Currency | null) ?? "IDR", country)}</div>
                     </div>
                     <a
                       href={href}

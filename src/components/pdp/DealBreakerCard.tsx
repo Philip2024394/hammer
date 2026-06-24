@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatPrice, type Currency } from "@/lib/fx";
+import { formatPriceForRegion, shouldShowPrice, type Currency } from "@/lib/fx";
+import { useCountry } from "@/components/CountryProvider";
 import { cart } from "@/lib/cart";
 import type { HammerexDealBreaker } from "@/lib/supabase";
 import { DealBreakerDetailModal } from "./DealBreakerDetailModal";
@@ -25,6 +26,7 @@ export function DealBreakerCard({
   currency: Currency;
   anchorProductName: string;
 }) {
+  const country = useCountry();
   const [detailFor, setDetailFor] = useState<HammerexDealBreaker | null>(null);
   const [open, setOpen] = useState(false);
   const [qtys, setQtys] = useState<Record<string, number>>({});
@@ -105,7 +107,7 @@ export function DealBreakerCard({
             Deal Breaker
           </span>
           <span className="text-xs text-brand-text">
-            {items.length} add-on{items.length === 1 ? "" : "s"} from {formatPrice(startingFrom, currency)} · bundle price
+            {items.length} add-on{items.length === 1 ? "" : "s"} from {formatPriceForRegion(startingFrom, currency, country)} · bundle price
           </span>
         </span>
         <span
@@ -154,11 +156,11 @@ export function DealBreakerCard({
                         <span className="text-xs font-semibold text-brand-accent">Ref: {displayRef}</span>
                       )}
                       <span className="flex flex-wrap items-baseline gap-2 text-xs">
-                        <span className="font-bold text-brand-text">{formatPrice(d.deal_price_idr, currency)}</span>
-                        {rrp > d.deal_price_idr && (
-                          <span className="text-brand-muted line-through">{formatPrice(rrp, currency)}</span>
+                        <span className="font-bold text-brand-text">{formatPriceForRegion(d.deal_price_idr, currency, country)}</span>
+                        {shouldShowPrice(country) && rrp > d.deal_price_idr && (
+                          <span className="text-brand-muted line-through">{formatPriceForRegion(rrp, currency, country)}</span>
                         )}
-                        {savedPct > 0 && (
+                        {shouldShowPrice(country) && savedPct > 0 && (
                           <span className="rounded-full bg-brand-accent/20 px-2 py-0.5 text-xs font-semibold text-brand-accent">
                             −{savedPct}%
                           </span>
@@ -226,9 +228,9 @@ export function DealBreakerCard({
               </span>
               {totalQty > 0 ? (
                 <span className="flex flex-wrap items-baseline gap-2 text-xs">
-                  <span className="font-bold text-brand-text">{formatPrice(totalDeal, currency)}</span>
-                  {savings > 0 && (
-                    <span className="text-brand-accent">save {formatPrice(savings, currency)}</span>
+                  <span className="font-bold text-brand-text">{formatPriceForRegion(totalDeal, currency, country)}</span>
+                  {shouldShowPrice(country) && savings > 0 && (
+                    <span className="text-brand-accent">save {formatPriceForRegion(savings, currency, country)}</span>
                   )}
                 </span>
               ) : (

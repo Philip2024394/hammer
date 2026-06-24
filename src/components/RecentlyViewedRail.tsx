@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { recentlyViewed } from "@/lib/recentlyViewed";
 import { supabase, type HammerexProduct, type HammerexCategory } from "@/lib/supabase";
 import { ProductRow } from "./ProductRow";
+import { useCountry } from "./CountryProvider";
 
 export function RecentlyViewedRail() {
   const [products, setProducts] = useState<HammerexProduct[]>([]);
+  const country = useCountry();
 
   useEffect(() => {
     const slugs = recentlyViewed.read();
@@ -29,5 +31,5 @@ export function RecentlyViewedRail() {
   }, []);
 
   if (products.length === 0) return null;
-  return <ProductRow items={products} title="Recently viewed" viewAllHref="/" />;
+  return <ProductRow items={products} title="Recently viewed" viewAllHref="/" country={country} />;
 }
