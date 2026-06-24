@@ -273,6 +273,25 @@ export type HammerexXratedView = {
   duration_seconds: number | null;
 };
 
+export type HammerexXratedJob = {
+  id: string;
+  slug: string;
+  customer_name: string;
+  customer_whatsapp: string;
+  trade_slug: string;
+  city: string;
+  postcode_prefix: string | null;
+  description: string;
+  budget_hint: string | null;
+  photos: string[];
+  status: "pending" | "live" | "completed" | "rejected" | "expired";
+  is_example: boolean;
+  report_count: number;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type HammerexXratedPayment = {
   id: string;
   listing_id: string;

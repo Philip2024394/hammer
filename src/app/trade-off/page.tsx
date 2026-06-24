@@ -6,6 +6,7 @@ import { BRAND, absolute } from "@/lib/seo";
 import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
+import { JobsCarousel } from "@/components/xrated/jobs/JobsCarousel";
 
 export const revalidate = 300;
 
@@ -92,6 +93,8 @@ export default async function TradeOffLandingPage() {
           </div>
         </div>
       </section>
+
+      <JobsCarousel />
 
       <section className="mx-auto max-w-6xl px-4 pt-8">
         <p
