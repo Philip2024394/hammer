@@ -78,14 +78,9 @@ export function PremiumCustomisationPanel({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Theme colour">
-          <input
-            type="color"
-            value={state.theme_color || "#F97316"}
-            onChange={(e) => set("theme_color", e.target.value)}
-            className="h-11 w-full cursor-pointer rounded-md border border-brand-line bg-brand-bg p-1"
-          />
-        </Field>
+        {/* Theme colour picker removed — all tradies are locked to the
+            Xrated brand orange (#F97316). The DB column stays so existing
+            data doesn't break, but the form no longer exposes it. */}
         <Field label="Button text colour">
           <input
             type="color"

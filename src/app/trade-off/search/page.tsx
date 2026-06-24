@@ -117,7 +117,7 @@ export default async function XratedSearchPage({
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
       <XratedViewTracker page="search" listingId={null} />
-      <XratedHeader defaultQuery={rawQ} />
+      <XratedHeader />
 
       <section className="border-b border-brand-line bg-black/40">
         <div className="mx-auto max-w-6xl px-4 pb-6 pt-8">

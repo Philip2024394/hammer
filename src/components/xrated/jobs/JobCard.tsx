@@ -1,6 +1,8 @@
 // Xrated Trades — public jobs feed card.
 // Server component, no client JS. Links to /trade-off/jobs/<slug>.
 // Shows the EXAMPLE pill for demo posts so tradies know not to message.
+// A country flag emoji renders inline with the city so international source
+// is instantly visible (UK, US, AU, DE, ES, etc.).
 
 import type { HammerexXratedJob } from "@/lib/supabase";
 import { tradeLabel } from "@/lib/tradeOff";
@@ -22,6 +24,15 @@ function relativeTime(iso: string): string {
   const months = Math.floor(days / 30);
   if (months < 12) return `${months}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
+}
+
+// ISO 3166-1 alpha-2 country code → Unicode regional indicator emoji pair.
+// e.g. 'GB' → 🇬🇧. Returns empty string for unknown / malformed codes so
+// the caller can render conditionally without extra checks.
+export function flagFor(cc: string): string {
+  if (!cc || cc.length !== 2) return '';
+  const A = 0x1F1E6 - 65;
+  return String.fromCodePoint(cc.charCodeAt(0) + A, cc.charCodeAt(1) + A);
 }
 
 function tradeIconPlaceholder() {
@@ -47,6 +58,8 @@ function tradeIconPlaceholder() {
 export function JobCard({ job }: { job: HammerexXratedJob }) {
   const photo = job.photos?.[0] ?? null;
   const label = tradeLabel(job.trade_slug);
+  const cc = (job.country ?? '').toUpperCase();
+  const flag = flagFor(cc);
 
   return (
     <a
@@ -68,6 +81,15 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
         )}
         {job.is_example && (
           <ExamplePill className="absolute right-2 top-2 shadow-lg" />
+        )}
+        {flag && (
+          <span
+            title={cc}
+            aria-label={`Country ${cc}`}
+            className="absolute left-2 top-2 inline-flex items-center rounded-full bg-black/70 px-1.5 py-0.5 text-sm leading-none shadow-lg backdrop-blur"
+          >
+            {flag}
+          </span>
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
@@ -91,6 +113,11 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
               <circle cx="12" cy="10" r="3" />
             </svg>
             <span className="truncate">{job.city}</span>
+            {flag && (
+              <span title={cc} aria-label={`Country ${cc}`} className="ml-0.5">
+                {flag}
+              </span>
+            )}
           </span>
         </div>
         <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-brand-text sm:line-clamp-4">

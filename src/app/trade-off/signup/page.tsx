@@ -15,19 +15,36 @@ export const metadata: Metadata = {
   alternates: { canonical: "/trade-off/signup" }
 };
 
+const SIGNUP_HERO =
+  "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated-signup-hero.png";
+
 export default function TradeOffSignupPage() {
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
       <XratedViewTracker page="signup" listingId={null} />
       <XratedHeader />
-      <section className="mx-auto max-w-3xl px-4 pb-6 pt-10">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
-          Trade Off · Sign up
-        </p>
-        <h1 className="mt-2 text-2xl font-extrabold leading-tight text-brand-text sm:text-4xl">
-          List yourself on Trade Off
-        </h1>
-        <p className="mt-3 max-w-xl text-xs text-brand-muted sm:text-sm">
+
+      <section className="relative bg-black">
+        <div className="relative h-56 w-full overflow-hidden sm:h-72 md:h-96">
+          <img
+            src={SIGNUP_HERO}
+            alt="Xrated Trades — list your trade"
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/0" />
+          <div className="absolute inset-x-0 bottom-0 mx-auto max-w-3xl px-4 pb-5 sm:pb-7">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+              Xrated Trades · Sign up
+            </p>
+            <h1 className="mt-1.5 text-2xl font-extrabold leading-tight text-white drop-shadow-md sm:text-4xl">
+              List yourself on Xrated Trades
+            </h1>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-4 pb-6 pt-6">
+        <p className="max-w-xl text-xs text-brand-muted sm:text-sm">
           Free for life. Photos of your work, where you operate, a WhatsApp number.
           That's it — no reviews, no ratings, no commission. We send customers
           your way; the job stays between you and them.

@@ -1,12 +1,32 @@
+// Xrated Trades — landing page.
+// Server component. Fetches live tradies, live jobs, and aggregate counts
+// in parallel, then composes the landing experience: header, SearchHero
+// (prominent search bar — the primary funnel), the Xrated banner image
+// (no overlay text — it stands alone), stats row, live pulse ticker,
+// auto-flipping live jobs spotlight (country-weighted), landscape trade
+// cards, featured tradies, how it works, closing CTA, sticky mobile bar.
+// Mobile-first throughout.
+
 import type { Metadata } from "next";
+import { headers, cookies } from "next/headers";
 import { XratedHeader } from "@/components/xrated/XratedHeader";
 import { XratedFooter } from "@/components/xrated/XratedFooter";
-import { supabase, type HammerexTradeOffListing } from "@/lib/supabase";
+import {
+  supabase,
+  type HammerexTradeOffListing,
+  type HammerexXratedJob
+} from "@/lib/supabase";
 import { BRAND, absolute } from "@/lib/seo";
-import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
+import { getCountryFromRequest } from "@/lib/geo";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
-import { JobsCarousel } from "@/components/xrated/jobs/JobsCarousel";
+import { SearchHero } from "@/components/xrated/landing/SearchHero";
+import { LivePulseTicker } from "@/components/xrated/landing/LivePulseTicker";
+import { AutoFlipJobsSpotlight } from "@/components/xrated/landing/AutoFlipJobsSpotlight";
+import { TradeShowcaseGrid } from "@/components/xrated/landing/TradeShowcaseGrid";
+import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
+import { HowItWorks } from "@/components/xrated/landing/HowItWorks";
+import { StickyMobileLandingBar } from "@/components/xrated/landing/StickyMobileLandingBar";
 
 export const revalidate = 300;
 
@@ -32,194 +52,180 @@ export const metadata: Metadata = {
 };
 
 export default async function TradeOffLandingPage() {
-  const res = await supabase
-    .from("hammerex_trade_off_listings")
-    .select("*")
-    .eq("status", "live")
-    .order("hammerex_standard_verified", { ascending: false })
-    .order("joined_at", { ascending: false });
-  const listings = (res.data ?? []) as HammerexTradeOffListing[];
+  // Detect the visitor's country server-side so the spotlight can weight
+  // its display list ~70% local / ~30% international.
+  const [h, c] = await Promise.all([headers(), cookies()]);
+  const userCountry = getCountryFromRequest(h, c);
+
+  // Parallel fetches — listings (ranked) + spotlight jobs (top 20 so the
+  // country-weighted shuffle has enough to pick from) + headcount-only query
+  // for the live jobs stat so the hero number reflects the full live feed,
+  // not just what the spotlight cycles through.
+  const [listingsRes, spotlightJobsRes, jobsCountRes] = await Promise.all([
+    supabase
+      .from("hammerex_trade_off_listings")
+      .select("*")
+      .eq("status", "live")
+      .order("hammerex_standard_verified", { ascending: false })
+      .order("joined_at", { ascending: false }),
+    supabase
+      .from("hammerex_xrated_jobs")
+      .select("*")
+      .eq("status", "live")
+      .order("created_at", { ascending: false })
+      .limit(20),
+    supabase
+      .from("hammerex_xrated_jobs")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "live")
+  ]);
+
+  const listings = (listingsRes.data ?? []) as HammerexTradeOffListing[];
+  const jobs = (spotlightJobsRes.data ?? []) as HammerexXratedJob[];
+
+  // Live stats — tradies from the listings fetch, jobs from the count-only
+  // query (so we don't silently cap at the spotlight's limit), cities from
+  // the union of listing cities + job cities so customer demand counts too.
+  const tradieCount = listings.length;
+  const jobCount = jobsCountRes.count ?? jobs.length;
+  const citySet = new Set<string>();
+  for (const l of listings) {
+    const c = l.city?.trim().toLowerCase();
+    if (c) citySet.add(c);
+  }
+  for (const j of jobs) {
+    const c = j.city?.trim().toLowerCase();
+    if (c) citySet.add(c);
+  }
+  const cityCount = citySet.size;
+
+  // Per-trade tradie count for the showcase tiles. Counts a tradie under
+  // every trade they list (primary + secondary) so the badge reflects
+  // searchable supply, not just the primary heading.
+  const countsBySlug: Record<string, number> = {};
+  for (const l of listings) {
+    countsBySlug[l.primary_trade] = (countsBySlug[l.primary_trade] ?? 0) + 1;
+    for (const s of l.secondary_trades ?? []) {
+      countsBySlug[s] = (countsBySlug[s] ?? 0) + 1;
+    }
+  }
+
+  // Featured tradies — app_paid first, then verified Standard, then the rest.
+  // Top 6 of whatever survives.
+  const tierWeight = (l: HammerexTradeOffListing): number => {
+    if (l.tier === "app_paid") return 0;
+    if (l.tier === "app_trial") return 1;
+    if (l.hammerex_standard_verified) return 2;
+    return 3;
+  };
+  const featured = [...listings]
+    .sort((a, b) => {
+      const w = tierWeight(a) - tierWeight(b);
+      if (w !== 0) return w;
+      return (
+        new Date(b.joined_at).getTime() - new Date(a.joined_at).getTime()
+      );
+    })
+    .slice(0, 6);
 
   return (
-    <main className="bg-[#0a0a0a]">
+    <main className="bg-[#0a0a0a] pb-24 md:pb-0">
       <XratedViewTracker page="landing" listingId={null} />
       <XratedHeader />
 
-      {/* Xrated Trades hero — banner image on top, copy block UNDERNEATH on
-          mobile so nothing overlays the artwork. From `sm:` we revert to the
-          overlay/gradient treatment where the viewport is wide enough to
-          give the image proper headroom. */}
-      <section className="relative isolate overflow-hidden border-b border-white/10 bg-black">
+      {/* The new primary funnel — search-first. */}
+      <SearchHero />
+
+      {/* Xrated banner image — stands alone, no overlay text obscuring it.
+          Compact heights so the scroll signal kicks in fast. */}
+      <section className="relative w-full bg-black">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={XRATED_BRAND.heroImageUrl}
           alt={`${XRATED_BRAND.name} — ${XRATED_BRAND.tagline}`}
-          className="block h-auto w-full"
+          className="block max-h-[320px] w-full object-cover sm:max-h-[480px]"
         />
-        {/* Bottom-to-top gradient — only meaningful when copy overlays the
-            image (sm and up). Hidden on mobile because the copy sits below. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[55%] bg-gradient-to-t from-black via-black/75 to-transparent sm:block"
-        />
-        <div className="relative bg-black sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-transparent">
-          <div className="mx-auto max-w-5xl px-4 pb-8 pt-6 sm:pb-12">
-            <p
-              className="text-[11px] font-bold uppercase tracking-widest sm:text-xs"
-              style={{ color: XRATED_BRAND.accent }}
-            >
-              UK Trade Directory
-            </p>
-            <h1 className="mt-1 text-xl font-bold leading-tight text-white sm:text-4xl">
-              {XRATED_BRAND.name}
-            </h1>
-            <p
-              className="mt-2 text-sm font-semibold leading-snug sm:text-xl"
-              style={{ color: XRATED_BRAND.accent }}
-            >
-              {XRATED_BRAND.tagline}
-            </p>
-            <p className="mt-3 max-w-2xl text-xs leading-relaxed text-white/85 sm:text-sm">
-              Free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free standard listing for life. 30-day free trial of Xrated App for premium profiles.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+      </section>
+
+      {/* Stats strip — single line, brand orange highlights. */}
+      <section className="border-b border-white/10 bg-black">
+        <div className="mx-auto max-w-6xl px-4 py-4">
+          <p className="text-center text-xs font-semibold text-white/85 sm:text-sm">
+            <span className="text-white">{tradieCount}</span> verified tradies
+            <span className="mx-2 text-white/40">·</span>
+            <span className="text-white">{jobCount}</span> live jobs
+            <span className="mx-2 text-white/40">·</span>
+            <span className="text-white">{cityCount}</span> cities
+            <span className="mx-2 text-white/40">·</span>
+            <span style={{ color: XRATED_BRAND.accent }}>Free for life</span>
+          </p>
+        </div>
+      </section>
+
+      <LivePulseTicker jobs={jobs} tradies={listings.slice(0, 8)} />
+
+      <AutoFlipJobsSpotlight jobs={jobs} userCountry={userCountry} />
+
+      <TradeShowcaseGrid countsBySlug={countsBySlug} />
+
+      <FeaturedTradiesRail tradies={featured} />
+
+      <HowItWorks />
+
+      {/* Closing CTA — primary funnel is "Find a tradesperson"; the "List
+          your trade" half stays as a secondary nudge for tradies. */}
+      <section className="mx-auto max-w-6xl px-4 pb-12 md:pb-20">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-black via-[#0c0c0c] to-black">
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="border-b border-white/10 p-6 md:border-b-0 md:border-r md:p-10">
+              <p
+                className="text-xs font-bold uppercase tracking-[0.18em]"
+                style={{ color: XRATED_BRAND.accent }}
+              >
+                Customers
+              </p>
+              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+                Find a tradesperson — fast.
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-brand-muted sm:text-sm">
+                Search by trade or city. WhatsApp them direct. No middleman,
+                no commission. Free for customers, forever.
+              </p>
+              <a
+                href="/trade-off/search"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#F97316] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98] sm:w-auto"
+              >
+                Find a tradesperson
+              </a>
+            </div>
+            <div className="p-6 md:p-10">
+              <p
+                className="text-xs font-bold uppercase tracking-[0.18em]"
+                style={{ color: XRATED_BRAND.accent }}
+              >
+                Tradespeople
+              </p>
+              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+                List your trade — free.
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-brand-muted sm:text-sm">
+                A profile with real photos, your city, your WhatsApp.
+                30-day free trial of the Xrated App for premium features.
+              </p>
               <a
                 href="/trade-off/signup"
-                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98] sm:h-12 sm:w-auto sm:px-6 sm:text-sm"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/30 bg-black px-6 text-sm font-bold text-white transition hover:border-[#F97316] hover:text-[#F97316] active:scale-[0.98] sm:w-auto"
               >
                 List your trade — free
               </a>
-              <p className="text-xs text-white/75">
-                {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} on Xrated Trades
-              </p>
             </div>
           </div>
         </div>
-      </section>
-
-      <JobsCarousel />
-
-      <section className="mx-auto max-w-6xl px-4 pt-8">
-        <p
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: XRATED_BRAND.accent }}
-        >
-          Browse by trade
-        </p>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {TRADE_OFF_TRADES.map((t) => (
-            <li key={t.slug}>
-              <a
-                href={`/trade-off/${t.slug}`}
-                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
-              >
-                {t.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-8">
-        <div className="flex items-baseline justify-between gap-2">
-          <h2
-            className="text-xs font-bold uppercase tracking-widest"
-            style={{ color: XRATED_BRAND.accent }}
-          >
-            All live tradies
-          </h2>
-        </div>
-        {listings.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-brand-line bg-brand-surface p-10 text-center">
-            <p className="text-sm font-semibold text-brand-text">
-              No live listings yet — be the first.
-            </p>
-            <p className="mt-1 text-xs text-brand-muted">
-              List your trade in under two minutes. Free for life.
-            </p>
-            <a
-              href="/trade-off/signup"
-              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
-            >
-              List your trade — free
-            </a>
-          </div>
-        ) : (
-          <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((l) => (
-              <li key={l.id}>
-                <ListingCard listing={l} />
-              </li>
-            ))}
-          </ul>
-        )}
       </section>
 
       <XratedFooter />
-    </main>
-  );
-}
 
-function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
-  const photo = listing.photos[0] ?? listing.avatar_url ?? BRAND.logo;
-  const primary = tradeLabel(listing.primary_trade);
-  const initial = (listing.display_name.charAt(0) || "?").toUpperCase();
-  return (
-    <a
-      href={`/trade/${listing.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
-        <img
-          src={photo}
-          alt={listing.display_name}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover transition group-hover:scale-[1.02]"
-        />
-        {listing.hammerex_standard_verified && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
-            </svg>
-            Standard
-          </span>
-        )}
-        <div className="absolute bottom-3 left-3 h-14 w-14 overflow-hidden rounded-full border-2 border-brand-bg bg-brand-surface shadow-lg">
-          {listing.avatar_url ? (
-            <img
-              src={listing.avatar_url}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[#F97316] text-base font-bold text-white">
-              {initial}
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-base font-semibold text-brand-text group-hover:text-[#F97316]">
-          {listing.display_name}
-        </h3>
-        {listing.trading_name && (
-          <p className="mt-0.5 text-xs text-brand-muted">{listing.trading_name}</p>
-        )}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full border border-brand-line bg-black/40 px-2.5 py-1 text-xs font-semibold text-brand-text">
-            {primary}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs text-brand-muted">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            {listing.city}
-          </span>
-        </div>
-      </div>
-    </a>
+      <StickyMobileLandingBar />
+    </main>
   );
 }

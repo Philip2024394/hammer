@@ -130,17 +130,8 @@ export default async function JobDetailPage({
 
       <section className="mx-auto max-w-5xl px-4 pt-6">
         <article className="rounded-2xl border border-brand-line bg-brand-surface/60 p-5 sm:p-7">
-          {job.is_example && (
-            <div className="mb-4 flex items-center gap-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3">
-              <ExamplePill className="shrink-0" />
-              <p className="text-xs leading-relaxed text-brand-text sm:text-sm">
-                This is an example post used to seed the feed — there's no real customer
-                behind it. The real jobs work exactly the same way.
-              </p>
-            </div>
-          )}
-
           <div className="flex flex-wrap items-center gap-2">
+            {job.is_example && <ExamplePill />}
             <span className="inline-flex items-center rounded-full bg-[#F97316] px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
               {label}
             </span>
@@ -199,22 +190,7 @@ export default async function JobDetailPage({
       )}
 
       <section className="mx-auto max-w-5xl px-4 pt-8">
-        {job.is_example ? (
-          <div className="rounded-2xl border border-dashed border-brand-line bg-brand-surface p-6 text-center">
-            <p className="text-sm font-semibold text-brand-text">
-              This is an example post — no real customer to message.
-            </p>
-            <p className="mt-1 text-xs text-brand-muted">
-              Real customer posts include a WhatsApp button right here.
-            </p>
-            <a
-              href="/trade-off/jobs/post"
-              className="mt-4 inline-flex h-12 items-center justify-center rounded-xl bg-[#F97316] px-6 text-sm font-bold text-white transition hover:bg-[#EA580C]"
-            >
-              Post a real job →
-            </a>
-          </div>
-        ) : whatsappUrl ? (
+        {job.is_example ? null : whatsappUrl ? (
           <a
             href={whatsappUrl}
             target="_blank"

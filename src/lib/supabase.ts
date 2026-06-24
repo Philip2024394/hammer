@@ -280,6 +280,7 @@ export type HammerexXratedJob = {
   customer_whatsapp: string;
   trade_slug: string;
   city: string;
+  country: string;
   postcode_prefix: string | null;
   description: string;
   budget_hint: string | null;
