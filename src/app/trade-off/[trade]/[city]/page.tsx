@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { supabase, type HammerexTradeOffListing } from "@/lib/supabase";
 import { BRAND, absolute, breadcrumbJsonLd, localBusinessJsonLd } from "@/lib/seo";
 import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
+import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 
 export const revalidate = 300;
 
@@ -89,6 +90,7 @@ export default async function TradeOffCityPage({
 
   return (
     <main>
+      <XratedViewTracker page="trade_city" listingId={null} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
@@ -102,7 +104,7 @@ export default async function TradeOffCityPage({
           }}
         />
       ))}
-      <Header />
+      <XratedHeader />
 
       <nav className="mx-auto max-w-6xl px-4 pt-4 text-xs text-brand-muted" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
@@ -150,7 +152,7 @@ export default async function TradeOffCityPage({
         )}
       </section>
 
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }

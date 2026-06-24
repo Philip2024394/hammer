@@ -6,8 +6,8 @@
 // WhatsApp escape hatch — same pattern as /trade-off/edit/[slug].
 
 import type { Metadata } from "next";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { adminWhatsapp } from "@/lib/whatsapp";
 import { ProjectManager } from "@/components/trade-off/ProjectManager";
@@ -56,7 +56,7 @@ export default async function TradeOffProjectsEditPage({
 
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
-      <Header />
+      <XratedHeader />
       <section className="mx-auto max-w-3xl px-4 pb-6 pt-10">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
           Trade Off · Verified work
@@ -72,7 +72,7 @@ export default async function TradeOffProjectsEditPage({
       <section className="mx-auto max-w-3xl px-4 pb-16">
         <ProjectManager slug={slug} editToken={token} initialProjects={projects} />
       </section>
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }
@@ -84,7 +84,7 @@ function InvalidLink({ reason }: { reason: string }) {
   );
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
-      <Header />
+      <XratedHeader />
       <section className="mx-auto max-w-xl px-4 pb-16 pt-16 text-center">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
           Trade Off
@@ -106,7 +106,7 @@ function InvalidLink({ reason }: { reason: string }) {
           Message Hammerex on WhatsApp
         </a>
       </section>
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }

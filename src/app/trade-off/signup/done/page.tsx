@@ -7,8 +7,8 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +54,7 @@ function Inner() {
 
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
-      <Header />
+      <XratedHeader />
       <section className="mx-auto max-w-2xl px-4 pb-16 pt-12">
         <div
           className={`rounded-2xl border p-6 ${
@@ -161,7 +161,7 @@ function Inner() {
           Trade Off is free for life. We use it to introduce you to customers — that's it.
         </p>
       </section>
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }

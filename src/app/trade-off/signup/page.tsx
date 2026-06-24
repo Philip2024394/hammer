@@ -3,9 +3,10 @@
 // can be reused by the /trade-off/edit/[slug] page.
 
 import type { Metadata } from "next";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { TradeOffForm } from "./TradeOffForm";
+import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 
 export const metadata: Metadata = {
   title: "Join Trade Off — list yourself for free | Hammerex",
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
 export default function TradeOffSignupPage() {
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
-      <Header />
+      <XratedViewTracker page="signup" listingId={null} />
+      <XratedHeader />
       <section className="mx-auto max-w-3xl px-4 pb-6 pt-10">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
           Trade Off · Sign up
@@ -34,7 +36,7 @@ export default function TradeOffSignupPage() {
       <section className="mx-auto max-w-3xl px-4 pb-16">
         <TradeOffForm mode={{ kind: "create" }} />
       </section>
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }

@@ -251,9 +251,38 @@ export type HammerexTradeOffListing = {
   trial_started_at: string | null;
   trial_expires_at: string | null;
   running_marquee: string | null;
+  paid_expires_at: string | null;
+  last_payment_plan: "monthly" | "annual" | null;
   joined_at: string;
   created_at: string;
   updated_at: string;
+};
+
+export type HammerexXratedView = {
+  id: string;
+  listing_id: string | null;
+  page: string;
+  session_id: string | null;
+  ip_hash: string | null;
+  country: string | null;
+  city: string | null;
+  referrer: string | null;
+  user_agent: string | null;
+  viewed_at: string;
+  ended_at: string | null;
+  duration_seconds: number | null;
+};
+
+export type HammerexXratedPayment = {
+  id: string;
+  listing_id: string;
+  plan: "monthly" | "annual";
+  amount_gbp: number;
+  paid_at: string;
+  paid_via: string;
+  admin_note: string | null;
+  expires_at: string;
+  created_at: string;
 };
 
 export type HammerexTradeOffProject = {

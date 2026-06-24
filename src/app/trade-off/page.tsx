@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { supabase, type HammerexTradeOffListing } from "@/lib/supabase";
 import { BRAND, absolute } from "@/lib/seo";
 import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
+import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 
 export const revalidate = 300;
 
@@ -39,56 +40,55 @@ export default async function TradeOffLandingPage() {
   const listings = (res.data ?? []) as HammerexTradeOffListing[];
 
   return (
-    <main>
-      <Header />
+    <main className="bg-[#0a0a0a]">
+      <XratedViewTracker page="landing" listingId={null} />
+      <XratedHeader />
 
-      {/* Xrated Trades hero — orange brand, background image, dark overlay */}
-      <section className="relative isolate overflow-hidden border-b border-brand-line">
+      {/* Xrated Trades hero — show the FULL banner image (no crop). The hero
+          image grows to its natural height; copy overlays the bottom with a
+          dark gradient for readability. */}
+      <section className="relative isolate overflow-hidden border-b border-white/10 bg-black">
         <img
           src={XRATED_BRAND.heroImageUrl}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 h-full w-full object-cover"
+          alt={`${XRATED_BRAND.name} — ${XRATED_BRAND.tagline}`}
+          className="block h-auto w-full"
         />
+        {/* Bottom-to-top gradient for legibility of the overlay copy */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/60 to-black/85"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black via-black/75 to-transparent"
         />
-        <div className="mx-auto max-w-5xl px-4 pb-12 pt-12 sm:pt-16">
-          <img
-            src={XRATED_BRAND.logoUrl}
-            alt={XRATED_BRAND.name}
-            className="block h-12 w-auto object-contain sm:h-16"
-            style={{ background: "transparent" }}
-          />
-          <p
-            className="mt-4 text-xs font-bold uppercase tracking-widest"
-            style={{ color: XRATED_BRAND.accent }}
-          >
-            UK Trade Directory · Powered by Hammerex
-          </p>
-          <h1 className="mt-2 text-3xl font-bold leading-tight text-white sm:text-5xl">
-            {XRATED_BRAND.name}
-          </h1>
-          <p
-            className="mt-3 text-xl font-semibold leading-snug sm:text-2xl"
-            style={{ color: XRATED_BRAND.accent }}
-          >
-            {XRATED_BRAND.tagline}
-          </p>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
-            Free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free standard listing for life. 30-day free trial of Xrated App for premium profiles.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <a
-              href="/trade-off/signup"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-[#F97316] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98]"
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="mx-auto max-w-5xl px-4 pb-8 pt-6 sm:pb-12">
+            <p
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: XRATED_BRAND.accent }}
             >
-              List your trade — free
-            </a>
-            <p className="text-xs text-white/75">
-              {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} on Xrated Trades
+              UK Trade Directory
             </p>
+            <h1 className="mt-1 text-2xl font-bold leading-tight text-white sm:text-4xl">
+              {XRATED_BRAND.name}
+            </h1>
+            <p
+              className="mt-2 text-base font-semibold leading-snug sm:text-xl"
+              style={{ color: XRATED_BRAND.accent }}
+            >
+              {XRATED_BRAND.tagline}
+            </p>
+            <p className="mt-3 max-w-2xl text-xs leading-relaxed text-white/85 sm:text-sm">
+              Free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free standard listing for life. 30-day free trial of Xrated App for premium profiles.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <a
+                href="/trade-off/signup"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98] sm:h-12 sm:px-6 sm:text-sm"
+              >
+                List your trade — free
+              </a>
+              <p className="text-xs text-white/75">
+                {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} on Xrated Trades
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -149,7 +149,7 @@ export default async function TradeOffLandingPage() {
         )}
       </section>
 
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }

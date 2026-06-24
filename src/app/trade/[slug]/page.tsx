@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { GuideShareBar } from "@/components/guides/GuideShareBar";
 import { TradePhotoGallery } from "@/components/trade-off/TradePhotoGallery";
 import { TradeReportButton } from "@/components/trade-off/TradeReportButton";
@@ -11,6 +11,7 @@ import { TradeProfileUrlChip } from "@/components/trade-off/TradeProfileUrlChip"
 import { InstantQuoteForm } from "@/components/trade-off/InstantQuoteForm";
 import { ProjectGalleryGrid } from "@/components/trade-off/ProjectGalleryGrid";
 import { TradeSocialIcons } from "@/components/trade-off/TradeSocialIcons";
+import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { AvatarFrame } from "@/components/xrated/AvatarFrame";
 import { HeroTextOverlay } from "@/components/xrated/HeroTextOverlay";
 import { ProfileInfoCard } from "@/components/xrated/ProfileInfoCard";
@@ -281,6 +282,7 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
 
   return (
     <main className="pb-20 md:pb-0">
+      <XratedViewTracker page="profile" listingId={listing.id} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
@@ -289,7 +291,7 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }}
       />
-      <Header />
+      <XratedHeader />
       <AcceptingBanner accepting={listing.accepting_jobs} />
 
       {isPremium ? (
@@ -314,7 +316,7 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
         />
       )}
 
-      <DeliveryFooter />
+      <XratedFooter />
 
       <TradeMobileActionBar
         waUrl={waUrl}

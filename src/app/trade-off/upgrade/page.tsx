@@ -9,8 +9,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Header } from "@/components/Header";
-import { DeliveryFooter } from "@/components/DeliveryFooter";
+import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   XRATED_BRAND,
@@ -20,6 +20,7 @@ import {
 } from "@/lib/xratedTrades";
 import { maybeExpireListingTier } from "@/lib/xratedTier";
 import { UpgradeActions } from "./UpgradeActions";
+import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +98,8 @@ export default async function UpgradePage({
 
   return (
     <main className="min-h-screen bg-brand-bg text-brand-text">
-      <Header />
+      <XratedViewTracker page="upgrade" listingId={listing?.id ?? null} />
+      <XratedHeader />
 
       <section className="mx-auto max-w-3xl px-4 pt-10 pb-6">
         <div className="flex items-center gap-3">
@@ -262,7 +264,7 @@ export default async function UpgradePage({
         )}
       </section>
 
-      <DeliveryFooter />
+      <XratedFooter />
     </main>
   );
 }

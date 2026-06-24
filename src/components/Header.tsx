@@ -7,7 +7,7 @@ import { MobileDrawer } from "./MobileDrawer";
 import { SearchBar } from "./SearchBar";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { useT } from "./LocaleProvider";
-import { XRATED_BRAND } from "@/lib/xratedTrades";
+import { XratedHeader } from "./xrated/XratedHeader";
 
 export function Header() {
   const t = useT();
@@ -22,6 +22,12 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Xrated Trades routes get an entirely different header — no Hammerex chrome.
+  // The single back-link to Hammerex lives in the XratedFooter instead.
+  if (isXrated) {
+    return <XratedHeader />;
+  }
 
   return (
     <>
@@ -40,36 +46,15 @@ export function Header() {
             />
           </a>
 
-          {isXrated && (
-            <a
-              href="/trade-off"
-              aria-label={`${XRATED_BRAND.name} home`}
-              className="block shrink-0 p-0"
-            >
-              <img
-                src={XRATED_BRAND.logoUrl}
-                alt={XRATED_BRAND.name}
-                className="block h-10 w-auto object-contain sm:h-12"
-                style={{ background: "transparent" }}
-              />
-            </a>
-          )}
-
           <div className="hidden flex-1 sm:block">
             <SearchBar id="search" />
             <div className="mt-1 flex items-center gap-2 text-[13px] text-brand-muted">
               <a
                 href="/trade-off"
-                className={`inline-flex items-center gap-1.5 py-2 font-semibold hover:underline ${
-                  isXrated ? "text-[#F97316]" : "text-brand-accent"
-                }`}
+                className="inline-flex items-center gap-1.5 py-2 font-semibold text-brand-accent hover:underline"
               >
-                {isXrated ? `${XRATED_BRAND.name} →` : "Trade Off →"}
-                <span
-                  className={`rounded px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
-                    isXrated ? "bg-[#F97316] text-white" : "bg-brand-accent text-black"
-                  }`}
-                >
+                Trade Off →
+                <span className="rounded bg-brand-accent px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black">
                   NEW
                 </span>
               </a>
@@ -119,16 +104,10 @@ export function Header() {
           <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-brand-muted">
             <a
               href="/trade-off"
-              className={`inline-flex items-center gap-1.5 py-2 font-semibold hover:underline ${
-                isXrated ? "text-[#F97316]" : "text-brand-accent"
-              }`}
+              className="inline-flex items-center gap-1.5 py-2 font-semibold text-brand-accent hover:underline"
             >
-              {isXrated ? `${XRATED_BRAND.name} →` : "Trade Off →"}
-              <span
-                className={`rounded px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
-                  isXrated ? "bg-[#F97316] text-white" : "bg-brand-accent text-black"
-                }`}
-              >
+              Trade Off →
+              <span className="rounded bg-brand-accent px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black">
                 NEW
               </span>
             </a>
