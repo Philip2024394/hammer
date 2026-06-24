@@ -21,7 +21,6 @@ import { XRATED_BRAND } from "@/lib/xratedTrades";
 import { getCountryFromRequest } from "@/lib/geo";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { SearchHero } from "@/components/xrated/landing/SearchHero";
-import { LivePulseTicker } from "@/components/xrated/landing/LivePulseTicker";
 import { AutoFlipJobsSpotlight } from "@/components/xrated/landing/AutoFlipJobsSpotlight";
 import { TradeShowcaseGrid } from "@/components/xrated/landing/TradeShowcaseGrid";
 import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
@@ -161,8 +160,6 @@ export default async function TradeOffLandingPage() {
           </p>
         </div>
       </section>
-
-      <LivePulseTicker jobs={jobs} tradies={listings.slice(0, 8)} />
 
       <AutoFlipJobsSpotlight jobs={jobs} userCountry={userCountry} />
 

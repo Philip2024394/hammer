@@ -12,6 +12,7 @@ import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
 import { BRAND, absolute } from "@/lib/seo";
 import { JobCard } from "@/components/xrated/jobs/JobCard";
+import { JobsFiltersDrawer } from "@/components/xrated/jobs/JobsFiltersDrawer";
 
 export const revalidate = 60;
 
@@ -97,80 +98,31 @@ export default async function JobsFeedPage({
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-8">
-        <p
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: XRATED_BRAND.accent }}
-        >
-          Filter by trade
-        </p>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          <li>
-            <a
-              href={cityFilter ? `/trade-off/jobs?city=${encodeURIComponent(cityFilter)}` : "/trade-off/jobs"}
-              className={`inline-flex h-11 items-center rounded-full border px-4 text-xs font-semibold transition ${
-                tradeSlug === null
-                  ? "border-[#F97316] bg-[#F97316] text-white"
-                  : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316] hover:text-[#F97316]"
-              }`}
-            >
-              All trades
-            </a>
-          </li>
-          {TRADE_OFF_TRADES.map((t) => {
-            const on = tradeSlug === t.slug;
-            const q = new URLSearchParams();
-            q.set("trade", t.slug);
-            if (cityFilter) q.set("city", cityFilter);
-            return (
-              <li key={t.slug}>
-                <a
-                  href={`/trade-off/jobs?${q.toString()}`}
-                  className={`inline-flex h-11 items-center rounded-full border px-4 text-xs font-semibold transition ${
-                    on
-                      ? "border-[#F97316] bg-[#F97316] text-white"
-                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316] hover:text-[#F97316]"
-                  }`}
-                >
-                  {t.label}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-
-        <form
-          method="GET"
-          action="/trade-off/jobs"
-          className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center"
-        >
-          {tradeSlug && <input type="hidden" name="trade" value={tradeSlug} />}
-          <label htmlFor="city-filter" className="sr-only">
-            City
-          </label>
-          <input
-            id="city-filter"
-            type="text"
-            name="city"
-            defaultValue={cityFilter ?? ""}
-            placeholder="Filter by city (e.g. Manchester)"
-            maxLength={80}
-            className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#F97316] focus:outline-none sm:max-w-xs"
+        <div className="flex flex-wrap items-center gap-3">
+          <JobsFiltersDrawer
+            trades={TRADE_OFF_TRADES.map((t) => ({ slug: t.slug, label: t.label }))}
+            activeTradeSlug={tradeSlug}
+            activeCity={cityFilter}
           />
-          <button
-            type="submit"
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
-          >
-            Apply
-          </button>
-          {(cityFilter || tradeSlug) && (
+          {activeTradeLabel && (
+            <span className="inline-flex h-11 items-center rounded-full border border-[#F97316]/40 bg-[#F97316]/10 px-4 text-xs font-semibold text-[#F97316]">
+              {activeTradeLabel}
+            </span>
+          )}
+          {cityFilter && (
+            <span className="inline-flex h-11 items-center rounded-full border border-[#F97316]/40 bg-[#F97316]/10 px-4 text-xs font-semibold text-[#F97316]">
+              {cityFilter}
+            </span>
+          )}
+          {(activeTradeLabel || cityFilter) && (
             <a
               href="/trade-off/jobs"
               className="inline-flex h-11 items-center justify-center rounded-lg px-3 text-xs text-brand-muted transition hover:text-brand-text"
             >
-              Clear filters
+              Clear
             </a>
           )}
-        </form>
+        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 pt-6">
