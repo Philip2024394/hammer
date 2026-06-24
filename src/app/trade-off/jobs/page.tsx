@@ -75,7 +75,7 @@ export default async function JobsFeedPage({
           >
             Xrated Trades · Jobs
           </p>
-          <h1 className="mt-2 text-3xl font-extrabold leading-tight text-brand-text sm:text-4xl">
+          <h1 className="mt-2 text-2xl font-extrabold leading-tight text-brand-text sm:text-4xl">
             Live jobs on Xrated Trades
           </h1>
           <p className="mt-3 max-w-2xl text-xs leading-relaxed text-brand-muted sm:text-sm">

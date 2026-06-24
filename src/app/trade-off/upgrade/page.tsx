@@ -118,7 +118,7 @@ export default async function UpgradePage({
             >
               {XRATED_BRAND.name}
             </p>
-            <h1 className="text-3xl font-extrabold leading-tight sm:text-4xl">
+            <h1 className="text-2xl font-extrabold leading-tight sm:text-4xl">
               Upgrade to Xrated App
             </h1>
           </div>

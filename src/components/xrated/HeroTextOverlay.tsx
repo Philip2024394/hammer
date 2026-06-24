@@ -79,12 +79,12 @@ export function HeroTextOverlay({
         </p>
       )}
       {line2 && (
-        <h1 className="mt-1 text-4xl font-extrabold leading-[1.05] drop-shadow sm:text-5xl">
+        <h1 className="mt-1 text-3xl font-extrabold leading-[1.05] drop-shadow sm:text-5xl">
           {line2El}
         </h1>
       )}
       {tagline && (
-        <p className="mt-2 text-sm text-white/85 drop-shadow">
+        <p className="mt-2 text-xs text-white/85 drop-shadow sm:text-sm">
           {tagline}
         </p>
       )}

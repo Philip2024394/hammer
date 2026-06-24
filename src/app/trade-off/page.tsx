@@ -45,33 +45,35 @@ export default async function TradeOffLandingPage() {
       <XratedViewTracker page="landing" listingId={null} />
       <XratedHeader />
 
-      {/* Xrated Trades hero — show the FULL banner image (no crop). The hero
-          image grows to its natural height; copy overlays the bottom with a
-          dark gradient for readability. */}
+      {/* Xrated Trades hero — banner image on top, copy block UNDERNEATH on
+          mobile so nothing overlays the artwork. From `sm:` we revert to the
+          overlay/gradient treatment where the viewport is wide enough to
+          give the image proper headroom. */}
       <section className="relative isolate overflow-hidden border-b border-white/10 bg-black">
         <img
           src={XRATED_BRAND.heroImageUrl}
           alt={`${XRATED_BRAND.name} — ${XRATED_BRAND.tagline}`}
           className="block h-auto w-full"
         />
-        {/* Bottom-to-top gradient for legibility of the overlay copy */}
+        {/* Bottom-to-top gradient — only meaningful when copy overlays the
+            image (sm and up). Hidden on mobile because the copy sits below. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black via-black/75 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[55%] bg-gradient-to-t from-black via-black/75 to-transparent sm:block"
         />
-        <div className="absolute inset-x-0 bottom-0">
+        <div className="relative bg-black sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-transparent">
           <div className="mx-auto max-w-5xl px-4 pb-8 pt-6 sm:pb-12">
             <p
-              className="text-xs font-bold uppercase tracking-widest"
+              className="text-[11px] font-bold uppercase tracking-widest sm:text-xs"
               style={{ color: XRATED_BRAND.accent }}
             >
               UK Trade Directory
             </p>
-            <h1 className="mt-1 text-2xl font-bold leading-tight text-white sm:text-4xl">
+            <h1 className="mt-1 text-xl font-bold leading-tight text-white sm:text-4xl">
               {XRATED_BRAND.name}
             </h1>
             <p
-              className="mt-2 text-base font-semibold leading-snug sm:text-xl"
+              className="mt-2 text-sm font-semibold leading-snug sm:text-xl"
               style={{ color: XRATED_BRAND.accent }}
             >
               {XRATED_BRAND.tagline}
@@ -82,7 +84,7 @@ export default async function TradeOffLandingPage() {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <a
                 href="/trade-off/signup"
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98] sm:h-12 sm:px-6 sm:text-sm"
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98] sm:h-12 sm:w-auto sm:px-6 sm:text-sm"
               >
                 List your trade — free
               </a>

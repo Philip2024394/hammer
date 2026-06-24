@@ -24,7 +24,7 @@ export default function TradeOffSignupPage() {
         <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
           Trade Off · Sign up
         </p>
-        <h1 className="mt-2 text-3xl font-extrabold leading-tight text-brand-text sm:text-4xl">
+        <h1 className="mt-2 text-2xl font-extrabold leading-tight text-brand-text sm:text-4xl">
           List yourself on Trade Off
         </h1>
         <p className="mt-3 max-w-xl text-xs text-brand-muted sm:text-sm">

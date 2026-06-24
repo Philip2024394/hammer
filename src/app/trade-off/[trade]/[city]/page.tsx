@@ -123,7 +123,7 @@ export default async function TradeOffCityPage({
           <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
             Xrated Trades
           </p>
-          <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
+          <h1 className="mt-3 text-2xl font-bold leading-tight text-brand-text sm:text-4xl">
             {label}s in {cityLabel}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">

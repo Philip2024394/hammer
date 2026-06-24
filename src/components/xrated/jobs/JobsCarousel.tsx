@@ -53,10 +53,13 @@ export async function JobsCarousel() {
             </p>
           </div>
         ) : (
-          <div className="mt-5 -mx-4 overflow-x-auto px-4">
+          <div className="mt-5 -mx-4 overflow-x-auto px-4 [scrollbar-width:thin] snap-x snap-mandatory">
             <ul className="flex w-max gap-4">
               {jobs.map((j) => (
-                <li key={j.id} className="w-[280px] shrink-0 sm:w-[320px]">
+                <li
+                  key={j.id}
+                  className="w-[88vw] max-w-[420px] shrink-0 snap-start sm:w-[460px] sm:max-w-none"
+                >
                   <JobCard job={j} />
                 </li>
               ))}

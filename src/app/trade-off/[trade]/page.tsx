@@ -83,19 +83,21 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
 
       {tradeHeroFor(trade) && (
         <section className="relative bg-black">
-          <img
-            src={tradeHeroFor(trade) as string}
-            alt={`${label}s on Xrated Trades`}
-            className="block h-auto w-full"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0" />
-          <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
-              Xrated Trades
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold leading-tight text-white drop-shadow-md sm:text-4xl">
-              {label}s on Xrated Trades
-            </h1>
+          <div className="relative h-48 w-full overflow-hidden sm:h-64 md:h-80">
+            <img
+              src={tradeHeroFor(trade) as string}
+              alt={`${label}s on Xrated Trades`}
+              className="absolute inset-0 h-full w-full object-cover object-center"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/0" />
+            <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-5">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+                Xrated Trades
+              </p>
+              <h1 className="mt-1.5 text-2xl font-extrabold leading-tight text-white drop-shadow-md sm:text-3xl">
+                {label}s on Xrated Trades
+              </h1>
+            </div>
           </div>
         </section>
       )}
@@ -117,7 +119,7 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
               <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
                 Xrated Trades
               </p>
-              <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
+              <h1 className="mt-3 text-2xl font-bold leading-tight text-brand-text sm:text-4xl">
                 {label}s on Xrated Trades
               </h1>
             </>

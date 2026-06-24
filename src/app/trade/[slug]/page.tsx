@@ -727,7 +727,7 @@ function StandardLayout({
                 </span>
               )}
             </div>
-            <h1 className="mt-2 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
+            <h1 className="mt-2 text-2xl font-bold leading-tight text-brand-text sm:text-4xl">
               {listing.display_name}
             </h1>
             {listing.trading_name && (

@@ -39,7 +39,7 @@ export default function JobPostPage() {
           >
             Xrated Trades · Post a job
           </p>
-          <h1 className="mt-2 text-3xl font-extrabold leading-tight text-brand-text sm:text-4xl">
+          <h1 className="mt-2 text-2xl font-extrabold leading-tight text-brand-text sm:text-4xl">
             Post your job — free, direct, no middleman
           </h1>
           <p className="mt-3 max-w-2xl text-xs leading-relaxed text-brand-muted sm:text-sm">

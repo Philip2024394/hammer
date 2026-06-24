@@ -51,9 +51,9 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
   return (
     <a
       href={`/trade-off/jobs/${job.slug}`}
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
+      className="group relative flex h-full flex-row overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
+      <div className="relative aspect-[4/3] w-[42%] shrink-0 overflow-hidden bg-black sm:w-[44%]">
         {photo ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -61,18 +61,18 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
             alt={`${label} job in ${job.city}`}
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+            className="absolute inset-0 h-full w-full object-cover transition group-hover:scale-[1.02]"
           />
         ) : (
           tradeIconPlaceholder()
         )}
         {job.is_example && (
-          <ExamplePill className="absolute right-3 top-3 shadow-lg" />
+          <ExamplePill className="absolute right-2 top-2 shadow-lg" />
         )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-[#F97316] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center rounded-full bg-[#F97316] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
             {label}
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-brand-muted">
@@ -90,13 +90,13 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
-            {job.city}
+            <span className="truncate">{job.city}</span>
           </span>
         </div>
-        <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-brand-text">
+        <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-brand-text sm:line-clamp-4">
           {job.description}
         </p>
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4 text-xs text-brand-muted">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3 text-xs text-brand-muted">
           <span>{relativeTime(job.created_at)}</span>
           {job.budget_hint && (
             <span className="inline-flex items-center rounded-full border border-brand-line bg-black/40 px-2 py-0.5 font-semibold text-brand-text">
