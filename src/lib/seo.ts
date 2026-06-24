@@ -1,4 +1,4 @@
-import type { HammerexCategory, HammerexGuide, HammerexProduct } from "./supabase";
+import type { HammerexCategory, HammerexGuide, HammerexProduct, HammerexTradeOffListing } from "./supabase";
 
 const FALLBACK = "http://localhost:3007";
 
@@ -331,6 +331,42 @@ export function articleJsonLd(guide: HammerexGuide) {
     datePublished: guide.created_at,
     dateModified: guide.updated_at,
     mainEntityOfPage: { "@type": "WebPage", "@id": absolute(`/guides/${guide.slug}`) }
+  };
+}
+
+// LocalBusiness schema for a Trade Off tradesperson profile.
+// Surfaces the listing to Google as a local trade so /t/<slug> can rank for
+// "<trade> in <city>" queries the way Checkatrade pages do.
+export function localBusinessJsonLd(listing: HammerexTradeOffListing, tradeLabelText: string) {
+  const url = absolute(`/t/${listing.slug}`);
+  const photo = listing.avatar_url ?? listing.photos[0] ?? BRAND.logo;
+  const digits = listing.whatsapp.replace(/\D/g, "");
+  const geo =
+    listing.lat != null && listing.lng != null
+      ? { "@type": "GeoCoordinates", latitude: listing.lat, longitude: listing.lng }
+      : undefined;
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": url,
+    name: listing.trading_name ?? listing.display_name,
+    description: stripMarkdown(listing.bio).slice(0, 320),
+    image: photo,
+    url,
+    telephone: digits ? `+${digits}` : undefined,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: listing.city,
+      addressCountry: listing.country,
+      postalCode: listing.postcode_prefix ?? undefined
+    },
+    geo,
+    areaServed: listing.service_postcodes.length
+      ? listing.service_postcodes
+      : [listing.city],
+    knowsAbout: [tradeLabelText, ...listing.secondary_trades],
+    foundingDate: listing.start_year ? `${listing.start_year}-01-01` : undefined,
+    sameAs: [listing.website, listing.instagram ? `https://instagram.com/${listing.instagram.replace(/^@/, "")}` : null].filter(Boolean)
   };
 }
 

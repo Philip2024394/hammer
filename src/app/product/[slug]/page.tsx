@@ -45,6 +45,17 @@ import { TrackPageEvent } from "@/components/TrackPageEvent";
 // every 60s — content changes are catalogue edits, not real-time data.
 export const revalidate = 60;
 
+// Flagship "Hammerex Standard" slugs — only these PDPs render the Trade Off
+// cross-link panel. List mirrors HAMMEREX_STANDARD_BLURBS in lib/tradeOff.ts.
+const HAMMEREX_STANDARD_PDP_SLUGS = new Set<string>([
+  "k9-plastering-tool-station",
+  "k11-drywall-tool-station",
+  "scaffolders-setup-kit",
+  "electrician-pro-pouch",
+  "plastering-pro-bag",
+  "drywall-pro-kit"
+]);
+
 async function loadProduct(slug: string) {
   const productRes = await supabase
     .from("hammerex_products")
@@ -333,6 +344,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             }
           : {})}
       />
+      {HAMMEREX_STANDARD_PDP_SLUGS.has(product.slug ?? "") && (
+        <section className="mx-auto max-w-6xl px-4 py-8">
+          <div className="rounded-2xl bg-brand-accent p-6 text-black sm:p-7">
+            <h3 className="text-base font-bold sm:text-lg">
+              Tradespeople — get your free Trade Off listing.
+            </h3>
+            <p className="mt-2 max-w-2xl text-[13px] leading-relaxed">
+              Hammerex Trade Off is our free UK directory for working tradies.
+              Free for life. WhatsApp direct. No middleman.
+            </p>
+            <a
+              href="/trade-off/signup"
+              className="mt-4 inline-flex h-11 items-center rounded-lg bg-black/90 px-5 text-[13px] font-semibold text-white transition hover:bg-black"
+            >
+              Claim your free listing →
+            </a>
+          </div>
+        </section>
+      )}
       <CompareSection currentProduct={product} others={compareProducts} />
       <RetailShopsSection productName={product.name} productSku={product.sku} />
       <PairsWith pairs={pairs} />

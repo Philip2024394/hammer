@@ -38,7 +38,17 @@ export function Header() {
 
           <div className="hidden flex-1 sm:block">
             <SearchBar id="search" />
-            <div className="mt-1 flex items-center gap-3 text-[13px] text-brand-muted">
+            <div className="mt-1 flex items-center gap-2 text-[13px] text-brand-muted">
+              <a
+                href="/trade-off"
+                className="inline-flex items-center gap-1.5 py-2 font-semibold text-brand-accent hover:underline"
+              >
+                Trade Off →
+                <span className="rounded bg-brand-accent px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black">
+                  NEW
+                </span>
+              </a>
+              <span className="text-brand-muted/60">•</span>
               <a href="/guides" className="font-semibold text-brand-accent hover:underline">
                 Guides →
               </a>
@@ -81,11 +91,20 @@ export function Header() {
 
         <div className="border-t border-brand-line bg-brand-bg/95 px-3 py-2 sm:hidden">
           <SearchBar id="search-m" mobile />
-          <div className="mt-1 flex items-center gap-3 text-[13px] text-brand-muted">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-brand-muted">
+            <a
+              href="/trade-off"
+              className="inline-flex items-center gap-1.5 py-2 font-semibold text-brand-accent hover:underline"
+            >
+              Trade Off →
+              <span className="rounded bg-brand-accent px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black">
+                NEW
+              </span>
+            </a>
+            <span className="text-brand-muted/60">•</span>
             <a href="/guides" className="font-semibold text-brand-accent hover:underline">
               Guides →
             </a>
-            <span className="text-brand-muted/70">Trade reads from the workshop</span>
           </div>
         </div>
       </header>

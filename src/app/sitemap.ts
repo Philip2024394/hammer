@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { supabase } from "@/lib/supabase";
 import { siteUrl } from "@/lib/seo";
 import { SEO_LANDING_SLUGS } from "@/lib/seoLandings";
+import { TRADE_OFF_TRADES, tradeOffSlugify } from "@/lib/tradeOff";
 
 export const revalidate = 3600;
 
@@ -19,9 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prodsRes = await supabase.from("hammerex_products").select("slug, id, created_at");
   }
 
-  const [catsRes, guidesRes] = await Promise.all([
+  const [catsRes, guidesRes, tradeOffRes] = await Promise.all([
     supabase.from("hammerex_categories").select("slug").order("sort_order"),
-    supabase.from("hammerex_guides").select("slug, updated_at").eq("published", true)
+    supabase.from("hammerex_guides").select("slug, updated_at").eq("published", true),
+    supabase
+      .from("hammerex_trade_off_listings")
+      .select("slug, primary_trade, city, updated_at")
+      .eq("status", "live")
   ]);
 
   // Category lastModified: most-recent product create date inside that
@@ -65,12 +70,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9
   }));
 
+  // Trade Off — per-trade index pages (one per slug in TRADE_OFF_TRADES).
+  const tradeOffTradeIndexes: MetadataRoute.Sitemap = TRADE_OFF_TRADES.map((t) => ({
+    url: `${base}/trade-off/${t.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.7
+  }));
+
+  // Trade Off — public listing profiles (/t/<slug>).
+  const tradeOffListings: MetadataRoute.Sitemap = (tradeOffRes.data ?? [])
+    .filter((l) => l.slug)
+    .map((l) => ({
+      url: `${base}/t/${l.slug}`,
+      lastModified: l.updated_at ? new Date(l.updated_at) : now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8
+    }));
+
+  // Trade Off — city pages, deduped on (primary_trade, lower(city)).
+  const cityKeys = new Set<string>();
+  const tradeOffCities: MetadataRoute.Sitemap = [];
+  for (const l of tradeOffRes.data ?? []) {
+    if (!l.primary_trade || !l.city) continue;
+    const citySlug = tradeOffSlugify(l.city);
+    if (!citySlug) continue;
+    const key = `${l.primary_trade}/${citySlug}`;
+    if (cityKeys.has(key)) continue;
+    cityKeys.add(key);
+    tradeOffCities.push({
+      url: `${base}/trade-off/${l.primary_trade}/${citySlug}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7
+    });
+  }
+
   return [
     { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/trade-off`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/trade-off/signup`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     ...landings,
     ...categories,
     ...products,
-    ...guides
+    ...guides,
+    ...tradeOffTradeIndexes,
+    ...tradeOffListings,
+    ...tradeOffCities
   ];
 }

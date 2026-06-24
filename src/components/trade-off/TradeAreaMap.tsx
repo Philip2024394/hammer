@@ -1,0 +1,87 @@
+"use client";
+
+// OpenStreetMap-based service-area map for a Trade Off profile.
+// Renders a tile map at the tradie's geocoded coordinates with a marker
+// and a soft 5km circle. If lat/lng are missing, returns null — the
+// existing postcode chips remain as the fallback.
+//
+// Map components are imported dynamically so react-leaflet (which touches
+// `window`) doesn't blow up under SSR.
+
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
+import "leaflet/dist/leaflet.css";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((m) => m.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((m) => m.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((m) => m.Marker),
+  { ssr: false }
+);
+const Circle = dynamic(
+  () => import("react-leaflet").then((m) => m.Circle),
+  { ssr: false }
+);
+
+export function TradeAreaMap({
+  lat,
+  lng,
+  city,
+  servicePostcodes
+}: {
+  lat: number | null;
+  lng: number | null;
+  city: string;
+  servicePostcodes: string[];
+}) {
+  // Silence unused-prop warnings — kept on the API so the parent can pass
+  // the full context without TypeScript complaining later.
+  void city;
+  void servicePostcodes;
+
+  const center = useMemo<[number, number] | null>(() => {
+    if (typeof lat !== "number" || typeof lng !== "number") return null;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return [lat, lng];
+  }, [lat, lng]);
+
+  if (!center) return null;
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
+      <div className="h-[260px] w-full">
+        <MapContainer
+          center={center}
+          zoom={11}
+          scrollWheelZoom={false}
+          style={{ height: "100%", width: "100%" }}
+          attributionControl
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          <Circle
+            center={center}
+            radius={5000}
+            pathOptions={{
+              color: "#FFD400",
+              weight: 2,
+              fillColor: "#FFD400",
+              fillOpacity: 0.12
+            }}
+          />
+          <Marker position={center} />
+        </MapContainer>
+      </div>
+    </div>
+  );
+}
+
+export default TradeAreaMap;

@@ -205,6 +205,39 @@ export type HammerexProductDeal = {
   icon_emoji: string | null;
 };
 
+export type HammerexTradeOffListing = {
+  id: string;
+  slug: string;
+  display_name: string;
+  trading_name: string | null;
+  primary_trade: string;
+  secondary_trades: string[];
+  city: string;
+  country: string;
+  postcode_prefix: string | null;
+  lat: number | null;
+  lng: number | null;
+  service_postcodes: string[];
+  whatsapp: string;
+  phone: string | null;
+  email: string;
+  website: string | null;
+  instagram: string | null;
+  bio: string;
+  years_in_trade: number | null;
+  start_year: number | null;
+  avatar_url: string | null;
+  photos: string[];
+  status: "draft" | "live" | "hidden";
+  report_count: number;
+  hammerex_standard_verified: boolean;
+  hammerex_standard_products: string[];
+  hammerex_standard_blurb: string | null;
+  joined_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type HammerexShippingZone = {
   id: string;
   country_code: string;
