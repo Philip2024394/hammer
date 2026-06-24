@@ -5,6 +5,7 @@ import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { supabase, type HammerexTradeOffListing } from "@/lib/supabase";
 import { BRAND, absolute, breadcrumbJsonLd } from "@/lib/seo";
 import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
+import { tradeHeroFor } from "@/lib/tradeOffHeroes";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 
 export const revalidate = 300;
@@ -80,6 +81,25 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
       />
       <XratedHeader />
 
+      {tradeHeroFor(trade) && (
+        <section className="relative bg-black">
+          <img
+            src={tradeHeroFor(trade) as string}
+            alt={`${label}s on Xrated Trades`}
+            className="block h-auto w-full"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0" />
+          <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+              Xrated Trades
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold leading-tight text-white drop-shadow-md sm:text-4xl">
+              {label}s on Xrated Trades
+            </h1>
+          </div>
+        </section>
+      )}
+
       <nav className="mx-auto max-w-6xl px-4 pt-4 text-xs text-brand-muted" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
           <li><a href="/" className="hover:text-brand-text">Home</a></li>
@@ -92,13 +112,17 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
 
       <section className="border-b border-brand-line">
         <div className="mx-auto max-w-5xl px-4 pb-8 pt-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
-            Xrated Trades
-          </p>
-          <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
-            {label}s on Xrated Trades
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
+          {!tradeHeroFor(trade) && (
+            <>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+                Xrated Trades
+              </p>
+              <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
+                {label}s on Xrated Trades
+              </h1>
+            </>
+          )}
+          <p className={tradeHeroFor(trade) ? "max-w-2xl text-sm leading-relaxed text-brand-muted" : "mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted"}>
             {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} — free WhatsApp quotation, verified Hammerex Standard tradies first.
           </p>
           <div className="mt-5">

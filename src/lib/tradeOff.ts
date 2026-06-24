@@ -17,6 +17,7 @@ export const TRADE_OFF_TRADES: Array<{
   { slug: "painter", label: "Painter & Decorator", category_slug: "painting" },
   { slug: "roofer", label: "Roofer", category_slug: "roofing" },
   { slug: "bricklayer", label: "Bricklayer", category_slug: "bricklaying" },
+  { slug: "stonemason", label: "Stonemason", category_slug: null },
   { slug: "groundworker", label: "Groundworker", category_slug: null },
   { slug: "general-builder", label: "General Builder", category_slug: null },
   { slug: "concrete-specialist", label: "Concrete Specialist", category_slug: "concrete" },
