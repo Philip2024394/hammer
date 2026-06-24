@@ -4,27 +4,28 @@ import { DeliveryFooter } from "@/components/DeliveryFooter";
 import { supabase, type HammerexTradeOffListing } from "@/lib/supabase";
 import { BRAND, absolute } from "@/lib/seo";
 import { TRADE_OFF_TRADES, tradeLabel } from "@/lib/tradeOff";
+import { XRATED_BRAND } from "@/lib/xratedTrades";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Hammerex Trade Off — UK trade directory",
+  title: "Xrated Trades — Find Trades. View Real Work. Get Quotes Fast.",
   description:
-    "Find a real tradesperson on Hammerex Trade Off. Drywallers, plasterers, electricians, scaffolders and more — free WhatsApp quotation, verified Hammerex Standard tradies first.",
+    "Xrated Trades is a free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free standard listing for life. 30-day free trial of the Xrated App for premium profiles. Powered by Hammerex.",
   alternates: { canonical: "/trade-off" },
   openGraph: {
     type: "website",
-    title: `Hammerex Trade Off — UK trade directory | ${BRAND.name}`,
+    title: "Xrated Trades — Find Trades. View Real Work. Get Quotes Fast.",
     description:
-      "Find a real tradesperson. Free WhatsApp quotation, verified Hammerex Standard tradies first.",
+      "Xrated Trades is a free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free for life. Powered by Hammerex.",
     url: absolute("/trade-off"),
     siteName: BRAND.name
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hammerex Trade Off — UK trade directory",
+    title: "Xrated Trades — Find Trades. View Real Work. Get Quotes Fast.",
     description:
-      "Find a real tradesperson. Free WhatsApp quotation, verified Hammerex Standard tradies first."
+      "Xrated Trades is a free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free for life."
   }
 };
 
@@ -41,37 +42,62 @@ export default async function TradeOffLandingPage() {
     <main>
       <Header />
 
-      <section className="border-b border-brand-line bg-brand-bg">
-        <div className="mx-auto max-w-5xl px-4 pb-10 pt-12 sm:pt-16">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
-            Hammerex Trade Off
+      {/* Xrated Trades hero — orange brand, background image, dark overlay */}
+      <section className="relative isolate overflow-hidden border-b border-brand-line">
+        <img
+          src={XRATED_BRAND.heroImageUrl}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/60 to-black/85"
+        />
+        <div className="mx-auto max-w-5xl px-4 pb-12 pt-12 sm:pt-16">
+          <img
+            src={XRATED_BRAND.logoUrl}
+            alt={XRATED_BRAND.name}
+            className="block h-12 w-auto object-contain sm:h-16"
+            style={{ background: "transparent" }}
+          />
+          <p
+            className="mt-4 text-xs font-bold uppercase tracking-widest"
+            style={{ color: XRATED_BRAND.accent }}
+          >
+            UK Trade Directory · Powered by Hammerex
           </p>
-          <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-5xl">
-            Find a real tradesperson.
-            <br />
-            <span className="text-brand-accent">Free. WhatsApp direct.</span>
+          <h1 className="mt-2 text-3xl font-bold leading-tight text-white sm:text-5xl">
+            {XRATED_BRAND.name}
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-brand-muted sm:text-base">
-            No middlemen. No paywall. No fake reviews.
-            <br />
-            Hammerex Standard verified tradies first — the rest by recent join date.
+          <p
+            className="mt-3 text-xl font-semibold leading-snug sm:text-2xl"
+            style={{ color: XRATED_BRAND.accent }}
+          >
+            {XRATED_BRAND.tagline}
+          </p>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
+            Free UK directory of working tradespeople. Real photos, verified work, WhatsApp direct. Free standard listing for life. 30-day free trial of Xrated App for premium profiles.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <a
               href="/trade-off/signup"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-brand-accent px-6 text-sm font-bold text-black transition hover:brightness-110 active:scale-[0.98]"
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-[#F97316] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98]"
             >
-              List your trade (free)
+              List your trade — free
             </a>
-            <p className="text-xs text-brand-muted">
-              {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} on Trade Off
+            <p className="text-xs text-white/75">
+              {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} on Xrated Trades
             </p>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+        <p
+          className="text-xs font-bold uppercase tracking-widest"
+          style={{ color: XRATED_BRAND.accent }}
+        >
           Browse by trade
         </p>
         <ul className="mt-3 flex flex-wrap gap-2">
@@ -79,7 +105,7 @@ export default async function TradeOffLandingPage() {
             <li key={t.slug}>
               <a
                 href={`/trade-off/${t.slug}`}
-                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-brand-accent hover:text-brand-accent"
+                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
               >
                 {t.label}
               </a>
@@ -90,7 +116,10 @@ export default async function TradeOffLandingPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-16 pt-8">
         <div className="flex items-baseline justify-between gap-2">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+          <h2
+            className="text-xs font-bold uppercase tracking-widest"
+            style={{ color: XRATED_BRAND.accent }}
+          >
             All live tradies
           </h2>
         </div>
@@ -104,9 +133,9 @@ export default async function TradeOffLandingPage() {
             </p>
             <a
               href="/trade-off/signup"
-              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-xs font-bold text-black transition hover:brightness-110"
+              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
             >
-              List your trade (free)
+              List your trade — free
             </a>
           </div>
         ) : (
@@ -131,8 +160,8 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
   const initial = (listing.display_name.charAt(0) || "?").toUpperCase();
   return (
     <a
-      href={`/t/${listing.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-brand-accent"
+      href={`/trade/${listing.slug}`}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
         <img
@@ -143,7 +172,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
           className="h-full w-full object-cover transition group-hover:scale-[1.02]"
         />
         {listing.hammerex_standard_verified && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-brand-accent px-2.5 py-1 text-xs font-bold text-black shadow-lg">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
@@ -160,14 +189,14 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-brand-accent text-base font-bold text-black">
+            <div className="flex h-full w-full items-center justify-center bg-[#F97316] text-base font-bold text-white">
               {initial}
             </div>
           )}
         </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-base font-semibold text-brand-text group-hover:text-brand-accent">
+        <h3 className="text-base font-semibold text-brand-text group-hover:text-[#F97316]">
           {listing.display_name}
         </h3>
         {listing.trading_name && (

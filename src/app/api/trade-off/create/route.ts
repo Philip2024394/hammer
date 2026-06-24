@@ -21,6 +21,7 @@ import {
 } from "@/lib/tradeOff";
 import { recomputeHammerexStandard } from "@/lib/tradeOffStandard";
 import { geocodeListing } from "@/lib/tradeOffGeocode";
+import { startTrialFor } from "@/lib/xratedTier";
 
 export const runtime = "nodejs";
 
@@ -67,7 +68,10 @@ export async function POST(req: NextRequest) {
     phone: s(body.phone).slice(0, 40) || null,
     email: s(body.email).slice(0, 160),
     website: s(body.website).slice(0, 240) || null,
-    instagram: s(body.instagram).slice(0, 80) || null,
+    instagram: s(body.instagram).slice(0, 240) || null,
+    facebook: s(body.facebook).slice(0, 240) || null,
+    tiktok: s(body.tiktok).slice(0, 240) || null,
+    youtube: s(body.youtube).slice(0, 240) || null,
     bio: s(body.bio).slice(0, 1200),
     years_in_trade: intOrNull(body.years_in_trade),
     start_year: intOrNull(body.start_year),
@@ -171,6 +175,15 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (insert.data) {
+      // Auto-start the 30-day Xrated App trial. Per spec, every new tradie
+      // gets the premium tier free for 30 days — after that effectiveTier()
+      // demotes them to 'app_expired' on render.
+      let trial: { trial_started_at: string; trial_expires_at: string } | null = null;
+      try {
+        trial = await startTrialFor(insert.data.id);
+      } catch (err) {
+        console.error("[trade-off/create] startTrialFor failed:", err);
+      }
       // Fire-and-await the Hammerex Standard recompute. Failure here should
       // not block the response — log + carry on.
       try {
@@ -183,6 +196,9 @@ export async function POST(req: NextRequest) {
         slug: insert.data.slug,
         edit_token: insert.data.edit_token,
         status: insert.data.status,
+        tier: trial ? "app_trial" : "standard",
+        trial_started_at: trial?.trial_started_at ?? null,
+        trial_expires_at: trial?.trial_expires_at ?? null,
         missing
       });
     }

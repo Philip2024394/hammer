@@ -335,10 +335,10 @@ export function articleJsonLd(guide: HammerexGuide) {
 }
 
 // LocalBusiness schema for a Trade Off tradesperson profile.
-// Surfaces the listing to Google as a local trade so /t/<slug> can rank for
+// Surfaces the listing to Google as a local trade so /trade/<slug> can rank for
 // "<trade> in <city>" queries the way Checkatrade pages do.
 export function localBusinessJsonLd(listing: HammerexTradeOffListing, tradeLabelText: string) {
-  const url = absolute(`/t/${listing.slug}`);
+  const url = absolute(`/trade/${listing.slug}`);
   const photo = listing.avatar_url ?? listing.photos[0] ?? BRAND.logo;
   const digits = listing.whatsapp.replace(/\D/g, "");
   const geo =

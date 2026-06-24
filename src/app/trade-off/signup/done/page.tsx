@@ -21,12 +21,12 @@ function Inner() {
 
   const isLive = status === "live";
   const editPath = `/trade-off/edit/${slug}?token=${token}`;
-  const profilePath = `/t/${slug}`;
+  const profilePath = `/trade/${slug}`;
   const editAbsolute =
     typeof window !== "undefined" ? `${window.location.origin}${editPath}` : editPath;
   const profileAbsolute =
     typeof window !== "undefined" ? `${window.location.origin}${profilePath}` : profilePath;
-  const profileDisplay = `hammerex.com/t/${slug}`;
+  const profileDisplay = `hammerex.com/trade/${slug}`;
 
   const [copied, setCopied] = useState(false);
   const [profileCopied, setProfileCopied] = useState(false);
@@ -116,7 +116,7 @@ function Inner() {
                 View my profile
               </a>
               <a
-                href={`/t/${slug}/qr.png?download=1`}
+                href={`/trade/${slug}/qr.png?download=1`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-brand-accent"

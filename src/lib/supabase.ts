@@ -223,6 +223,9 @@ export type HammerexTradeOffListing = {
   email: string;
   website: string | null;
   instagram: string | null;
+  facebook: string | null;
+  tiktok: string | null;
+  youtube: string | null;
   bio: string;
   years_in_trade: number | null;
   start_year: number | null;
@@ -233,7 +236,38 @@ export type HammerexTradeOffListing = {
   hammerex_standard_verified: boolean;
   hammerex_standard_products: string[];
   hammerex_standard_blurb: string | null;
+  theme_color: string;
+  button_text_color: string;
+  cta_button_effect: "none" | "pulse" | "glow" | "shake";
+  hero_text_line1: string | null;
+  hero_text_line2: string | null;
+  hero_text_line2_color: string | null;
+  hero_text_tagline: string | null;
+  hero_text_effect: "none" | "shimmer" | "dance" | "underline";
+  avatar_frame_style: "none" | "ring" | "pulse" | "dance";
+  profile_placement: "center" | "top-left" | "bottom-left";
+  accepting_jobs: boolean;
+  tier: "standard" | "app_trial" | "app_paid" | "app_expired";
+  trial_started_at: string | null;
+  trial_expires_at: string | null;
+  running_marquee: string | null;
   joined_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HammerexTradeOffProject = {
+  id: string;
+  listing_id: string;
+  title: string;
+  description: string | null;
+  before_url: string | null;
+  during_url: string | null;
+  after_url: string | null;
+  location_city: string | null;
+  completed_at: string | null;
+  verified: boolean;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 };

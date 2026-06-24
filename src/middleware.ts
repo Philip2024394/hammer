@@ -36,21 +36,35 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // /trade is overloaded: the B2B portal lives at /trade + /trade/{auth,
+  // cart, catalogue, checkout, order}, and the public Trade Off tradesperson
+  // profiles live at /trade/<vanity-slug>. Only the B2B portal sub-paths are
+  // gated; everything else is treated as a profile slug and let through.
+  const TRADE_PORTAL_PATHS = new Set([
+    "auth",
+    "cart",
+    "catalogue",
+    "checkout",
+    "order"
+  ]);
   if (
     pathname.startsWith("/trade/") &&
     pathname !== "/trade" &&
     !pathname.startsWith("/trade/auth/")
   ) {
-    // @supabase/ssr stores its session as one or more cookies prefixed
-    // `sb-<project-ref>-auth-token`. We just check that at least one
-    // such cookie exists — the page handler does the real auth + trade-
-    // account whitelist check (and will 404 itself on mismatch).
-    const all = req.cookies.getAll();
-    const hasSupabaseAuth = all.some((c) =>
-      c.name.startsWith("sb-") && c.name.includes("auth-token")
-    );
-    if (!hasSupabaseAuth) {
-      return new NextResponse(null, { status: 404 });
+    const tradeSegment = pathname.split("/")[2] ?? "";
+    if (TRADE_PORTAL_PATHS.has(tradeSegment)) {
+      // @supabase/ssr stores its session as one or more cookies prefixed
+      // `sb-<project-ref>-auth-token`. We just check that at least one
+      // such cookie exists — the page handler does the real auth + trade-
+      // account whitelist check (and will 404 itself on mismatch).
+      const all = req.cookies.getAll();
+      const hasSupabaseAuth = all.some((c) =>
+        c.name.startsWith("sb-") && c.name.includes("auth-token")
+      );
+      if (!hasSupabaseAuth) {
+        return new NextResponse(null, { status: 404 });
+      }
     }
   }
 

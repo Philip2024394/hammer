@@ -17,6 +17,7 @@ import {
   TRADE_OFF_TRADES,
   tradeLabel
 } from "@/lib/tradeOff";
+import { TRADE_SOCIAL_FIELDS } from "@/lib/tradeOffSocial";
 import { SlugAvailabilityField } from "@/components/trade-off/SlugAvailabilityField";
 
 type Mode =
@@ -38,6 +39,9 @@ export type TradeOffFormInitial = {
   email: string;
   website: string;
   instagram: string;
+  facebook: string;
+  tiktok: string;
+  youtube: string;
   bio: string;
   years_in_trade: string;
   start_year: string;
@@ -60,6 +64,9 @@ const EMPTY_INITIAL: TradeOffFormInitial = {
   email: "",
   website: "",
   instagram: "",
+  facebook: "",
+  tiktok: "",
+  youtube: "",
   bio: "",
   years_in_trade: "",
   start_year: "",
@@ -212,6 +219,9 @@ export function TradeOffForm({
       email: state.email.trim(),
       website: state.website.trim(),
       instagram: state.instagram.trim(),
+      facebook: state.facebook.trim(),
+      tiktok: state.tiktok.trim(),
+      youtube: state.youtube.trim(),
       bio: state.bio.trim(),
       years_in_trade: state.years_in_trade.trim() || null,
       start_year: state.start_year.trim() || null,
@@ -482,22 +492,16 @@ export function TradeOffForm({
             <p className="mt-1 text-xs text-brand-muted">That email doesn't look right.</p>
           )}
         </Field>
-        <Field label="Website (optional)">
-          <Input
-            value={state.website}
-            onChange={(v) => update("website", v)}
-            placeholder="https://"
-            maxLength={240}
-          />
-        </Field>
-        <Field label="Instagram handle (optional, without @)">
-          <Input
-            value={state.instagram}
-            onChange={(v) => update("instagram", v)}
-            placeholder="yourhandle"
-            maxLength={80}
-          />
-        </Field>
+        {TRADE_SOCIAL_FIELDS.map((f) => (
+          <Field key={f.key} label={`${f.label} (optional)`}>
+            <Input
+              value={state[f.key]}
+              onChange={(v) => update(f.key, v)}
+              placeholder={f.placeholder}
+              maxLength={240}
+            />
+          </Field>
+        ))}
       </Section>
 
       {/* About */}

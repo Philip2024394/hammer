@@ -1,7 +1,7 @@
 "use client";
 
 // Vanity-slug picker for the Trade Off signup form. Live-prefixed with
-// `hammerex.com/t/`, strips/lowercases to [a-z0-9-] as the tradie types,
+// `hammerex.com/trade/`, strips/lowercases to [a-z0-9-] as the tradie types,
 // and shows a debounced availability check (green ✓ / red ✗) next to the
 // input.
 //
@@ -75,9 +75,9 @@ export function SlugAvailabilityField({
 
   return (
     <div>
-      <div className="flex items-stretch overflow-hidden rounded-lg border border-brand-line bg-brand-bg focus-within:border-brand-accent">
+      <div className="flex items-stretch overflow-hidden rounded-lg border border-brand-line bg-brand-bg focus-within:border-[#F97316]">
         <span className="inline-flex items-center bg-black/40 px-3 text-xs text-brand-muted">
-          hammerex.com/t/
+          hammerex.com/trade/
         </span>
         <input
           type="text"

@@ -44,12 +44,12 @@ export async function generateMetadata({
   if (!TRADE_OFF_TRADES.find((t) => t.slug === trade)) return { title: "Trade not found" };
   const label = tradeLabel(trade);
   const cityLabel = titleCase(decodeURIComponent(city));
-  const title = `${label}s in ${cityLabel} — Hammerex Trade Off`;
+  const title = `${label}s in ${cityLabel} — Xrated Trades`;
   const data = await loadTradeCity(trade, city);
   const n = data?.listings.length ?? 0;
   const description = n
-    ? `${n} ${label.toLowerCase()}${n === 1 ? "" : "s"} in ${cityLabel} on Hammerex Trade Off. Free WhatsApp quotation, Hammerex Standard verified pros first.`
-    : `Looking for a ${label.toLowerCase()} in ${cityLabel}? List your trade free on Hammerex Trade Off.`;
+    ? `${n} ${label.toLowerCase()}${n === 1 ? "" : "s"} in ${cityLabel} on Xrated Trades. Free WhatsApp quotation, Hammerex Standard verified pros first. Powered by Hammerex.`
+    : `Looking for a ${label.toLowerCase()} in ${cityLabel}? List your trade free on Xrated Trades — powered by Hammerex.`;
   return {
     title,
     description,
@@ -118,8 +118,8 @@ export default async function TradeOffCityPage({
 
       <section className="border-b border-brand-line">
         <div className="mx-auto max-w-5xl px-4 pb-8 pt-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
-            Hammerex Trade Off
+          <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+            Xrated Trades
           </p>
           <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
             {label}s in {cityLabel}
@@ -175,12 +175,12 @@ function EmptyState({
       </p>
       <a
         href="/trade-off/signup"
-        className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-xs font-bold text-black transition hover:brightness-110"
+        className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
       >
         List your trade here — free
       </a>
       <div className="mt-6 border-t border-brand-line pt-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
           Try a nearby trade
         </p>
         <ul className="mt-3 flex flex-wrap gap-2">
@@ -188,7 +188,7 @@ function EmptyState({
             <li key={t.slug}>
               <a
                 href={`/trade-off/${t.slug}`}
-                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-black/40 px-4 text-xs font-semibold text-brand-text transition hover:border-brand-accent hover:text-brand-accent"
+                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-black/40 px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
               >
                 {t.label}s
               </a>
@@ -206,8 +206,8 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
   const initial = (listing.display_name.charAt(0) || "?").toUpperCase();
   return (
     <a
-      href={`/t/${listing.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-brand-accent"
+      href={`/trade/${listing.slug}`}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
         <img
@@ -218,7 +218,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
           className="h-full w-full object-cover transition group-hover:scale-[1.02]"
         />
         {listing.hammerex_standard_verified && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-brand-accent px-2.5 py-1 text-xs font-bold text-black shadow-lg">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
@@ -235,14 +235,14 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-brand-accent text-base font-bold text-black">
+            <div className="flex h-full w-full items-center justify-center bg-[#F97316] text-base font-bold text-white">
               {initial}
             </div>
           )}
         </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-base font-semibold text-brand-text group-hover:text-brand-accent">
+        <h3 className="text-base font-semibold text-brand-text group-hover:text-[#F97316]">
           {listing.display_name}
         </h3>
         {listing.trading_name && (

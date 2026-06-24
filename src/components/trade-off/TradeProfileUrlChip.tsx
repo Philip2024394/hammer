@@ -1,7 +1,7 @@
 "use client";
 
 // Copyable chip showing the tradie's canonical public URL —
-// `hammerex.com/t/<slug>` — sat at the top of the profile hero.
+// `hammerex.com/trade/<slug>` — sat at the top of the profile hero.
 // One-click clipboard copy with a 2s "Copied!" flash.
 
 import { useState } from "react";
@@ -11,13 +11,13 @@ export function TradeProfileUrlChip({
   fullUrl
 }: {
   slug: string;
-  // Pre-resolved absolute URL (e.g. `https://hammerex.com/t/<slug>`).
+  // Pre-resolved absolute URL (e.g. `https://hammerex.com/trade/<slug>`).
   // Falls back to a relative form if not provided.
   fullUrl?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const display = `hammerex.com/t/${slug}`;
-  const target = fullUrl ?? `/t/${slug}`;
+  const display = `hammerex.com/trade/${slug}`;
+  const target = fullUrl ?? `/trade/${slug}`;
 
   async function copy() {
     try {
@@ -37,7 +37,7 @@ export function TradeProfileUrlChip({
     <button
       type="button"
       onClick={copy}
-      className="inline-flex h-9 items-center gap-2 rounded-full border border-brand-line bg-black/40 px-3 text-xs font-semibold text-brand-text transition hover:border-brand-accent hover:text-brand-accent"
+      className="inline-flex h-9 items-center gap-2 rounded-full border border-brand-line bg-black/40 px-3 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
       aria-label={`Copy ${display}`}
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

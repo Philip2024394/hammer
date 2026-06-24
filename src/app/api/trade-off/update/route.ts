@@ -58,8 +58,25 @@ const UPDATABLE_STRING_FIELDS = [
   "email",
   "website",
   "instagram",
+  "facebook",
+  "tiktok",
+  "youtube",
   "bio",
-  "avatar_url"
+  "avatar_url",
+  // Xrated App visual customisation — only meaningful when the listing's
+  // effectiveTier is app_trial / app_paid. The render layer enforces gating;
+  // we accept the writes regardless so an upgrade re-activates them.
+  "theme_color",
+  "button_text_color",
+  "cta_button_effect",
+  "hero_text_line1",
+  "hero_text_line2",
+  "hero_text_line2_color",
+  "hero_text_tagline",
+  "hero_text_effect",
+  "avatar_frame_style",
+  "profile_placement",
+  "running_marquee"
 ] as const;
 
 const UPDATABLE_ARRAY_FIELDS = [
@@ -69,6 +86,9 @@ const UPDATABLE_ARRAY_FIELDS = [
 ] as const;
 
 const UPDATABLE_INT_FIELDS = ["years_in_trade", "start_year"] as const;
+
+// Booleans accepted through the customisation panel.
+const UPDATABLE_BOOL_FIELDS = ["accepting_jobs"] as const;
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
@@ -117,6 +137,12 @@ export async function POST(req: NextRequest) {
   }
   for (const f of UPDATABLE_INT_FIELDS) {
     if (f in fieldsIn) patch[f] = intOrNull(fieldsIn[f]);
+  }
+  for (const f of UPDATABLE_BOOL_FIELDS) {
+    if (f in fieldsIn) {
+      const v = fieldsIn[f];
+      patch[f] = v === true || v === "true" || v === 1 || v === "1";
+    }
   }
 
   // Required-field NOT NULLs cannot be set to null — refuse instead.

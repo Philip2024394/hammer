@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ trade: st
   const { trade } = await params;
   if (!TRADE_OFF_TRADES.find((t) => t.slug === trade)) return { title: "Trade not found" };
   const label = tradeLabel(trade);
-  const title = `${label}s — Hammerex Trade Off`;
-  const description = `Find a ${label.toLowerCase()} on Hammerex Trade Off. Free WhatsApp quotation. Verified Hammerex Standard tradies first.`;
+  const title = `${label}s — Xrated Trades`;
+  const description = `Find a ${label.toLowerCase()} on Xrated Trades. Free WhatsApp quotation. Verified Hammerex Standard tradies first. Powered by Hammerex.`;
   return {
     title,
     description,
@@ -90,11 +90,11 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
 
       <section className="border-b border-brand-line">
         <div className="mx-auto max-w-5xl px-4 pb-8 pt-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
-            Hammerex Trade Off
+          <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+            Xrated Trades
           </p>
           <h1 className="mt-3 text-3xl font-bold leading-tight text-brand-text sm:text-4xl">
-            {label}s on Trade Off
+            {label}s on Xrated Trades
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted">
             {listings.length} live {listings.length === 1 ? "tradie" : "tradies"} — free WhatsApp quotation, verified Hammerex Standard tradies first.
@@ -102,7 +102,7 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
           <div className="mt-5">
             <a
               href="/trade-off/signup"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-xs font-bold text-black transition hover:brightness-110"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
             >
               List your trade (free)
             </a>
@@ -112,7 +112,7 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
 
       {cities.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pt-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
             Filter by city
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -120,7 +120,7 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
               <li key={c.slug}>
                 <a
                   href={`/trade-off/${trade}/${encodeURIComponent(c.slug)}`}
-                  className="inline-flex h-11 items-center rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-brand-accent hover:text-brand-accent"
+                  className="inline-flex h-11 items-center rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
                 >
                   {c.label}
                   <span className="ml-2 text-brand-muted">{c.count}</span>
@@ -142,7 +142,7 @@ export default async function TradeOffByTradePage({ params }: { params: Promise<
             </p>
             <a
               href="/trade-off/signup"
-              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-brand-accent px-5 text-xs font-bold text-black transition hover:brightness-110"
+              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
             >
               List your trade (free)
             </a>
@@ -169,8 +169,8 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
   const initial = (listing.display_name.charAt(0) || "?").toUpperCase();
   return (
     <a
-      href={`/t/${listing.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-brand-accent"
+      href={`/trade/${listing.slug}`}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
         <img
@@ -181,7 +181,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
           className="h-full w-full object-cover transition group-hover:scale-[1.02]"
         />
         {listing.hammerex_standard_verified && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-brand-accent px-2.5 py-1 text-xs font-bold text-black shadow-lg">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
@@ -198,14 +198,14 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-brand-accent text-base font-bold text-black">
+            <div className="flex h-full w-full items-center justify-center bg-[#F97316] text-base font-bold text-white">
               {initial}
             </div>
           )}
         </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-base font-semibold text-brand-text group-hover:text-brand-accent">
+        <h3 className="text-base font-semibold text-brand-text group-hover:text-[#F97316]">
           {listing.display_name}
         </h3>
         {listing.trading_name && (

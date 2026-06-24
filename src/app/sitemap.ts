@@ -78,11 +78,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7
   }));
 
-  // Trade Off — public listing profiles (/t/<slug>).
+  // Trade Off — public listing profiles (/trade/<slug>).
   const tradeOffListings: MetadataRoute.Sitemap = (tradeOffRes.data ?? [])
     .filter((l) => l.slug)
     .map((l) => ({
-      url: `${base}/t/${l.slug}`,
+      url: `${base}/trade/${l.slug}`,
       lastModified: l.updated_at ? new Date(l.updated_at) : now,
       changeFrequency: "weekly" as const,
       priority: 0.8
