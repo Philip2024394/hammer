@@ -411,18 +411,32 @@ function PremiumLayout({
             />
           </div>
 
-          {/* Contact + Visit buttons sit INSIDE the banner under the tagline.
-              Anchor hrefs drive the expand panels below — no client state
-              passed across the server boundary. */}
-          <div className="absolute bottom-4 left-4 z-10 sm:bottom-6 sm:left-6">
-            <ProfileActionTriple
-              whatsappHref="#contact-panel"
-              visitHref="#visit-panel"
-              shareHref="#share"
-              themeColor={theme}
-              variant="overlay"
-            />
-          </div>
+          {/* Three trade-icon chips sit on the bottom-left of the banner,
+              under the hero tagline text. Pulled from the tradie's top three
+              services — each chip is a small button-sized pill with an icon. */}
+          {listing.services_offered && listing.services_offered.length > 0 && (
+            <ul className="absolute bottom-3 left-3 z-10 flex gap-1.5 sm:bottom-5 sm:left-5 sm:gap-2">
+              {listing.services_offered.slice(0, 3).map((svc) => (
+                <li key={svc}>
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full bg-black/65 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm sm:px-2.5 sm:text-[11px]"
+                  >
+                    <span
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full sm:h-5 sm:w-5"
+                      style={{ background: theme, color: ctaInk }}
+                      aria-hidden="true"
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0-.83-.83-.83-2.17 0-3L12 9" />
+                        <path d="m17.64 15 3.36-3.36a3 3 0 0 0 0-4.24L18.36 4.36a3 3 0 0 0-4.24 0L11 7.5l6.64 7.5Z" />
+                      </svg>
+                    </span>
+                    <span className="max-w-[120px] truncate sm:max-w-none">{svc}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
@@ -433,25 +447,21 @@ function PremiumLayout({
           anchored to the BOTTOM-RIGHT of the card. */}
       <section className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 sm:-mt-20">
         <div className="relative rounded-2xl bg-brand-surface p-4 shadow-2xl sm:p-5">
-          {/* Top row: name (left) + avatar (right) */}
+          {/* Top row: avatar (LEFT) + name + stars + location stack (right) */}
           <div className="flex items-center gap-3">
+            <div className="shrink-0">
+              <AvatarFrame
+                src={listing.avatar_url}
+                name={listing.display_name}
+                size={72}
+                style={listing.avatar_frame_style}
+                themeColor={theme}
+              />
+            </div>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <h1 className="truncate text-lg font-bold leading-tight text-brand-text sm:text-2xl">
-                  {listing.display_name}
-                </h1>
-                {listing.hammerex_standard_verified && (
-                  <span
-                    className="inline-block align-middle"
-                    title="Hammerex Standard verified"
-                    aria-label="Verified"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#facc15" aria-hidden="true">
-                      <path d="m12 1 3 5 6 1-4.5 4.5L18 18l-6-3-6 3 1.5-6.5L3 7l6-1Z" />
-                    </svg>
-                  </span>
-                )}
-              </div>
+              <h1 className="truncate text-lg font-bold leading-tight text-brand-text sm:text-2xl">
+                {listing.display_name}
+              </h1>
               <div className="mt-1">
                 <StarRatingRow
                   rating_avg={listing.rating_avg}
@@ -467,23 +477,7 @@ function PremiumLayout({
                   {listing.city}
                   {listing.country ? `, ${listing.country}` : ""}
                 </span>
-                <a
-                  href="#visit-panel"
-                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text underline-offset-4 hover:underline"
-                >
-                  Visit us
-                  <span aria-hidden="true">→</span>
-                </a>
               </div>
-            </div>
-            <div className="shrink-0">
-              <AvatarFrame
-                src={listing.avatar_url}
-                name={listing.display_name}
-                size={72}
-                style={listing.avatar_frame_style}
-                themeColor={theme}
-              />
             </div>
           </div>
 
@@ -548,14 +542,24 @@ function PremiumLayout({
         }
       />
 
-      {/* 4. About — eyebrow is the company name; bio capped at 5 lines. */}
+      {/* 4. Company Details eyebrow with inline "Visit us →" link on the
+          right; bio capped at 5 lines. */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-        <h2
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: theme }}
-        >
-          {listing.trading_name || listing.display_name}
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2
+            className="text-xs font-bold uppercase tracking-widest"
+            style={{ color: theme }}
+          >
+            Company Details
+          </h2>
+          <a
+            href="#visit-panel"
+            className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text underline-offset-4 hover:underline"
+          >
+            Visit us
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
         <div className="mt-3">
           <AboutBio
             text={listing.bio || "No bio provided yet."}

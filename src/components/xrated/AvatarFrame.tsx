@@ -1,9 +1,9 @@
-// Xrated Trades — circular avatar with optional animated frame variant.
-// Mirrors the cityapp beautician avatar pattern: the frame is the only
-// visible "theme" the punter notices, so it has to feel premium without
-// being noisy. CSS-only animations — no client state needed.
+// Xrated Trades — circular avatar with optional themed ring.
+// Ring + image are layered absolutely so the image is inset slightly inside
+// the ring border — visible orange ring surrounding the rounded image with a
+// small gap, regardless of size.
 
-import { inkForTheme, type AvatarFrameStyle } from "@/lib/xratedTrades";
+import { type AvatarFrameStyle } from "@/lib/xratedTrades";
 
 export function AvatarFrame({
   src,
@@ -18,51 +18,28 @@ export function AvatarFrame({
   style: AvatarFrameStyle;
   themeColor: string;
 }) {
-  const ink = inkForTheme(themeColor);
-  // Stable animation name per instance so multiple avatars on a page don't
-  // collide on keyframe identifiers.
+  const hasRing = style !== "none";
+  const ringWidth = Math.max(3, Math.round(size * 0.05));
+  const innerInset = hasRing ? ringWidth + 2 : 0;
   const animId = `xaf-${style}`;
 
-  const wrapperStyle: React.CSSProperties = {
-    width: size,
-    height: size
-  };
-
   const ringStyle: React.CSSProperties = {
-    width: size,
-    height: size,
-    borderRadius: "9999px"
+    position: "absolute",
+    inset: 0,
+    borderRadius: "9999px",
+    border: `${ringWidth}px solid ${themeColor}`,
+    boxSizing: "border-box",
+    ...(style === "pulse"
+      ? { animation: `${animId} 2s ease-in-out infinite`, transformOrigin: "center" }
+      : {})
   };
 
-  // Decorative ring layer behind the image.
-  let frameLayer: React.ReactNode = null;
-  if (style === "ring") {
-    frameLayer = (
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 rounded-full"
-        style={{ ...ringStyle, boxShadow: `0 0 0 4px ${themeColor}` }}
-      />
-    );
-  } else if (style === "pulse") {
-    frameLayer = (
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 rounded-full"
-        style={{
-          ...ringStyle,
-          boxShadow: `0 0 0 4px ${themeColor}`,
-          animation: `${animId} 2s ease-in-out infinite`,
-          transformOrigin: "center"
-        }}
-      />
-    );
-  }
-
-  const imgWrapperClass = "relative overflow-hidden rounded-full shadow-lg";
-
-  const imgWrapperStyle: React.CSSProperties = {
-    ...wrapperStyle,
+  const innerStyle: React.CSSProperties = {
+    position: "absolute",
+    inset: innerInset,
+    borderRadius: "9999px",
+    overflow: "hidden",
+    background: "rgb(var(--brand-bg) / 1)",
     ...(style === "dance"
       ? { animation: `${animId} 3s ease-in-out infinite`, transformOrigin: "center" }
       : {})
@@ -70,24 +47,20 @@ export function AvatarFrame({
 
   return (
     <span
-      className="relative inline-block"
-      style={wrapperStyle}
+      className="relative inline-block shadow-lg"
+      style={{ width: size, height: size, borderRadius: "9999px" }}
     >
-      {frameLayer}
-      <span className={imgWrapperClass} style={imgWrapperStyle}>
+      {hasRing && <span aria-hidden="true" style={ringStyle} />}
+      <span style={innerStyle}>
         {src ? (
           <img
             src={src}
             alt={`${name} profile photo`}
             className="block h-full w-full object-cover"
-            width={size}
-            height={size}
           />
         ) : (
-          // Soft neutral placeholder when no avatar uploaded — a generic
-          // person silhouette on a muted grey rather than a coloured initial.
           <span
-            className="flex h-full w-full items-center justify-center bg-brand-bg"
+            className="flex h-full w-full items-center justify-center"
             aria-hidden="true"
           >
             <svg
