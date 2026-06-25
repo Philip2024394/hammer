@@ -20,6 +20,12 @@ export type PricedService = {
   name: string;
   image_url: string | null;
   image_urls?: string[];
+  /** Optional CSS object-position value (e.g. "center top", "50% 30%")
+   *  used to frame the cover image when the tradesperson picks a
+   *  non-default focal point via the dashboard image-positioner. Falls
+   *  back to "top" so AI-generated art with bottom-edge text/branding
+   *  shows the headline of the image, not the watermark. */
+  image_position?: string | null;
   price: number;
   unit: string;
   description?: string | null;
@@ -355,7 +361,8 @@ function ServiceCard({
           <img
             src={cover}
             alt={svc.name}
-            className="h-full w-full object-cover transition group-hover:scale-[1.03]"
+            className="h-full w-full object-cover object-top transition group-hover:scale-[1.03]"
+            style={svc.image_position ? { objectPosition: svc.image_position } : undefined}
           />
           {images.length > 1 && (
             <span

@@ -6,6 +6,7 @@ import { PremiumHero } from "@/components/xrated/profile/PremiumHero";
 import { VideoLightbox } from "@/components/xrated/profile/VideoLightbox";
 import { EnquireButton } from "@/components/xrated/profile/EnquireButton";
 import { ServicesTabbedGallery } from "@/components/xrated/profile/ServicesTabbedGallery";
+import { TeamGrid } from "@/components/xrated/profile/TeamGrid";
 import { AboutFlipPanel } from "@/components/xrated/profile/AboutFlipPanel";
 import { TradeIcon } from "@/lib/tradeIcons";
 import { ReviewsCarousel } from "@/components/xrated/profile/ReviewsCarousel";
@@ -86,7 +87,7 @@ async function loadListing(slug: string) {
   const reviewsRes = await supabase
     .from("hammerex_xrated_reviews")
     .select(
-      "id, customer_name, customer_postcode, project_type, service_name, overall_rating, workmanship_rating, communication_rating, value_rating, timeliness_rating, body, status, public_response, submitted_at"
+      "id, customer_name, customer_postcode, customer_avatar_url, project_type, service_name, overall_rating, workmanship_rating, communication_rating, value_rating, timeliness_rating, body, status, public_response, submitted_at"
     )
     .eq("listing_id", listing.id)
     .in("status", ["live", "disputed"])
@@ -103,6 +104,7 @@ type XratedReviewPublic = {
   id: string;
   customer_name: string;
   customer_postcode: string | null;
+  customer_avatar_url: string | null;
   project_type: string | null;
   service_name: string | null;
   overall_rating: number;
@@ -484,7 +486,10 @@ function PremiumLayout({
       {/* Opening hours removed from the home page — surfaced as a
           running marquee on the contact page instead. */}
       <ClientsCarousel listing={listing} reviews={reviews} />
-      <ToolsIUseBlock toolProducts={toolProducts} tierLabel={tierLabel} />
+      {/* Tools-I-Use block removed from premium. Replaced by the
+          Meet the Team grid below — last trust signal before the
+          contact CTA. Solo tradies (< 2 members) auto-hide. */}
+      <TeamGrid listing={listing} />
       <ShareAndContactCta
         listing={listing}
         waUrl={waUrl}

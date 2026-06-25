@@ -316,6 +316,16 @@ export type HammerexTradeOffListing = {
   // Short label rendered next to the video tile (e.g. "Level 5 skim
   // example"). Editor caps to 60 chars.
   video_caption: string | null;
+  // "Meet the team" — optional team-member roster shown on the premium
+  // profile when length >= 2. Avatar URL is optional; missing photos
+  // fall back to initials on a yellow circle.
+  team_members: {
+    name: string;
+    role: string;
+    years_experience: number | null;
+    avatar_url: string | null;
+    skills: string[];
+  }[];
   joined_at: string;
   created_at: string;
   updated_at: string;

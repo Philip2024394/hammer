@@ -18,15 +18,22 @@ export function XratedFooter() {
               style={{ background: "transparent" }}
             />
             <p className="mt-3 text-xs leading-relaxed text-white/70">
-              {XRATED_BRAND.tagline}
+              The shareable trade profile for UK tradies — replaces your
+              website, quote form and business card with one link.
             </p>
             <a
               href="/trade-off/signup"
-              className="mt-3 inline-flex h-10 items-center rounded-lg px-4 text-xs font-bold text-white transition active:scale-[0.98]"
+              className="mt-4 inline-flex h-10 items-center gap-1.5 rounded-lg px-4 text-xs font-extrabold text-neutral-900 transition active:scale-[0.98]"
               style={{ background: XRATED_BRAND.accent }}
             >
-              List your trade (free)
+              Start 30-day free trial
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
             </a>
+            <p className="mt-2 text-xs text-white/60">
+              No card on signup · Cancel any time
+            </p>
           </section>
 
           <section>
@@ -39,12 +46,17 @@ export function XratedFooter() {
             <ul className="mt-3 space-y-2 text-sm text-white/80">
               <li>
                 <a href="/trade-off/signup" className="hover:text-white">
-                  List your trade
+                  Start free trial
                 </a>
               </li>
               <li>
-                <a href="/trade-off/upgrade" className="hover:text-white">
+                <a href="/trade-off/pricing" className="hover:text-white">
                   Pricing
+                </a>
+              </li>
+              <li>
+                <a href="/trade-off" className="hover:text-white">
+                  How it works
                 </a>
               </li>
               <li className="text-white/60">
@@ -59,16 +71,23 @@ export function XratedFooter() {
               className="text-xs font-bold uppercase tracking-widest"
               style={{ color: XRATED_BRAND.accent }}
             >
-              For customers
+              Why Xrated
             </h3>
             <ul className="mt-3 space-y-2 text-sm text-white/80">
-              <li>
-                <a href="/trade-off" className="hover:text-white">
-                  Find a tradesperson
-                </a>
+              <li className="text-white/70">
+                One link replaces your website
               </li>
               <li className="text-white/70">
-                Quote process — browse a tradie&apos;s profile then message direct on WhatsApp
+                Quote form built in
+              </li>
+              <li className="text-white/70">
+                Verified reviews tied to specific services
+              </li>
+              <li className="text-white/70">
+                Direct WhatsApp / email — no platform fee on jobs
+              </li>
+              <li className="text-white/70">
+                Free Hammerex knife voucher on signup
               </li>
             </ul>
           </section>

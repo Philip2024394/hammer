@@ -19,6 +19,7 @@ export type ReviewCard = {
   id: string;
   customer_name: string;
   customer_postcode: string | null;
+  customer_avatar_url: string | null;
   project_type: string | null;
   service_name: string | null;
   overall_rating: number;
@@ -133,7 +134,32 @@ export function ReviewsCarousel({
 
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr,auto] sm:items-end sm:gap-6">
           <p className="text-sm leading-relaxed text-neutral-700">{r.body}</p>
-          <div className="text-right">
+          <div className="flex flex-col items-end gap-1.5 text-right">
+            <span
+              className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full ring-2 ring-white"
+              style={{ boxShadow: "0 4px 10px rgba(0,0,0,0.10)" }}
+            >
+              {r.customer_avatar_url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={r.customer_avatar_url}
+                  alt={r.customer_name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span
+                  className="flex h-full w-full items-center justify-center text-sm font-extrabold"
+                  style={{ background: "#FFB300", color: "#0A0A0A" }}
+                >
+                  {r.customer_name
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((w) => w[0]?.toUpperCase() ?? "")
+                    .join("")}
+                </span>
+              )}
+            </span>
             <p className="text-sm font-bold text-neutral-900">{r.customer_name}</p>
             <p className="text-xs text-neutral-500">{outcode ? `${outcode} · ${city}` : city}</p>
             <p className="mt-0.5 text-xs text-neutral-400">{date}</p>

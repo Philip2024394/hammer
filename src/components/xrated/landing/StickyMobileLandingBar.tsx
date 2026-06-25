@@ -39,17 +39,19 @@ export function StickyMobileLandingBar() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="mx-auto flex max-w-6xl items-stretch gap-2 px-3 py-2">
+        {/* Reframed after the pivot to app-for-tradies: secondary link
+            opens the pricing page, primary CTA starts the free trial. */}
         <a
-          href="/trade-off/jobs"
+          href="/trade-off/pricing"
           className="inline-flex h-14 flex-1 items-center justify-center rounded-xl border border-neutral-300 bg-white px-3 text-xs font-bold text-neutral-900 transition active:scale-[0.98]"
         >
-          Find tradie
+          See pricing
         </a>
         <a
-          href="/trade-off/jobs/post"
-          className="inline-flex h-14 flex-1 items-center justify-center rounded-xl bg-[#FFB300] px-3 text-xs font-bold text-white shadow-lg transition hover:bg-[#E5A500] active:scale-[0.98]"
+          href="/trade-off/signup"
+          className="inline-flex h-14 flex-1 items-center justify-center rounded-xl bg-[#FFB300] px-3 text-xs font-extrabold text-neutral-900 shadow-lg transition active:scale-[0.98]"
         >
-          Post job
+          Start free trial
         </a>
       </div>
     </div>
