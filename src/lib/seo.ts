@@ -25,7 +25,10 @@ export const BRAND = {
     "Construction tools, tool belts & tool bags direct from the Hammerex workshop — hardware-store-direct prices, worldwide shipping.",
   logo: "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/85e5e067cf0cb299.png",
   whatsapp: process.env.NEXT_PUBLIC_HAMMEREX_WHATSAPP ?? "+6281392000050",
-  locale: "en_US"
+  // UK English — biggest single signal to Google + OG consumers that
+  // this site targets the UK market. Was en_US (US English) which
+  // confused localised SERPs and lost ranking ground in google.co.uk.
+  locale: "en_GB"
 };
 
 // Site-wide keyword set kept in one place so titles, meta descriptions, JSON-LD
@@ -56,6 +59,7 @@ export function organizationJsonLd() {
     url: siteUrl(),
     logo: BRAND.logo,
     description: BRAND.description,
+    inLanguage: "en-GB",
     // Social-profile cross-links — Google uses sameAs for the Knowledge
     // Graph card and entity disambiguation.
     sameAs: [
@@ -66,8 +70,8 @@ export function organizationJsonLd() {
         "@type": "ContactPoint",
         telephone: `+${digits}`,
         contactType: "sales",
-        availableLanguage: ["en", "id"],
-        areaServed: "Worldwide"
+        availableLanguage: ["en-GB", "en", "id"],
+        areaServed: ["GB", "Worldwide"]
       }
     ]
   };
@@ -110,6 +114,7 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     name: BRAND.name,
     url: siteUrl(),
+    inLanguage: "en-GB",
     potentialAction: {
       "@type": "SearchAction",
       target: `${siteUrl()}/?q={search_term_string}`,
@@ -141,7 +146,11 @@ const IDR_PER_AUD = 12578;
 const IDR_PER_SGD = 13866;
 
 function priceForJsonLd(product: HammerexProduct): { priceCurrency: string; price: string } {
-  const cur = (product.base_currency ?? "IDR").toUpperCase();
+  // Default to GBP so Google Merchant Center + UK Shopping see a
+  // £-denominated Offer (the canonical IDR price gets divided by the
+  // indicative FX rate above). Tradies who set base_currency='IDR'
+  // still get raw IDR — that's the explicit opt-in for IDR audiences.
+  const cur = (product.base_currency ?? "GBP").toUpperCase();
   const divisor =
     cur === "GBP" ? IDR_PER_GBP :
     cur === "USD" ? IDR_PER_USD :
@@ -196,6 +205,7 @@ export function productJsonLd(product: HammerexProduct, category?: HammerexCateg
     name: product.name,
     description,
     image,
+    inLanguage: "en-GB",
     sku: product.sku ?? product.id,
     brand: { "@type": "Brand", name: product.brand ?? BRAND.name },
     ...(product.model_number ? { mpn: product.model_number } : {}),

@@ -28,6 +28,11 @@ export type SeoLandingConfig = {
   ctaCategorySlug?: string | null;
   // Page-specific FAQ (3-5 Qs). Emitted as visible accordion + FAQPage JSON-LD.
   faq: { q: string; a: string }[];
+  // Optional 4-up trust strip rendered between the hero and the category
+  // grid. Used on UK / region-targeted landings to surface delivery,
+  // compliance and fit signals at a glance. Each entry maps to a small
+  // icon ID (see SeoLandingPage), a bold label, and a one-line sublabel.
+  valueProps?: { icon: "delivery" | "shield" | "spanner" | "leaf" | "check" | "weight" | "uk"; label: string; sublabel: string }[];
 };
 
 export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
@@ -244,6 +249,70 @@ export const SEO_LANDINGS: Record<string, SeoLandingConfig> = {
       {
         q: "Are new tools the same trade-grade build as the rest of the range?",
         a: "Yes. New tools follow the same brief — full-grain leather, brass-bound rivets, contrast stitching, reinforced stress points — and ship under the same 1-year defect warranty and optional 3-year Pro Trade Cover."
+      }
+    ]
+  },
+  // ─── UK-targeted landing: scaffolding tool belts ─────────────────────
+  "scaffolding-tool-belts-uk": {
+    slug: "scaffolding-tool-belts-uk",
+    title: "Scaffolding Tool Belts UK | Leather Scaffolders Belts — Hammerex",
+    h1: "Scaffolding Tool Belts for UK Scaffolders",
+    metaDescription:
+      "Scaffolding tool belts for UK scaffolders — heavy-duty leather, 19/21mm spanner stations, 8m tape holder, NASC-compatible. Free UK delivery. Direct from Hammerex.",
+    intro:
+      "Hammerex scaffolding tool belts are built for UK scaffolders working tube-and-fitting, Layher Allround and Cuplok systems on commercial and domestic sites. Every belt is cut from full-grain leather, brass-rivet reinforced and stitched in our Yogyakarta workshop — the hardware-store-direct alternative to the marked-up scaffolders belts you find at UK building merchants.\n\nThe range is designed around the daily kit a UK scaffolder actually runs: two 19/21mm or 22mm scaffold spanners, a ratchet, a hammer, an 8 metre tape, a single-bubble level, gloves and a tool lanyard. Stations are positioned so the belt sits flat with the load distributed across the hips — no roll, no sag, no slow climbs. NASC-compliant tool tether attachment points support the Work At Height (WAH) tethering UK HSE guidance recommends above two metres.\n\nA popular choice with UK scaffolders running tube-and-fitting AND system scaffolding. Free UK delivery on every scaffolders belt, dispatched within 3-4 working days from the workshop.",
+    categorySlugs: ["scaffolding", "belts", "belt-holders"],
+    ctaCategorySlug: "scaffolding",
+    valueProps: [
+      {
+        icon: "uk",
+        label: "Free UK delivery",
+        sublabel: "On every scaffolders belt, every order"
+      },
+      {
+        icon: "spanner",
+        label: "Fits 19/21mm spanners",
+        sublabel: "Sized for standard UK scaffold spanners"
+      },
+      {
+        icon: "shield",
+        label: "NASC-compatible",
+        sublabel: "WAH-compliant lanyard attachment points"
+      },
+      {
+        icon: "weight",
+        label: "Lightweight with room",
+        sublabel: "Carries the full UK kit without the sag"
+      }
+    ],
+    faq: [
+      {
+        q: "Are these scaffolding tool belts popular with UK scaffolders?",
+        a: "Yes — Hammerex scaffolders belts are a popular choice with UK scaffolders working commercial, domestic and industrial sites. The 19/21mm and 22mm spanner stations match the standard UK scaffold spanner combinations, the 8 metre tape holder fits the tapes most UK scaffolders run, and the solid-core leather handles the daily wear of UK scaffolding work."
+      },
+      {
+        q: "Do the belts work for NASC-compliant UK scaffolding sites?",
+        a: "Yes. Tool belts themselves are not subject to a specific UK standard, but every Hammerex scaffolders belt is designed to suit NASC-member firms and TG20:24 working practice. The tool-lanyard attachment points support the Work At Height (WAH) compliant tool tethers UK HSE guidance recommends for any lift above two metres."
+      },
+      {
+        q: "What do UK scaffolders look for in a tool belt?",
+        a: "UK scaffolders typically prioritise three things in a belt: lightweight construction so the belt does not weigh them down on long lifts, enough room to carry the full daily kit (two spanners, a ratchet, a hammer, an 8 metre tape and a level), and secure attachment points compatible with tool lanyards for work at height. Hammerex scaffolders belts are built to all three."
+      },
+      {
+        q: "Do you ship scaffolding tool belts to the UK and how much is delivery?",
+        a: "Yes — direct from our Yogyakarta workshop with free UK delivery on every scaffolders belt. Dispatch typically follows within 3-4 working days of payment, then 4-6 working days air freight to the UK with tracking provided. Email or WhatsApp the Hammerex team if you need a guaranteed date for an upcoming job start."
+      },
+      {
+        q: "Will the spanner stations fit standard UK 19/21mm scaffold spanners?",
+        a: "Yes. Every scaffolders belt in the range is sized for the standard 19/21mm and 22mm scaffold spanners used across the UK scaffolding industry. Spanners drop in cleanly and lift out without snagging or rotating in the holder, which is what UK scaffolders look for on a busy lift."
+      },
+      {
+        q: "Can I use one belt for tube-and-fitting AND system scaffolding?",
+        a: "Yes. The Hammerex scaffolders belt layout works for both tube-and-fitting (where quick spanner access matters most) and system scaffolding such as Layher Allround or Cuplok (where ratchets and a hammer get more daily use). UK scaffolders running mixed sites can keep one belt set up for both jobs."
+      },
+      {
+        q: "Are these lightweight scaffolders belts with extra room?",
+        a: "Yes — UK scaffolders often prefer lightweight belts with more room over heavy military-style rigs. The Hammerex range strikes that balance: solid-core leather construction for durability across long site life, but cut to keep the overall weight down so the belt does not slow you on long climbs."
       }
     ]
   }

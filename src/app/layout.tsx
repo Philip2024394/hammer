@@ -34,6 +34,14 @@ export const metadata: Metadata = {
   keywords: SEO_KEYWORDS,
   alternates: {
     canonical: "/",
+    // Explicit en-GB self-reference so Google indexes UK English and
+    // serves us in google.co.uk SERPs; x-default points back to the
+    // same canonical for non-localised crawlers. Other locales (id, vi,
+    // ms) are emitted on the localised landing pages, not the root.
+    languages: {
+      "en-GB": "/",
+      "x-default": "/"
+    },
     types: {
       "application/rss+xml": [{ url: "/feed.xml", title: `${BRAND.name} — latest products` }]
     }
@@ -74,8 +82,20 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const country = getCountryFromRequest(await headers(), await cookies());
   const locale = await getLocale();
+  // <html lang> needs the BCP 47 region tag so Google reads UK English
+  // (not generic en). Other dictionary locales pass through as-is.
+  const htmlLang =
+    locale === "en"
+      ? "en-GB"
+      : locale === "id"
+        ? "id-ID"
+        : locale === "vi"
+          ? "vi-VN"
+          : locale === "ms"
+            ? "ms-MY"
+            : locale;
   return (
-    <html lang={locale}>
+    <html lang={htmlLang}>
       <body className="min-h-screen bg-brand-bg pb-[calc(56px+env(safe-area-inset-bottom))] text-brand-text antialiased md:pb-0">
         <script
           type="application/ld+json"

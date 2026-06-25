@@ -54,6 +54,10 @@ export async function SeoLandingPage({ landingKey }: { landingKey: string }) {
         </header>
       </section>
 
+      {config.valueProps && config.valueProps.length > 0 && (
+        <ValuePropStrip items={config.valueProps} />
+      )}
+
       {categories.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pt-8">
           <h2 className="text-lg font-bold uppercase tracking-wide text-brand-text sm:text-xl">Browse the range</h2>
@@ -97,6 +101,115 @@ export async function SeoLandingPage({ landingKey }: { landingKey: string }) {
       <DeliveryFooter />
     </main>
   );
+}
+
+// 4-up trust strip rendered between the hero and the category grid on
+// region-targeted landings (UK / EU). Each card is a small icon + bold
+// label + one-line sublabel. The icon set lives below so the component
+// can stay server-rendered (no client-side icon library needed).
+function ValuePropStrip({
+  items
+}: {
+  items: NonNullable<SeoLandingConfig["valueProps"]>;
+}) {
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-6">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {items.map((p) => (
+          <li
+            key={p.label}
+            className="flex items-start gap-3 rounded-xl border border-brand-line bg-brand-surface p-3 sm:p-4"
+          >
+            <span
+              aria-hidden="true"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-accent text-black"
+            >
+              <ValuePropIcon name={p.icon} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[13px] font-bold leading-tight text-brand-text sm:text-sm">
+                {p.label}
+              </span>
+              <span className="mt-0.5 block text-xs leading-snug text-brand-muted">
+                {p.sublabel}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ValuePropIcon({ name }: { name: NonNullable<SeoLandingConfig["valueProps"]>[number]["icon"] }) {
+  const common = {
+    width: 20,
+    height: 20,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true as const
+  };
+  switch (name) {
+    case "delivery":
+      return (
+        <svg {...common}>
+          <path d="M1 3h15v13H1z" />
+          <path d="M16 8h4l3 3v5h-7z" />
+          <circle cx="5.5" cy="18.5" r="2.5" />
+          <circle cx="18.5" cy="18.5" r="2.5" />
+        </svg>
+      );
+    case "shield":
+      return (
+        <svg {...common}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+    case "spanner":
+      return (
+        <svg {...common}>
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z" />
+        </svg>
+      );
+    case "weight":
+      return (
+        <svg {...common}>
+          <path d="M6 6h12l-1 14H7L6 6z" />
+          <path d="M9 6V4a3 3 0 0 1 6 0v2" />
+        </svg>
+      );
+    case "leaf":
+      return (
+        <svg {...common}>
+          <path d="M11 20a8 8 0 0 0 8-8c0-5-2-9-2-9s-9 0-13 4-4 13 7 13Z" />
+          <path d="M2 22 11 13" />
+        </svg>
+      );
+    case "uk":
+      // Stylised Union-Jack-style shield mark — simple lines so it reads
+      // at 20px without going noisy. Used as the "UK delivery" mark.
+      return (
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="14" rx="1" />
+          <path d="M3 4 21 18" />
+          <path d="M21 4 3 18" />
+          <path d="M12 4v14" />
+          <path d="M3 11h18" />
+        </svg>
+      );
+    case "check":
+    default:
+      return (
+        <svg {...common}>
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      );
+  }
 }
 
 // Inline tile grid for landing pages — same look as CategoryGrid but routes
