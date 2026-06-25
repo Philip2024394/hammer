@@ -319,6 +319,28 @@ export default async function TradiePublicProfilePage({
       />
       <XratedHeader />
 
+      {/* Per-trade default hero banner — sits directly under the header on
+          every tier. Annual paid members can override via custom_app_hero_url. */}
+      {(() => {
+        const heroUrl = resolveAppHero({
+          custom_app_hero_url: listing.custom_app_hero_url,
+          primary_trade: listing.primary_trade,
+          tier: listing.tier,
+          last_payment_plan: listing.last_payment_plan
+        });
+        if (!heroUrl) return null;
+        return (
+          <section className="w-full">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroUrl}
+              alt={`${listing.display_name} — ${tradeLabel(listing.primary_trade)} hero`}
+              className="block w-full"
+            />
+          </section>
+        );
+      })()}
+
       {isPremium ? (
         <PremiumLayout
           listing={listing}
@@ -366,9 +388,7 @@ export default async function TradiePublicProfilePage({
 // PREMIUM layout — app_trial / app_paid tiers
 // ─────────────────────────────────────────────────────────────────────────
 
-function PremiumLayout({
-  listing
-}: {
+function PremiumLayout(_props: {
   listing: HammerexTradeOffListing;
   projects: HammerexTradeOffProject[];
   toolProducts: HammerexProduct[];
@@ -377,27 +397,9 @@ function PremiumLayout({
   waUrl: string;
   profileFullUrl: string;
 }) {
-  const heroUrl = resolveAppHero({
-    custom_app_hero_url: listing.custom_app_hero_url,
-    primary_trade: listing.primary_trade,
-    tier: listing.tier,
-    last_payment_plan: listing.last_payment_plan
-  });
-
-  return (
-    <>
-      {heroUrl && (
-        <section className="w-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={heroUrl}
-            alt={`${listing.display_name} — ${tradeLabel(listing.primary_trade)} hero`}
-            className="block w-full"
-          />
-        </section>
-      )}
-    </>
-  );
+  // Banner now rendered at the page level (above the tier branch) so all
+  // tiers see it. Body intentionally empty pending the new spec.
+  return <></>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
