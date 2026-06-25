@@ -67,11 +67,11 @@ export function TradesOnStandby({
                   aria-label={`${l.display_name} — ${tradeLabel} in ${l.city}`}
                   className="flex w-full items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 transition active:scale-[0.997] hover:border-neutral-300 sm:p-4"
                 >
-                  {/* LEFT — yellow square icon button */}
+                  {/* LEFT — black square with yellow icon */}
                   <span
                     aria-hidden="true"
                     className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"
-                    style={{ background: "#FFB300", color: "#1a1a1a" }}
+                    style={{ background: "#0a0a0a", color: "#FFB300" }}
                   >
                     <Icon />
                   </span>
@@ -123,10 +123,11 @@ export function TradesOnStandby({
                     </span>
                   )}
 
-                  {/* FAR RIGHT — chevron */}
+                  {/* FAR RIGHT — yellow circle with black arrow */}
                   <span
                     aria-hidden="true"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: "#FFB300", color: "#0a0a0a" }}
                   >
                     <svg
                       width="14"
