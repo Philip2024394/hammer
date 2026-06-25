@@ -26,19 +26,6 @@ export function XratedHeader() {
         </a>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Hamburger menu — opens main nav drawer */}
-          <button
-            type="button"
-            aria-label="Open menu"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
-
           {/* Profile avatar — placeholder silhouette until auth lands */}
           <button
             type="button"
@@ -61,13 +48,24 @@ export function XratedHeader() {
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
               <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
             </svg>
-            {/* Unread dot — visible when alerts pending; placeholder shown
-                so the chrome has its full visual today */}
             <span
               className="absolute right-2 top-2 inline-block h-2 w-2 rounded-full"
               style={{ background: XRATED_BRAND.accent }}
               aria-hidden="true"
             />
+          </button>
+
+          {/* Hamburger menu — anchored to the far right */}
+          <button
+            type="button"
+            aria-label="Open menu"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </button>
         </div>
       </div>

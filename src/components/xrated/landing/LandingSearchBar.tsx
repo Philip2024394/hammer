@@ -83,7 +83,7 @@ export function LandingSearchBar({ cities }: Props) {
 
   return (
     <section id="search" className="mx-auto -mt-7 max-w-6xl px-3 sm:-mt-9 sm:px-4">
-      <div className="flex flex-col gap-2 rounded-2xl border border-neutral-200 bg-white p-2 shadow-xl sm:flex-row sm:items-center sm:gap-2 sm:p-2.5">
+      <div className="flex items-center gap-1.5 rounded-2xl border border-neutral-200 bg-white p-1.5 shadow-xl sm:gap-2 sm:p-2.5">
         {/* LEFT — search input */}
         <form
           className="flex flex-1 items-center gap-2"
@@ -218,20 +218,18 @@ export function LandingSearchBar({ cities }: Props) {
 
         <span className="hidden h-8 w-px bg-neutral-200 sm:block" aria-hidden="true" />
 
-        {/* RIGHT — Filter drawer trigger */}
+        {/* RIGHT — Filter drawer trigger (icon-only) */}
         <button
           type="button"
           onClick={() => setFilterOpen(true)}
           aria-label="Open filters"
-          className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-neutral-900 transition active:scale-[0.97]"
+          title="Filter"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-neutral-900 transition active:scale-[0.97]"
           style={{ background: XRATED_BRAND.accent }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
           </svg>
-          Filter
         </button>
       </div>
 
@@ -260,6 +258,10 @@ function FilterDrawer({
   const [priceMax, setPriceMax] = useState<string>("");
   const [acceptingOnly, setAcceptingOnly] = useState(false);
   const [keyword, setKeyword] = useState<string>(initial.q);
+  const [minRating, setMinRating] = useState<"0" | "3" | "4" | "4.5">("0");
+  const [hasPhotos, setHasPhotos] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(false);
 
   function apply() {
     const params = new URLSearchParams();
@@ -270,6 +272,10 @@ function FilterDrawer({
       params.set("price_max", priceMax.trim());
     }
     if (acceptingOnly) params.set("accepting", "1");
+    if (minRating !== "0") params.set("min_rating", minRating);
+    if (hasPhotos) params.set("has_photos", "1");
+    if (verifiedOnly) params.set("verified", "1");
+    if (featuredOnly) params.set("featured", "1");
     const qs = params.toString();
     window.location.href = qs ? `/trade-off/search?${qs}` : "/trade-off/search";
   }
@@ -384,16 +390,76 @@ function FilterDrawer({
           </div>
         </div>
 
-        <label className="mt-5 flex items-center gap-2 text-sm text-neutral-800">
-          <input
-            type="checkbox"
-            checked={acceptingOnly}
-            onChange={(e) => setAcceptingOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-neutral-300"
-            style={{ accentColor: XRATED_BRAND.accent }}
-          />
-          Only show tradies accepting new jobs
-        </label>
+        <p className="mt-5 text-xs font-bold uppercase tracking-widest text-neutral-500">
+          Minimum rating
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {([
+            { v: "0", label: "Any" },
+            { v: "3", label: "★ 3+" },
+            { v: "4", label: "★ 4+" },
+            { v: "4.5", label: "★ 4.5+" }
+          ] as const).map((opt) => (
+            <button
+              key={opt.v}
+              type="button"
+              onClick={() => setMinRating(opt.v)}
+              className={`inline-flex h-10 items-center rounded-full border px-3 text-xs font-semibold transition ${
+                minRating === opt.v
+                  ? "border-[#FFB300] bg-[#FFB300] text-neutral-900"
+                  : "border-neutral-200 bg-white text-neutral-700 hover:border-[#FFB300]"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="mt-5 text-xs font-bold uppercase tracking-widest text-neutral-500">
+          More filters
+        </p>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <label className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-800">
+            <input
+              type="checkbox"
+              checked={hasPhotos}
+              onChange={(e) => setHasPhotos(e.target.checked)}
+              className="h-4 w-4 rounded border-neutral-300"
+              style={{ accentColor: XRATED_BRAND.accent }}
+            />
+            Photos of work
+          </label>
+          <label className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-800">
+            <input
+              type="checkbox"
+              checked={verifiedOnly}
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+              className="h-4 w-4 rounded border-neutral-300"
+              style={{ accentColor: XRATED_BRAND.accent }}
+            />
+            Verified badge only
+          </label>
+          <label className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-800">
+            <input
+              type="checkbox"
+              checked={featuredOnly}
+              onChange={(e) => setFeaturedOnly(e.target.checked)}
+              className="h-4 w-4 rounded border-neutral-300"
+              style={{ accentColor: XRATED_BRAND.accent }}
+            />
+            Featured businesses
+          </label>
+          <label className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-800">
+            <input
+              type="checkbox"
+              checked={acceptingOnly}
+              onChange={(e) => setAcceptingOnly(e.target.checked)}
+              className="h-4 w-4 rounded border-neutral-300"
+              style={{ accentColor: XRATED_BRAND.accent }}
+            />
+            Accepting new jobs
+          </label>
+        </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
           <button
