@@ -60,9 +60,9 @@ export function ProfileActionTriple({
   ];
 
   if (variant === "overlay") {
-    // Share moves to its own icon-only button at the banner top-right.
-    // Overlay only renders Contact + Visit so the banner stays uncluttered.
-    const overlayButtons = buttons.filter((b) => b.label !== "Share");
+    // Banner overlay only renders Contact. Share lives in the top-right
+    // icon button; Visit lives as a text link inside the profile container.
+    const overlayButtons = buttons.filter((b) => b.label === "Contact");
     return (
       <ul className="flex gap-1.5 sm:gap-3">
         {overlayButtons.map((b) => (

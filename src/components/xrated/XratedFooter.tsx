@@ -76,7 +76,10 @@ export function XratedFooter() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {XRATED_BRAND.name} — Powered by Hammerex
+            © {new Date().getFullYear()} {XRATED_BRAND.name} — powered by{" "}
+            <a href="/trade-off" className="text-white/80 hover:text-white">
+              {XRATED_BRAND.domain}
+            </a>
           </p>
           <a
             href="/"

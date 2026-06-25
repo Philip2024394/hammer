@@ -18,7 +18,8 @@ export function AvatarFrame({
   style: AvatarFrameStyle;
   themeColor: string;
 }) {
-  const initial = (name.charAt(0) || "?").toUpperCase();
+  // If no avatar uploaded, render nothing — no orange-initial fallback.
+  if (!src) return null;
   const ink = inkForTheme(themeColor);
   // Stable animation name per instance so multiple avatars on a page don't
   // collide on keyframe identifiers.
@@ -60,10 +61,7 @@ export function AvatarFrame({
     );
   }
 
-  const imgWrapperClass =
-    style === "dance"
-      ? "relative overflow-hidden rounded-full border-2 border-white shadow-lg"
-      : "relative overflow-hidden rounded-full border-2 border-white shadow-lg";
+  const imgWrapperClass = "relative overflow-hidden rounded-full shadow-lg";
 
   const imgWrapperStyle: React.CSSProperties = {
     ...wrapperStyle,
@@ -79,27 +77,13 @@ export function AvatarFrame({
     >
       {frameLayer}
       <span className={imgWrapperClass} style={imgWrapperStyle}>
-        {src ? (
-          <img
-            src={src}
-            alt={`${name} profile photo`}
-            className="block h-full w-full object-cover"
-            width={size}
-            height={size}
-          />
-        ) : (
-          <span
-            className="flex h-full w-full items-center justify-center rounded-full font-bold leading-none"
-            style={{
-              background: themeColor,
-              color: ink,
-              fontSize: Math.round(size * 0.42)
-            }}
-            aria-hidden="true"
-          >
-            {initial}
-          </span>
-        )}
+        <img
+          src={src}
+          alt={`${name} profile photo`}
+          className="block h-full w-full object-cover"
+          width={size}
+          height={size}
+        />
       </span>
       <style>{`
         @keyframes xaf-pulse {

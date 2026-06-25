@@ -430,7 +430,7 @@ function PremiumLayout({
           the card straddles the photo (LinkedIn-style overlay). Compact
           "Contact us" pill at the TOP-RIGHT. */}
       <section className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 sm:-mt-20">
-        <div className="relative flex items-center gap-3 rounded-2xl border border-brand-line bg-brand-surface p-4 shadow-2xl sm:gap-4 sm:p-5">
+        <div className="relative flex items-center gap-3 rounded-2xl bg-brand-surface p-4 shadow-2xl sm:gap-4 sm:p-5">
           {/* Top-right compact Contact us pill */}
           <a
             href="#contact-panel"
@@ -541,16 +541,6 @@ function PremiumLayout({
         }
       />
 
-      {/* Powered-by chip + URL chip */}
-      <div className="mx-auto max-w-6xl px-4 pt-4">
-        <div className="rounded-full bg-black/40 px-3 py-1.5 text-center text-[13px] text-brand-muted">
-          <span aria-hidden="true">⚡</span> Powered by{" "}
-          <a href="/trade-off" className="font-semibold text-brand-text hover:text-brand-accent">
-            Hammerex Trade Off
-          </a>{" "}
-          · Free UK trade directory
-        </div>
-      </div>
       {/* 4. About — eyebrow is the company name; bio capped at 5 lines. */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
         <h2
