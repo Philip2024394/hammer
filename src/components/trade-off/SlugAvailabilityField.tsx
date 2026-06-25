@@ -76,7 +76,7 @@ export function SlugAvailabilityField({
   return (
     <div>
       <div className="flex items-stretch overflow-hidden rounded-lg border border-brand-line bg-brand-bg focus-within:border-[#F97316]">
-        <span className="inline-flex items-center bg-black/40 px-3 text-xs text-brand-muted">
+        <span className="inline-flex items-center bg-neutral-100 px-3 text-xs text-brand-muted">
           hammerex.com/trade/
         </span>
         <input
@@ -100,7 +100,7 @@ export function SlugAvailabilityField({
             <span className="text-brand-success" aria-label="available">✓</span>
           )}
           {status === "taken" && (
-            <span className="text-red-400" aria-label="taken">✗</span>
+            <span className="text-red-600" aria-label="taken">✗</span>
           )}
           {status === "invalid" && (
             <span className="text-red-400" aria-label="invalid">✗</span>

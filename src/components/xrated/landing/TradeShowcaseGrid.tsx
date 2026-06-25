@@ -24,7 +24,7 @@ export function TradeShowcaseGrid({ countsBySlug }: Props) {
           >
             Pick your trade
           </p>
-          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
             Pick your trade — tap to browse.
           </h2>
         </div>
@@ -40,9 +40,9 @@ export function TradeShowcaseGrid({ countsBySlug }: Props) {
               <a
                 href={`/trade-off/${slug}`}
                 aria-label={`Browse ${label} — ${count} ${count === 1 ? "tradie" : "tradies"} on Xrated`}
-                className="group flex flex-row items-stretch overflow-hidden rounded-2xl border border-white/10 bg-black transition hover:border-[#F97316]"
+                className="group flex flex-row items-stretch overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#F97316]"
               >
-                <div className="relative aspect-[4/3] w-[38%] shrink-0 overflow-hidden bg-black sm:w-[34%]">
+                <div className="relative aspect-[4/3] w-[38%] shrink-0 overflow-hidden bg-neutral-100 sm:w-[34%]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img}
@@ -54,7 +54,7 @@ export function TradeShowcaseGrid({ countsBySlug }: Props) {
                 </div>
                 <div className="flex min-w-0 flex-1 items-center justify-between gap-3 p-4 sm:p-5">
                   <div className="min-w-0">
-                    <p className="text-base font-extrabold leading-tight text-white sm:text-xl">
+                    <p className="text-base font-extrabold leading-tight text-neutral-900 sm:text-xl">
                       {label}
                     </p>
                     <p className="mt-1 text-xs font-semibold text-brand-muted">

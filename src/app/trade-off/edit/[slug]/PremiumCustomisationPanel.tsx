@@ -331,7 +331,7 @@ export function PremiumCustomisationPanel({
                   <button
                     type="button"
                     onClick={() => removePriced(i)}
-                    className="text-[11px] font-semibold text-red-300 hover:text-red-200"
+                    className="text-[11px] font-semibold text-red-600 hover:text-red-700"
                   >
                     Remove
                   </button>
@@ -464,7 +464,7 @@ export function PremiumCustomisationPanel({
                   <button
                     type="button"
                     onClick={() => removeFaq(i)}
-                    className="text-[11px] font-semibold text-red-300 hover:text-red-200"
+                    className="text-[11px] font-semibold text-red-600 hover:text-red-700"
                   >
                     Remove
                   </button>
@@ -529,7 +529,7 @@ export function PremiumCustomisationPanel({
           {busy ? "Saving…" : "Save customisation"}
         </button>
         {msg && <span className="text-xs text-brand-success">{msg}</span>}
-        {err && <span className="text-xs text-red-400">{err}</span>}
+        {err && <span className="text-xs text-red-600">{err}</span>}
       </div>
     </div>
   );

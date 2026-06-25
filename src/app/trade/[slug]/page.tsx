@@ -122,7 +122,7 @@ function formatJoinedMonth(iso: string): string {
 function AcceptingBanner({ accepting }: { accepting: boolean }) {
   if (accepting) return null;
   return (
-    <div className="border-b border-red-500/30 bg-red-500/10 px-4 py-2 text-center text-xs font-semibold text-red-300">
+    <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-center text-xs font-semibold text-red-700">
       Currently fully booked — please check back
     </div>
   );
@@ -443,7 +443,7 @@ function PremiumLayout({
           and location underneath the name on the left; Contact us button
           anchored to the BOTTOM-RIGHT of the card. */}
       <section className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 sm:-mt-20">
-        <div className="relative rounded-2xl bg-brand-surface p-4 shadow-2xl sm:p-5">
+        <div className="relative rounded-2xl bg-white p-4 shadow-xl ring-1 ring-neutral-200 sm:p-5">
           {/* Top row: avatar (LEFT) + name + stars + location stack (right) */}
           <div className="flex items-center gap-3">
             <div className="shrink-0">
@@ -573,23 +573,6 @@ function PremiumLayout({
       {/* 14. Tools I use cross-sell */}
       <ToolsIUseBlock toolProducts={toolProducts} tierLabel={tierLabel} />
 
-      {/* Primary CTA — themed WhatsApp button kept for users who scroll past */}
-      <section className="mx-auto max-w-3xl px-4 pb-2 pt-8">
-        <XratedCtaButton
-          href={waUrl}
-          label={`Request quote from ${listing.display_name}`}
-          themeColor={theme}
-          textColor={ctaInk}
-          effect={listing.cta_button_effect}
-          icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
-            </svg>
-          }
-        />
-      </section>
-
-
       {/* Report */}
       <section className="mx-auto max-w-3xl px-4 pb-8 pt-6">
         <TradeReportButton listingId={listing.id} />
@@ -639,9 +622,9 @@ function StandardLayout({
     <>
       {/* Powered-by chip */}
       <div className="mx-auto max-w-6xl px-4 pt-3">
-        <div className="rounded-full bg-black/40 px-3 py-1.5 text-center text-[13px] text-brand-muted">
+        <div className="rounded-full bg-neutral-100 px-3 py-1.5 text-center text-[13px] text-brand-muted">
           <span aria-hidden="true">⚡</span> Powered by{" "}
-          <a href="/trade-off" className="font-semibold text-brand-text hover:text-brand-accent">
+          <a href="/trade-off" className="font-semibold text-brand-text hover:text-[#F97316]">
             Hammerex Trade Off
           </a>{" "}
           · Free UK trade directory
@@ -656,7 +639,7 @@ function StandardLayout({
           </p>
           <a
             href={`/trade-off/upgrade?slug=${encodeURIComponent(listing.slug)}`}
-            className="inline-flex h-9 items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 text-[12px] font-semibold text-amber-200 transition hover:border-amber-300 hover:text-amber-100"
+            className="inline-flex h-9 items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 text-[12px] font-semibold text-amber-700 transition hover:border-amber-400 hover:text-amber-800"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
@@ -698,7 +681,7 @@ function StandardLayout({
       {/* Hero / identity */}
       <section className="mx-auto max-w-6xl px-4 pb-6 pt-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <figure className="relative overflow-hidden rounded-2xl border border-brand-line bg-black">
+          <figure className="relative overflow-hidden rounded-2xl border border-brand-line bg-neutral-100">
             <img
               src={cover}
               alt={listing.display_name}
@@ -744,7 +727,7 @@ function StandardLayout({
               {listing.secondary_trades.map((s) => (
                 <span
                   key={s}
-                  className="inline-flex items-center rounded-full border border-brand-line bg-black/40 px-3 py-1 text-xs text-brand-muted"
+                  className="inline-flex items-center rounded-full border border-brand-line bg-neutral-100 px-3 py-1 text-xs text-brand-muted"
                 >
                   {tradeLabel(s)}
                 </span>
@@ -880,7 +863,7 @@ function StandardLayout({
             href={`/trade/${listing.slug}/qr.png?download=1`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-11 items-center gap-2 rounded-lg border border-brand-line bg-black/40 px-4 text-xs font-semibold text-brand-text transition hover:border-brand-accent hover:text-brand-accent"
+            className="inline-flex h-11 items-center gap-2 rounded-lg border border-brand-line bg-neutral-50 px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2h-4" />

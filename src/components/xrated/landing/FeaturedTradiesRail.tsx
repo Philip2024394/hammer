@@ -14,7 +14,7 @@ export function FeaturedTradiesRail({ tradies }: Props) {
   if (tradies.length === 0) return null;
 
   return (
-    <section className="border-y border-white/10 bg-black">
+    <section className="border-y border-neutral-200 bg-neutral-50">
       <div className="mx-auto max-w-6xl px-4 py-10 md:py-16">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -24,13 +24,13 @@ export function FeaturedTradiesRail({ tradies }: Props) {
             >
               Featured tradies
             </p>
-            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
               Vetted, kitted, working today.
             </h2>
           </div>
           <a
             href="/trade-off/jobs"
-            className="hidden h-11 items-center rounded-lg border border-white/20 bg-black px-4 text-xs font-semibold text-white transition hover:border-[#F97316] hover:text-[#F97316] sm:inline-flex"
+            className="hidden h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] sm:inline-flex"
           >
             See all →
           </a>
@@ -48,10 +48,10 @@ export function FeaturedTradiesRail({ tradies }: Props) {
                   key={t.id}
                   className="w-[78vw] max-w-[320px] shrink-0 snap-start sm:w-[300px] sm:max-w-none"
                 >
-                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]">
+                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#F97316]">
                     <a
                       href={`/trade/${t.slug}`}
-                      className="group relative block aspect-[4/3] overflow-hidden bg-black"
+                      className="group relative block aspect-[4/3] overflow-hidden bg-neutral-100"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -69,7 +69,7 @@ export function FeaturedTradiesRail({ tradies }: Props) {
                           Standard
                         </span>
                       )}
-                      <div className="absolute bottom-3 left-3 h-12 w-12 overflow-hidden rounded-full border-2 border-black bg-brand-surface shadow-lg">
+                      <div className="absolute bottom-3 left-3 h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-white shadow-lg">
                         {t.avatar_url ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
@@ -88,10 +88,10 @@ export function FeaturedTradiesRail({ tradies }: Props) {
                     </a>
                     <div className="flex flex-1 flex-col p-4">
                       <a href={`/trade/${t.slug}`} className="block">
-                        <p className="text-sm font-bold text-white">
+                        <p className="text-sm font-bold text-neutral-900">
                           {t.display_name}
                         </p>
-                        <p className="mt-0.5 text-xs text-brand-muted">
+                        <p className="mt-0.5 text-xs text-neutral-500">
                           {trade} · {t.city}
                         </p>
                       </a>

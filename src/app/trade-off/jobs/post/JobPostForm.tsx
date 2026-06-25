@@ -294,7 +294,7 @@ export function JobPostForm() {
       </Section>
 
       {err && (
-        <div className="rounded-lg border border-red-900 bg-red-900/20 px-4 py-3 text-xs text-red-300">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
           {err}
         </div>
       )}

@@ -33,7 +33,7 @@ export function StickyMobileLandingBar() {
   return (
     <div
       aria-hidden={hidden}
-      className={`fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/95 backdrop-blur md:hidden ${
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur md:hidden ${
         hidden ? "pointer-events-none translate-y-full" : "translate-y-0"
       } transition-transform duration-300`}
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
@@ -41,7 +41,7 @@ export function StickyMobileLandingBar() {
       <div className="mx-auto flex max-w-6xl items-stretch gap-2 px-3 py-2">
         <a
           href="/trade-off/jobs"
-          className="inline-flex h-14 flex-1 items-center justify-center rounded-xl border border-white/20 bg-black px-3 text-xs font-bold text-white transition active:scale-[0.98]"
+          className="inline-flex h-14 flex-1 items-center justify-center rounded-xl border border-neutral-300 bg-white px-3 text-xs font-bold text-neutral-900 transition active:scale-[0.98]"
         >
           Find tradie
         </a>

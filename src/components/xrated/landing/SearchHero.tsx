@@ -8,7 +8,7 @@ import { XRATED_BRAND } from "@/lib/xratedTrades";
 
 export function SearchHero({ defaultQuery = "" }: { defaultQuery?: string } = {}) {
   return (
-    <section className="bg-black py-8 sm:py-12">
+    <section className="bg-white py-8 sm:py-12">
       <div className="mx-auto max-w-3xl px-4">
         <p
           className="text-xs font-bold uppercase tracking-[0.18em]"
@@ -16,10 +16,10 @@ export function SearchHero({ defaultQuery = "" }: { defaultQuery?: string } = {}
         >
           Find a tradesperson
         </p>
-        <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl">
+        <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl">
           Find a verified tradesperson, fast.
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-white/85 sm:text-base">
+        <p className="mt-3 text-sm leading-relaxed text-neutral-700 sm:text-base">
           Search by trade, city, or job. WhatsApp them direct. Free.
         </p>
 
@@ -32,7 +32,7 @@ export function SearchHero({ defaultQuery = "" }: { defaultQuery?: string } = {}
           <label htmlFor="xrated-hero-search" className="sr-only">
             Search Xrated Trades
           </label>
-          <div className="relative flex w-full items-stretch overflow-hidden rounded-2xl border border-white/15 bg-black/60 focus-within:border-[#F97316]">
+          <div className="relative flex w-full items-stretch overflow-hidden rounded-2xl border border-neutral-300 bg-white focus-within:border-[#F97316]">
             <input
               id="xrated-hero-search"
               type="search"
@@ -41,7 +41,7 @@ export function SearchHero({ defaultQuery = "" }: { defaultQuery?: string } = {}
               placeholder="drywaller in Manchester · plumber London · electrician Liverpool…"
               autoComplete="off"
               maxLength={120}
-              className="min-w-0 flex-1 bg-transparent px-4 text-sm text-white placeholder:text-white/50 focus:outline-none sm:text-base"
+              className="min-w-0 flex-1 bg-transparent px-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none sm:text-base"
               style={{ minHeight: 56 }}
             />
             <button

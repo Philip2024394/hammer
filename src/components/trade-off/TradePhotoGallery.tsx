@@ -39,7 +39,7 @@ export function TradePhotoGallery({ photos, name }: { photos: string[]; name: st
             <button
               type="button"
               onClick={() => setOpenIndex(i)}
-              className="group block aspect-square w-full overflow-hidden rounded-xl border border-brand-line bg-black transition hover:border-brand-accent"
+              className="group block aspect-square w-full overflow-hidden rounded-xl border border-brand-line bg-neutral-100 transition hover:border-[#F97316]"
               aria-label={`Open photo ${i + 1} of ${photos.length}`}
             >
               <img

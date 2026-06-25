@@ -68,7 +68,7 @@ export default async function JobsFeedPage({
       <XratedViewTracker page="jobs_feed" listingId={null} />
       <XratedHeader />
 
-      <section className="border-b border-brand-line bg-black/40">
+      <section className="border-b border-brand-line bg-brand-surface">
         <div className="mx-auto max-w-5xl px-4 pb-8 pt-10">
           <p
             className="text-xs font-bold uppercase tracking-widest"

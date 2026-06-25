@@ -167,7 +167,7 @@ export default async function JobDetailPage({
           </p>
 
           {job.budget_hint && (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-line bg-black/40 px-3 py-1.5 text-xs font-semibold text-brand-text">
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-surface px-3 py-1.5 text-xs font-semibold text-brand-text">
               <span className="text-brand-muted">Budget:</span>
               <span>{job.budget_hint}</span>
             </div>

@@ -236,7 +236,7 @@ function TierStatusCard({
   if (tier === "app_trial") {
     return (
       <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4">
-        <p className="text-sm font-bold text-emerald-300">
+        <p className="text-sm font-bold text-emerald-700">
           Xrated App — Trial active
           {trialDays !== null && ` · ${trialDays} day${trialDays === 1 ? "" : "s"} remaining`}
         </p>
@@ -274,7 +274,7 @@ function TierStatusCard({
   if (tier === "app_expired") {
     return (
       <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-        <p className="text-sm font-bold text-amber-300">
+        <p className="text-sm font-bold text-amber-700">
           Trial expired · You're back on Standard
         </p>
         <p className="mt-1 text-xs text-brand-muted">

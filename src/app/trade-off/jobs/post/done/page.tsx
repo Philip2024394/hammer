@@ -24,8 +24,8 @@ function Inner() {
       <XratedHeader />
 
       <section className="mx-auto max-w-2xl px-4 pb-16 pt-12">
-        <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 p-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-400">
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-700">
             Pending review
           </p>
           <h1 className="mt-2 text-2xl font-extrabold leading-tight sm:text-3xl">

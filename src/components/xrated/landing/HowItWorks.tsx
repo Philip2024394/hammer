@@ -30,7 +30,7 @@ export function HowItWorks() {
       >
         How it works
       </p>
-      <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+      <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
         Three steps. Free for life.
       </h2>
 
@@ -38,7 +38,7 @@ export function HowItWorks() {
         {STEPS.map((s) => (
           <li
             key={s.n}
-            className="rounded-2xl border border-brand-line bg-brand-surface p-5 md:p-6"
+            className="rounded-2xl border border-neutral-200 bg-white p-5 md:p-6"
           >
             <div
               className="text-5xl font-black leading-none tracking-tight md:text-6xl"
@@ -46,10 +46,10 @@ export function HowItWorks() {
             >
               {s.n}
             </div>
-            <h3 className="mt-3 text-lg font-bold text-white md:text-xl">
+            <h3 className="mt-3 text-lg font-bold text-neutral-900 md:text-xl">
               {s.title}
             </h3>
-            <p className="mt-1 text-xs leading-relaxed text-brand-muted md:text-sm">
+            <p className="mt-1 text-xs leading-relaxed text-neutral-500 md:text-sm">
               {s.body}
             </p>
           </li>

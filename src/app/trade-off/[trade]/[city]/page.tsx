@@ -190,7 +190,7 @@ function EmptyState({
             <li key={t.slug}>
               <a
                 href={`/trade-off/${t.slug}`}
-                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-black/40 px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+                className="inline-flex h-11 items-center rounded-full border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
               >
                 {t.label}s
               </a>
@@ -211,7 +211,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
       href={`/trade/${listing.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         <img
           src={photo}
           alt={listing.display_name}
@@ -251,7 +251,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
           <p className="mt-0.5 text-xs text-brand-muted">{listing.trading_name}</p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full border border-brand-line bg-black/40 px-2.5 py-1 text-xs font-semibold text-brand-text">
+          <span className="inline-flex items-center rounded-full border border-brand-line bg-brand-surface px-2.5 py-1 text-xs font-semibold text-brand-text">
             {primary}
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-brand-muted">

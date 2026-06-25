@@ -128,7 +128,7 @@ export default async function TradeOffLandingPage() {
     .slice(0, 6);
 
   return (
-    <main className="bg-[#0a0a0a] pb-24 md:pb-0">
+    <main className="bg-white pb-24 md:pb-0">
       <XratedViewTracker page="landing" listingId={null} />
       <XratedHeader />
 
@@ -137,7 +137,7 @@ export default async function TradeOffLandingPage() {
 
       {/* Xrated banner image — stands alone, no overlay text obscuring it.
           Compact heights so the scroll signal kicks in fast. */}
-      <section className="relative w-full bg-black">
+      <section className="relative w-full bg-neutral-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={XRATED_BRAND.heroImageUrl}
@@ -147,15 +147,15 @@ export default async function TradeOffLandingPage() {
       </section>
 
       {/* Stats strip — single line, brand orange highlights. */}
-      <section className="border-b border-white/10 bg-black">
+      <section className="border-b border-neutral-200 bg-neutral-50">
         <div className="mx-auto max-w-6xl px-4 py-4">
-          <p className="text-center text-xs font-semibold text-white/85 sm:text-sm">
-            <span className="text-white">{tradieCount}</span> verified tradies
-            <span className="mx-2 text-white/40">·</span>
-            <span className="text-white">{jobCount}</span> live jobs
-            <span className="mx-2 text-white/40">·</span>
-            <span className="text-white">{cityCount}</span> cities
-            <span className="mx-2 text-white/40">·</span>
+          <p className="text-center text-xs font-semibold text-neutral-700 sm:text-sm">
+            <span className="text-neutral-900">{tradieCount}</span> verified tradies
+            <span className="mx-2 text-neutral-400">·</span>
+            <span className="text-neutral-900">{jobCount}</span> live jobs
+            <span className="mx-2 text-neutral-400">·</span>
+            <span className="text-neutral-900">{cityCount}</span> cities
+            <span className="mx-2 text-neutral-400">·</span>
             <span style={{ color: XRATED_BRAND.accent }}>Free for life</span>
           </p>
         </div>
@@ -172,19 +172,19 @@ export default async function TradeOffLandingPage() {
       {/* Closing CTA — primary funnel is "Find a tradesperson"; the "List
           your trade" half stays as a secondary nudge for tradies. */}
       <section className="mx-auto max-w-6xl px-4 pb-12 md:pb-20">
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-black via-[#0c0c0c] to-black">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="border-b border-white/10 p-6 md:border-b-0 md:border-r md:p-10">
+            <div className="border-b border-neutral-200 p-6 md:border-b-0 md:border-r md:p-10">
               <p
                 className="text-xs font-bold uppercase tracking-[0.18em]"
                 style={{ color: XRATED_BRAND.accent }}
               >
                 Customers
               </p>
-              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-neutral-900 sm:text-3xl">
                 Find a tradesperson — fast.
               </h3>
-              <p className="mt-2 text-xs leading-relaxed text-brand-muted sm:text-sm">
+              <p className="mt-2 text-xs leading-relaxed text-neutral-500 sm:text-sm">
                 Search by trade or city. WhatsApp them direct. No middleman,
                 no commission. Free for customers, forever.
               </p>
@@ -202,16 +202,16 @@ export default async function TradeOffLandingPage() {
               >
                 Tradespeople
               </p>
-              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-neutral-900 sm:text-3xl">
                 List your trade — free.
               </h3>
-              <p className="mt-2 text-xs leading-relaxed text-brand-muted sm:text-sm">
+              <p className="mt-2 text-xs leading-relaxed text-neutral-500 sm:text-sm">
                 A profile with real photos, your city, your WhatsApp.
                 30-day free trial of the Xrated App for premium features.
               </p>
               <a
                 href="/trade-off/signup"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/30 bg-black px-6 text-sm font-bold text-white transition hover:border-[#F97316] hover:text-[#F97316] active:scale-[0.98] sm:w-auto"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-6 text-sm font-bold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] active:scale-[0.98] sm:w-auto"
               >
                 List your trade — free
               </a>

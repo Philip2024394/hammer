@@ -276,7 +276,7 @@ export function ContactFormPanel({
           />
         </div>
         {err && (
-          <p className="text-[13px] font-semibold text-red-300" role="alert">
+          <p className="text-[13px] font-semibold text-red-600" role="alert">
             {err}
           </p>
         )}

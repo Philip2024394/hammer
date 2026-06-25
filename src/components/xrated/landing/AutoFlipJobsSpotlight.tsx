@@ -134,11 +134,11 @@ export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
     return (
       <section className="mx-auto max-w-6xl px-4 py-10 md:py-16">
         <SpotlightHeader />
-        <div className="mt-5 rounded-2xl border border-dashed border-brand-line bg-brand-surface p-10 text-center">
-          <p className="text-sm font-semibold text-brand-text">
+        <div className="mt-5 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-10 text-center">
+          <p className="text-sm font-semibold text-neutral-900">
             No live jobs yet — customers will appear here soon.
           </p>
-          <p className="mt-1 text-xs text-brand-muted">
+          <p className="mt-1 text-xs text-neutral-500">
             Be first to post a job — free.
           </p>
           <a
@@ -179,7 +179,7 @@ export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
       <SpotlightHeader />
 
       <div
-        className="relative mt-5 overflow-hidden rounded-2xl border border-brand-line bg-brand-surface"
+        className="relative mt-5 overflow-hidden rounded-2xl border border-neutral-200 bg-white"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onTouchStart={handleTouchStart}
@@ -195,7 +195,7 @@ export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
           ))}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-brand-line bg-black/50 px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-t border-neutral-200 bg-neutral-50 px-4 py-3">
           <div className="flex flex-1 flex-wrap gap-1.5">
             {display.map((_, i) => (
               <button
@@ -204,12 +204,12 @@ export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
                 onClick={() => setIndex(i)}
                 aria-label={`Go to job ${i + 1} of ${count}`}
                 className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-8 bg-[#F97316]" : "w-2 bg-white/30 hover:bg-white/60"
+                  i === index ? "w-8 bg-[#F97316]" : "w-2 bg-neutral-300 hover:bg-neutral-400"
                 }`}
               />
             ))}
           </div>
-          <p className="shrink-0 text-xs font-semibold text-white/70">
+          <p className="shrink-0 text-xs font-semibold text-neutral-500">
             {index + 1} of {count}
           </p>
         </div>
@@ -233,13 +233,13 @@ function SpotlightHeader() {
           />
           Live jobs
         </p>
-        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
           Message customers direct.
         </h2>
       </div>
       <a
         href="/trade-off/jobs"
-        className="hidden h-11 items-center rounded-lg border border-white/20 bg-black px-4 text-xs font-semibold text-white transition hover:border-[#F97316] hover:text-[#F97316] sm:inline-flex"
+        className="hidden h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] sm:inline-flex"
       >
         See all jobs →
       </a>
@@ -306,7 +306,7 @@ function SpotlightSlide({
             <span className="inline-flex items-center rounded-full bg-[#F97316] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
               {label}
             </span>
-            <span className="inline-flex items-center gap-1 text-xs text-brand-muted">
+            <span className="inline-flex items-center gap-1 text-xs text-neutral-500">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                 <circle cx="12" cy="10" r="3" />
@@ -318,14 +318,14 @@ function SpotlightSlide({
                 </span>
               )}
             </span>
-            <span className="text-xs text-brand-muted">{relativeTime(job.created_at)}</span>
+            <span className="text-xs text-neutral-500">{relativeTime(job.created_at)}</span>
           </div>
-          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white md:text-base">
+          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-neutral-900 md:text-base">
             {job.description}
           </p>
           {job.budget_hint && (
             <p className="mt-3">
-              <span className="inline-flex items-center rounded-full border border-brand-line bg-black/40 px-3 py-1 text-xs font-semibold text-white">
+              <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-900">
                 Budget: {job.budget_hint}
               </span>
             </p>
@@ -334,7 +334,7 @@ function SpotlightSlide({
             {job.is_example || !waUrl ? (
               <a
                 href={`/trade-off/jobs/${job.slug}`}
-                className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/20 bg-black px-5 text-sm font-bold text-white transition hover:border-[#F97316] hover:text-[#F97316] sm:w-auto sm:px-7"
+                className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-bold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] sm:w-auto sm:px-7"
               >
                 View job →
               </a>

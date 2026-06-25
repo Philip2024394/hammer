@@ -556,7 +556,7 @@ export function TradeOffForm({
                   Cover
                 </span>
               )}
-              <div className="flex items-center justify-between gap-1 border-t border-brand-line bg-black/40 p-1">
+              <div className="flex items-center justify-between gap-1 border-t border-brand-line bg-neutral-50 p-1">
                 <button
                   type="button"
                   onClick={() => movePhoto(i, -1)}
@@ -605,7 +605,7 @@ export function TradeOffForm({
       </Section>
 
       {err && (
-        <div className="rounded-lg border border-red-900 bg-red-900/20 px-4 py-3 text-xs text-red-300">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
           {err}
         </div>
       )}

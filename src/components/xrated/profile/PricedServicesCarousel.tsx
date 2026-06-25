@@ -161,7 +161,7 @@ export function PricedServicesCarousel({
                         {formatPrice(svc.price, svc.unit)}
                       </p>
                       <span
-                        className="mt-auto inline-flex h-11 items-center justify-center gap-1 rounded-lg border border-brand-line bg-black/30 px-3 text-[13px] font-bold text-brand-text"
+                        className="mt-auto inline-flex h-11 items-center justify-center gap-1 rounded-lg border border-brand-line bg-neutral-100 px-3 text-[13px] font-bold text-brand-text"
                       >
                         View details
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

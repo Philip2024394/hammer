@@ -36,7 +36,7 @@ export function StarRatingRow({
             <span
               key={i}
               className="text-[15px] leading-none"
-              style={{ color: isFilled ? "#FACC15" : "rgba(255,255,255,0.3)" }}
+              style={{ color: isFilled ? "#FACC15" : "rgba(0,0,0,0.18)" }}
             >
               {isFilled ? "★" : "☆"}
             </span>

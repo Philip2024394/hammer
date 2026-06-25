@@ -227,7 +227,7 @@ export function ProjectManager({
       </div>
 
       {err && (
-        <div className="rounded-lg border border-red-900 bg-red-900/20 px-4 py-3 text-xs text-red-300">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
           {err}
         </div>
       )}
@@ -332,7 +332,7 @@ export function ProjectManager({
 
 function Thumb({ url, label }: { url: string; label: string }) {
   return (
-    <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-brand-line bg-black">
+    <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-brand-line bg-neutral-100">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={url} alt={label} className="h-full w-full object-cover" />
       <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1 py-0.5 text-center text-[10px] font-bold uppercase text-white">
@@ -486,7 +486,7 @@ function PhotoSlot({
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={value} alt={label} className="aspect-square w-full object-cover" />
-            <div className="flex items-center justify-between gap-1 border-t border-brand-line bg-black/40 p-1">
+            <div className="flex items-center justify-between gap-1 border-t border-brand-line bg-neutral-50 p-1">
               <label className="inline-flex h-11 flex-1 cursor-pointer items-center justify-center rounded text-xs text-brand-text hover:bg-brand-bg">
                 <input
                   ref={inputRef}
@@ -522,7 +522,7 @@ function PhotoSlot({
           </label>
         )}
       </div>
-      {err && <p className="mt-1 text-[11px] text-red-300">{err}</p>}
+      {err && <p className="mt-1 text-[11px] text-red-600">{err}</p>}
     </div>
   );
 }

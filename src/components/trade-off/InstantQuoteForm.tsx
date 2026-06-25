@@ -201,7 +201,7 @@ export function InstantQuoteForm({
             required
           />
           {touched && !nameOk && (
-            <span className="text-xs text-red-400">Enter your name (2+ characters).</span>
+            <span className="text-xs text-red-600">Enter your name (2+ characters).</span>
           )}
         </label>
         <label className="flex flex-col gap-1">
@@ -217,7 +217,7 @@ export function InstantQuoteForm({
             required
           />
           {touched && !postcodeOk && (
-            <span className="text-xs text-red-400">UK postcode required (e.g. SW1A 1AA).</span>
+            <span className="text-xs text-red-600">UK postcode required (e.g. SW1A 1AA).</span>
           )}
         </label>
       </div>
@@ -238,7 +238,7 @@ export function InstantQuoteForm({
           required
         />
         {touched && !descOk && (
-          <span className="text-xs text-red-400">
+          <span className="text-xs text-red-600">
             Describe the job in at least {MIN_DESC} characters (max {MAX_DESC}).
           </span>
         )}
@@ -292,7 +292,7 @@ export function InstantQuoteForm({
             {photos.map((p) => (
               <li
                 key={p.id}
-                className="relative overflow-hidden rounded-lg border border-brand-line bg-black"
+                className="relative overflow-hidden rounded-lg border border-brand-line bg-neutral-100"
               >
                 {p.url ? (
                   <img

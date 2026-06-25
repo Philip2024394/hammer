@@ -21,7 +21,7 @@ export async function JobsCarousel() {
   const jobs = (res.data ?? []) as HammerexXratedJob[];
 
   return (
-    <section className="border-b border-white/10 bg-black">
+    <section className="border-b border-neutral-200 bg-neutral-50">
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -31,13 +31,13 @@ export async function JobsCarousel() {
             >
               Live jobs
             </p>
-            <h2 className="mt-1 text-lg font-bold leading-tight text-white sm:text-xl">
+            <h2 className="mt-1 text-lg font-bold leading-tight text-neutral-900 sm:text-xl">
               Jobs posted on Xrated Trades — message customers direct.
             </h2>
           </div>
           <a
             href="/trade-off/jobs"
-            className="inline-flex h-11 items-center rounded-lg border border-white/20 bg-black px-4 text-xs font-semibold text-white transition hover:border-[#F97316] hover:text-[#F97316]"
+            className="inline-flex h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316]"
           >
             See all jobs →
           </a>

@@ -64,9 +64,9 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
   return (
     <a
       href={`/trade-off/jobs/${job.slug}`}
-      className="group relative flex h-full flex-row overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
+      className="group relative flex h-full flex-row overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#F97316]"
     >
-      <div className="relative aspect-[4/3] w-[42%] shrink-0 overflow-hidden bg-black sm:w-[44%]">
+      <div className="relative aspect-[4/3] w-[42%] shrink-0 overflow-hidden bg-neutral-100 sm:w-[44%]">
         {photo ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -126,7 +126,7 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3 text-xs text-brand-muted">
           <span>{relativeTime(job.created_at)}</span>
           {job.budget_hint && (
-            <span className="inline-flex items-center rounded-full border border-brand-line bg-black/40 px-2 py-0.5 font-semibold text-brand-text">
+            <span className="inline-flex items-center rounded-full border border-brand-line bg-neutral-100 px-2 py-0.5 font-semibold text-brand-text">
               {job.budget_hint}
             </span>
           )}

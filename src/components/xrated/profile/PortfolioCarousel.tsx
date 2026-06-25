@@ -131,7 +131,7 @@ export function PortfolioCarousel({
             aria-hidden="true"
             className="block h-1.5 w-1.5 rounded-full transition"
             style={{
-              background: i === pageIndex ? themeColor : "rgba(255,255,255,0.25)"
+              background: i === pageIndex ? themeColor : "rgba(0,0,0,0.18)"
             }}
           />
         ))}

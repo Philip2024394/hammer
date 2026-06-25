@@ -31,7 +31,7 @@ export default function JobPostPage() {
       <XratedViewTracker page="job_post" listingId={null} />
       <XratedHeader />
 
-      <section className="border-b border-brand-line bg-black/40">
+      <section className="border-b border-brand-line bg-brand-surface">
         <div className="mx-auto max-w-3xl px-4 pb-8 pt-10">
           <p
             className="text-xs font-bold uppercase tracking-widest"
