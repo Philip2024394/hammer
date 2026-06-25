@@ -21,6 +21,7 @@ import { XRATED_BRAND } from "@/lib/xratedTrades";
 import { getCountryFromRequest } from "@/lib/geo";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { LandingSearchBar } from "@/components/xrated/landing/LandingSearchBar";
+import { TradeIconChips } from "@/components/xrated/landing/TradeIconChips";
 import { AutoFlipJobsSpotlight } from "@/components/xrated/landing/AutoFlipJobsSpotlight";
 import { TradeShowcaseGrid } from "@/components/xrated/landing/TradeShowcaseGrid";
 import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
@@ -199,6 +200,9 @@ export default async function TradeOffLandingPage() {
           .map((c) => c.replace(/(^|\s|-)\w/g, (m) => m.toUpperCase()))
           .sort()}
       />
+
+      {/* Circular trade-icon chip row under the search bar */}
+      <TradeIconChips />
 
       {/* Stats strip — single line, brand orange highlights. */}
       <section className="border-b border-neutral-200 bg-neutral-50">
