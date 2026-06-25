@@ -89,8 +89,12 @@ export function AvatarFrame({
           />
         ) : (
           <span
-            className="flex h-full w-full items-center justify-center rounded-full text-3xl font-bold"
-            style={{ background: themeColor, color: ink }}
+            className="flex h-full w-full items-center justify-center rounded-full font-bold leading-none"
+            style={{
+              background: themeColor,
+              color: ink,
+              fontSize: Math.round(size * 0.42)
+            }}
             aria-hidden="true"
           >
             {initial}
