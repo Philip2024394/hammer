@@ -135,15 +135,43 @@ export default async function TradeOffLandingPage() {
       {/* The new primary funnel — search-first. */}
       <SearchHero />
 
-      {/* Xrated banner image — stands alone, no overlay text obscuring it.
-          Compact heights so the scroll signal kicks in fast. */}
-      <section className="relative w-full bg-neutral-100">
+      {/* Xrated landing hero — banner image with text overlay on the LEFT.
+          Left-side dark gradient so the headline reads against any photo. */}
+      <section className="relative w-full overflow-hidden bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={XRATED_BRAND.heroImageUrl}
           alt={`${XRATED_BRAND.name} — ${XRATED_BRAND.tagline}`}
-          className="block max-h-[320px] w-full object-cover sm:max-h-[480px]"
+          className="block h-[320px] w-full object-cover sm:h-[480px]"
         />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0) 80%)"
+          }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-y-0 left-0 flex items-center px-5 sm:px-10">
+          <div className="max-w-md sm:max-w-lg">
+            <p
+              className="text-xs font-bold uppercase tracking-[0.2em] drop-shadow sm:text-sm"
+              style={{ color: XRATED_BRAND.accent }}
+            >
+              {XRATED_BRAND.name}
+            </p>
+            <h1 className="mt-2 text-2xl font-extrabold leading-[1.05] text-white drop-shadow-lg sm:text-4xl md:text-5xl">
+              Find Trades.
+              <br />
+              View Real Work.
+              <br />
+              <span style={{ color: XRATED_BRAND.accent }}>Get Quotes Fast.</span>
+            </h1>
+            <p className="mt-3 max-w-sm text-xs leading-relaxed text-white/85 drop-shadow sm:text-sm">
+              Free UK directory of working tradespeople — message direct on WhatsApp, no middleman.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Stats strip — single line, brand orange highlights. */}

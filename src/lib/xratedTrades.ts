@@ -14,9 +14,9 @@ export const XRATED_BRAND = {
   accentHover: "#E5A500",
   accentInk: "#FFFFFF",
   logoUrl:
-    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated_logo_v2.png",
+    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated_logo_v3.png",
   heroImageUrl:
-    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated-whatsapp-hero.png"
+    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated-landing-hero-v3.png"
 } as const;
 
 // Tier system — Standard is free for life, App is a 30-day trial then £8/mo.
