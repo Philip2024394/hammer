@@ -22,8 +22,6 @@ import { LandingSearchBar } from "@/components/xrated/landing/LandingSearchBar";
 import { TradeIconChips } from "@/components/xrated/landing/TradeIconChips";
 import { TradesOnStandby } from "@/components/xrated/landing/TradesOnStandby";
 import { availabilityRank } from "@/lib/xratedAvailability";
-import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
-import { HowItWorks } from "@/components/xrated/landing/HowItWorks";
 import { StickyMobileLandingBar } from "@/components/xrated/landing/StickyMobileLandingBar";
 
 export const revalidate = 300;
@@ -90,24 +88,6 @@ export default async function TradeOffLandingPage() {
     if (c) citySet.add(c);
   }
   const cityCount = citySet.size;
-
-  // Featured tradies — app_paid first, then verified Standard, then the rest.
-  // Top 6 of whatever survives.
-  const tierWeight = (l: HammerexTradeOffListing): number => {
-    if (l.tier === "app_paid") return 0;
-    if (l.tier === "app_trial") return 1;
-    if (l.hammerex_standard_verified) return 2;
-    return 3;
-  };
-  const featured = [...listings]
-    .sort((a, b) => {
-      const w = tierWeight(a) - tierWeight(b);
-      if (w !== 0) return w;
-      return (
-        new Date(b.joined_at).getTime() - new Date(a.joined_at).getTime()
-      );
-    })
-    .slice(0, 6);
 
   return (
     <main className="bg-white pb-24 md:pb-0">
@@ -208,61 +188,6 @@ export default async function TradeOffLandingPage() {
             <span className="mx-2 text-neutral-400">·</span>
             <span style={{ color: XRATED_BRAND.accent }}>Free for life</span>
           </p>
-        </div>
-      </section>
-
-      <FeaturedTradiesRail tradies={featured} />
-
-      <HowItWorks />
-
-      {/* Closing CTA — primary funnel is "Find a tradesperson"; the "List
-          your trade" half stays as a secondary nudge for tradies. */}
-      <section className="mx-auto max-w-6xl px-4 pb-12 md:pb-20">
-        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="border-b border-neutral-200 p-6 md:border-b-0 md:border-r md:p-10">
-              <p
-                className="text-xs font-bold uppercase tracking-[0.18em]"
-                style={{ color: XRATED_BRAND.accent }}
-              >
-                Customers
-              </p>
-              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-neutral-900 sm:text-3xl">
-                Find a tradesperson — fast.
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-neutral-500 sm:text-sm">
-                Search by trade or city. WhatsApp them direct. No middleman,
-                no commission. Free for customers, forever.
-              </p>
-              <a
-                href="/trade-off/search"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#FFB300] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#E5A500] active:scale-[0.98] sm:w-auto"
-              >
-                Find a tradesperson
-              </a>
-            </div>
-            <div className="p-6 md:p-10">
-              <p
-                className="text-xs font-bold uppercase tracking-[0.18em]"
-                style={{ color: XRATED_BRAND.accent }}
-              >
-                Tradespeople
-              </p>
-              <h3 className="mt-2 text-2xl font-extrabold leading-tight text-neutral-900 sm:text-3xl">
-                List your trade — free.
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-neutral-500 sm:text-sm">
-                A profile with real photos, your city, your WhatsApp.
-                30-day free trial of the Xrated App for premium features.
-              </p>
-              <a
-                href="/trade-off/signup"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-6 text-sm font-bold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] active:scale-[0.98] sm:w-auto"
-              >
-                List your trade — free
-              </a>
-            </div>
-          </div>
         </div>
       </section>
 
