@@ -34,12 +34,17 @@ export function InstantQuoteForm({
   slug,
   displayName,
   tradeLabel,
-  whatsapp
+  whatsapp,
+  listingId
 }: {
   slug: string;
   displayName: string;
   tradeLabel: string;
   whatsapp: string;
+  /** Optional — when set, a WhatsApp-click beacon fires on submit so the
+   *  trial-tier upgrade-nudge counter stays in sync with the InstantQuote
+   *  path (not just the QrFooterDock and TradeMobileActionBar paths). */
+  listingId?: string | null;
 }) {
   void slug; // currently unused but kept in the signature for future tagging
 
@@ -165,6 +170,25 @@ export function InstantQuoteForm({
     e.preventDefault();
     setTouched(true);
     if (!canSubmit) return;
+    // Fire-and-forget click beacon — same endpoint the Contact button uses.
+    if (listingId) {
+      try {
+        const payload = JSON.stringify({ listing_id: listingId });
+        if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+          const blob = new Blob([payload], { type: "application/json" });
+          if (!navigator.sendBeacon("/api/trade-off/track-whatsapp-click", blob)) {
+            void fetch("/api/trade-off/track-whatsapp-click", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: payload,
+              keepalive: true
+            }).catch(() => undefined);
+          }
+        }
+      } catch {
+        // best-effort
+      }
+    }
     const url = `https://wa.me/${digits}?text=${encodeURIComponent(buildMessage())}`;
     window.open(url, "_blank", "noopener,noreferrer");
     setSent(true);

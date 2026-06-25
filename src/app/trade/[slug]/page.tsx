@@ -12,6 +12,8 @@ import { InstantQuoteForm } from "@/components/trade-off/InstantQuoteForm";
 import { ProjectGalleryGrid } from "@/components/trade-off/ProjectGalleryGrid";
 import { TradeSocialIcons } from "@/components/trade-off/TradeSocialIcons";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
+import { WhatsappClickTracker } from "@/components/trade-off/WhatsappClickTracker";
+import { PreviewModeBar } from "@/components/trade-off/PreviewModeBar";
 import { AvatarFrame } from "@/components/xrated/AvatarFrame";
 import { HeroTextOverlay } from "@/components/xrated/HeroTextOverlay";
 import { XratedCtaButton } from "@/components/xrated/XratedCtaButton";
@@ -255,8 +257,20 @@ function ToolsIUseBlock({
 // Page entry point
 // ─────────────────────────────────────────────────────────────────────────
 
-export default async function TradiePublicProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TradiePublicProfilePage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { slug } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const previewRaw = Array.isArray(sp.preview) ? sp.preview[0] : sp.preview;
+  // Standard-tier preview override. The whole profile is already public so
+  // we don't need a signed token — anyone can preview, the tradie's owner
+  // is the only person likely to care. A fixed top-bar makes it obvious.
+  const previewStandard = previewRaw === "standard";
   const { listing, projects } = await loadListing(slug);
   if (!listing) notFound();
 
@@ -287,11 +301,13 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
   const toolProducts = await loadStandardProducts(listing.hammerex_standard_products);
 
   const isPremium =
-    effectiveTier(listing) === "app_trial" || effectiveTier(listing) === "app_paid";
+    !previewStandard &&
+    (effectiveTier(listing) === "app_trial" || effectiveTier(listing) === "app_paid");
 
   return (
     <main className="pb-20 md:pb-0">
       <XratedViewTracker page="profile" listingId={listing.id} />
+      {previewStandard && <PreviewModeBar slug={listing.slug} />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
@@ -328,14 +344,18 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
 
       {/* Older mobile action bar — suppressed on premium tier because the
           QrFooterDock already shows a big WhatsApp button on mobile, and
-          stacking both creates a double sticky bar. */}
+          stacking both creates a double sticky bar.
+          Wrapped in WhatsappClickTracker so the WA tap fires the same
+          conversion beacon the QrFooterDock uses on the premium layout. */}
       {!isPremium && (
-        <TradeMobileActionBar
-          waUrl={waUrl}
-          phone={listing.phone}
-          email={listing.email}
-          displayName={listing.display_name}
-        />
+        <WhatsappClickTracker listingId={listing.id}>
+          <TradeMobileActionBar
+            waUrl={waUrl}
+            phone={listing.phone}
+            email={listing.email}
+            displayName={listing.display_name}
+          />
+        </WhatsappClickTracker>
       )}
     </main>
   );
@@ -576,12 +596,17 @@ function PremiumLayout({
         <TradeReportButton listingId={listing.id} />
       </section>
 
-      {/* 15. Sticky QR + Contact footer dock (above the global XratedFooter) */}
-      <QrFooterDock
-        qrPngUrl={qrPngUrl}
-        whatsappHref={waUrl}
-        themeColor={theme}
-      />
+      {/* 15. Sticky QR + Contact footer dock (above the global XratedFooter).
+          Wrapped in WhatsappClickTracker so a Contact tap pings the
+          /api/trade-off/track-whatsapp-click beacon before the browser
+          navigates out to wa.me — fuels the upgrade nudge on trial tier. */}
+      <WhatsappClickTracker listingId={listing.id}>
+        <QrFooterDock
+          qrPngUrl={qrPngUrl}
+          whatsappHref={waUrl}
+          themeColor={theme}
+        />
+      </WhatsappClickTracker>
     </>
   );
 }
@@ -749,6 +774,7 @@ function StandardLayout({
                 displayName={listing.display_name}
                 tradeLabel={primary}
                 whatsapp={listing.whatsapp}
+                listingId={listing.id}
               />
             </div>
 

@@ -15,6 +15,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normaliseVoucherCode, WELCOME_KNIFE_NAME } from "@/lib/xratedVoucher";
+import { lookupAnnualMember, ANNUAL_MEMBER_DISCOUNT_PCT } from "@/lib/xratedMember";
 
 export const runtime = "nodejs";
 
@@ -140,6 +141,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Xrated Annual-Member 5%-off perk. Client may have set is_annual_member
+  // true; we DO NOT trust it — re-resolve via lookupAnnualMember so a stale
+  // / spoofed flag can't unlock the discount note. We append to admin_notes
+  // (admin applies the discount when fulfilling, same pattern as the
+  // welcome-knife voucher — never auto-deducted from any stored total).
+  let memberNote: string | null = null;
+  if (body.is_annual_member === true) {
+    const memberCheck = await lookupAnnualMember({ email, whatsapp });
+    if (memberCheck.is_annual_member) {
+      memberNote = `XRATED-ANNUAL-${ANNUAL_MEMBER_DISCOUNT_PCT}% — ${memberCheck.display_name} (${memberCheck.slug}) — apply ${ANNUAL_MEMBER_DISCOUNT_PCT}% discount on order subtotal.`;
+    }
+  }
+  const combinedNotes = [voucherNote, memberNote].filter(Boolean).join("\n") || null;
+
   // Generate a reference and retry on the rare collision (unique constraint).
   let reference = generateReference();
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -155,7 +170,7 @@ export async function POST(req: NextRequest) {
         line_items: lines,
         subtotal_idr,
         status: "pending",
-        admin_notes: voucherNote
+        admin_notes: combinedNotes
       })
       .select("id, reference")
       .single();

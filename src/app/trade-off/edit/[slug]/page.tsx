@@ -17,6 +17,8 @@ import { effectiveTier, trialDaysRemaining } from "@/lib/xratedTrades";
 import { maybeExpireListingTier } from "@/lib/xratedTier";
 import { TradeOffForm, type TradeOffFormInitial } from "../../signup/TradeOffForm";
 import { PremiumCustomisationPanel } from "./PremiumCustomisationPanel";
+import { WhatsappLeadsNudge } from "@/components/trade-off/WhatsappLeadsNudge";
+import { LossAversionPreview } from "@/components/trade-off/LossAversionPreview";
 import type { HammerexXratedVoucher } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +85,33 @@ export default async function TradeOffEditPage({
   const trialDays =
     tier === "app_trial" ? trialDaysRemaining(row.data.trial_expires_at) : null;
   const upgradeHref = `/trade-off/upgrade?slug=${encodeURIComponent(slug)}&token=${encodeURIComponent(token)}`;
+  const upgradeAnnualHref = `${upgradeHref}&plan=annual`;
+  // ── Conversion mechanics ───────────────────────────────────────────────
+  // Mechanic 1 — nudge modal when a trial tradie's profile has earned at
+  //              least 3 WhatsApp clicks and they haven't dismissed in the
+  //              last 7 days.
+  // Mechanic 2 — day-25 loss-aversion banner when the trial has 1-5 days
+  //              left, regardless of click count.
+  const whatsappClickCount =
+    typeof row.data.whatsapp_click_count === "number"
+      ? row.data.whatsapp_click_count
+      : 0;
+  const nudgeDismissedAt =
+    typeof row.data.upgrade_nudge_dismissed_at === "string"
+      ? row.data.upgrade_nudge_dismissed_at
+      : null;
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  const dismissedRecently =
+    !!nudgeDismissedAt &&
+    Date.now() - new Date(nudgeDismissedAt).getTime() < SEVEN_DAYS_MS;
+  const showLeadsNudge =
+    tier === "app_trial" && whatsappClickCount >= 3 && !dismissedRecently;
+  const showLossPreview =
+    tier === "app_trial" &&
+    typeof trialDays === "number" &&
+    trialDays >= 1 &&
+    trialDays <= 5;
+  const previewHref = `/trade/${encodeURIComponent(slug)}?preview=standard`;
   const adminWaDigits = whatsappDigits(adminWhatsapp());
   const billingWaUrl = `https://wa.me/${adminWaDigits}?text=${encodeURIComponent(
     `Hi Xrated Trades — manage billing for ${row.data.display_name} (${row.data.slug}).`
@@ -156,6 +185,27 @@ export default async function TradeOffEditPage({
           Manage your verified work →
         </a>
       </section>
+
+      {showLeadsNudge && (
+        <WhatsappLeadsNudge
+          slug={slug}
+          editToken={token}
+          clickCount={whatsappClickCount}
+          upgradeHref={upgradeAnnualHref}
+        />
+      )}
+
+      {showLossPreview && (
+        <section className="mx-auto max-w-3xl px-4 pb-6">
+          <LossAversionPreview
+            slug={slug}
+            daysRemaining={trialDays as number}
+            trialExpiresAt={row.data.trial_expires_at ?? null}
+            upgradeAnnualHref={upgradeAnnualHref}
+            previewHref={previewHref}
+          />
+        </section>
+      )}
 
       {voucher && (
         <section className="mx-auto max-w-3xl px-4 pb-6">

@@ -290,6 +290,11 @@ export type HammerexTradeOffListing = {
   current_status_note: string | null;
   ready_date: string | null;
   promo_text: string | null;
+  // Conversion mechanics — track WhatsApp clicks so we can nudge trial
+  // tradies toward annual upgrade when they're getting real leads.
+  whatsapp_click_count: number;
+  last_whatsapp_click_at: string | null;
+  upgrade_nudge_dismissed_at: string | null;
   joined_at: string;
   created_at: string;
   updated_at: string;

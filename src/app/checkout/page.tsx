@@ -26,6 +26,39 @@ export default function CheckoutPage() {
   const [voucherCode, setVoucherCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Xrated annual-member perk — populated by /api/xrated-member/check on
+  // blur of either the email or WhatsApp field.
+  const [memberCheck, setMemberCheck] = useState<{
+    is_annual_member: boolean;
+    listing_id: string | null;
+    display_name: string | null;
+    slug: string | null;
+  }>({ is_annual_member: false, listing_id: null, display_name: null, slug: null });
+
+  async function checkMember(currentEmail: string, currentWhatsapp: string) {
+    const e = currentEmail.trim();
+    const w = currentWhatsapp.trim();
+    if (!e && !w) {
+      setMemberCheck({ is_annual_member: false, listing_id: null, display_name: null, slug: null });
+      return;
+    }
+    try {
+      const url = `/api/xrated-member/check?email=${encodeURIComponent(e)}&whatsapp=${encodeURIComponent(w)}`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json && typeof json.is_annual_member === "boolean") {
+        setMemberCheck({
+          is_annual_member: json.is_annual_member,
+          listing_id: typeof json.listing_id === "string" ? json.listing_id : null,
+          display_name: typeof json.display_name === "string" ? json.display_name : null,
+          slug: typeof json.slug === "string" ? json.slug : null
+        });
+      }
+    } catch {
+      // best-effort — no banner just means no banner
+    }
+  }
 
   useEffect(() => {
     const sync = () => setLines(cart.read());
@@ -50,6 +83,8 @@ export default function CheckoutPage() {
         country: country.trim(),
         address: address.trim(),
         voucher_code: voucherCode.trim() || null,
+        is_annual_member: memberCheck.is_annual_member,
+        member_listing_id: memberCheck.listing_id,
         lines: lines.map((l) => ({
           productId: l.productId,
           slug: l.slug,
@@ -137,8 +172,8 @@ export default function CheckoutPage() {
                 {t("checkout.yourDetails")}
               </legend>
               <Field label={t("checkout.fullName")}        icon={<User size={14} />}   value={name}     onChange={setName}     placeholder="John Smith" autoComplete="name" name="name" />
-              <Field label={t("checkout.email")}             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
-              <Field label={t("checkout.phone")}     icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="phone" />
+              <Field label={t("checkout.email")}             icon={<Mail size={14} />}   value={email}    onChange={setEmail}    onBlur={() => void checkMember(email, whatsapp)} placeholder="you@example.com" inputMode="email" type="email" autoComplete="email" name="email" />
+              <Field label={t("checkout.phone")}     icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} onBlur={() => void checkMember(email, whatsapp)} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="phone" />
               <Field label={t("checkout.country")}           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
               <Field label={t("checkout.deliveryAddress")} icon={<MapPin size={14} />} value={address} onChange={setAddress} placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
               <label className="flex flex-col gap-1">
@@ -183,6 +218,18 @@ export default function CheckoutPage() {
           </div>
 
           <aside className="h-fit rounded-2xl border border-brand-line bg-brand-surface p-5">
+            {memberCheck.is_annual_member && (
+              <div className="mb-4 rounded-xl border border-emerald-400/60 bg-emerald-50 p-3 text-emerald-900">
+                <p className="text-sm font-extrabold">
+                  <span aria-hidden="true">🎉</span> Xrated Annual Member — 5% off applied
+                </p>
+                <p className="mt-1 text-xs leading-relaxed">
+                  Hi {memberCheck.display_name ?? "there"}, your annual
+                  membership unlocks a permanent 5% discount on every Hammerex
+                  order.
+                </p>
+              </div>
+            )}
             <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-brand-text">
               <HeaderIcon icon={<Receipt size={16} />} />
               {t("checkout.orderSummary")}
@@ -210,6 +257,12 @@ export default function CheckoutPage() {
                 <span>Items subtotal</span>
                 <span className="text-brand-text">{shouldShowPrice(visitorCountry) ? formatPriceForRegion(subtotal, "IDR", visitorCountry) : <span className="text-brand-accent">Quote requested at checkout</span>}</span>
               </div>
+              {memberCheck.is_annual_member && (
+                <div className="mt-1 flex justify-between text-emerald-700">
+                  <span>Xrated Annual Member discount</span>
+                  <span className="font-semibold">−5%</span>
+                </div>
+              )}
               <div className="mt-1 flex justify-between text-brand-muted">
                 <span>Delivery</span>
                 <span className="text-brand-accent">Quoted within 24h</span>
@@ -270,11 +323,12 @@ export default function CheckoutPage() {
   );
 }
 
-function Field({ label, icon, value, onChange, placeholder, multiline, inputMode, type, autoComplete, name }: {
+function Field({ label, icon, value, onChange, onBlur, placeholder, multiline, inputMode, type, autoComplete, name }: {
   label: string;
   icon?: React.ReactNode;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   multiline?: boolean;
   inputMode?: "text" | "tel" | "email";
@@ -292,6 +346,7 @@ function Field({ label, icon, value, onChange, placeholder, multiline, inputMode
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder}
           autoComplete={autoComplete}
           name={name}
@@ -302,6 +357,7 @@ function Field({ label, icon, value, onChange, placeholder, multiline, inputMode
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder}
           inputMode={inputMode}
           type={type ?? "text"}

@@ -168,19 +168,11 @@ export default async function UpgradePage({
         </div>
       </section>
 
-      {/* Pricing grid */}
+      {/* Pricing grid — annual is the headline plan; monthly sits beside it
+          as the lower-commitment alternative. The 5%-off Hammerex perk is
+          only attached to annual, which is the wedge to push that plan. */}
       <section className="mx-auto max-w-3xl px-4 pb-6">
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-brand-line bg-brand-surface p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-muted">
-              Monthly
-            </p>
-            <p className="mt-2 text-3xl font-extrabold">
-              £{XRATED_PRICING.monthlyGbp}
-              <span className="ml-1 text-sm font-medium text-brand-muted">/month</span>
-            </p>
-            <p className="mt-2 text-xs text-brand-muted">Cancel any time.</p>
-          </div>
           <div
             className="relative rounded-xl border-2 p-5"
             style={{ borderColor: XRATED_BRAND.accent }}
@@ -195,7 +187,7 @@ export default async function UpgradePage({
               className="text-xs font-bold uppercase tracking-widest"
               style={{ color: XRATED_BRAND.accent }}
             >
-              Annual
+              Annual · Recommended
             </p>
             <p className="mt-2 text-3xl font-extrabold">
               £{XRATED_PRICING.annualGbp}
@@ -204,6 +196,25 @@ export default async function UpgradePage({
             <p className="mt-2 text-xs text-brand-muted">
               Equivalent to £{(XRATED_PRICING.annualGbp / 12).toFixed(2)}/month.
             </p>
+            <ul className="mt-3 space-y-1.5 text-[13px] text-brand-text">
+              <li>· All Xrated App premium features</li>
+              <li>
+                <span className="font-bold text-brand-accent">
+                  + 5% off Hammerex tools forever
+                </span>{" "}
+                while annual membership is active.
+              </li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-brand-line bg-brand-surface p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+              Monthly
+            </p>
+            <p className="mt-2 text-3xl font-extrabold">
+              £{XRATED_PRICING.monthlyGbp}
+              <span className="ml-1 text-sm font-medium text-brand-muted">/month</span>
+            </p>
+            <p className="mt-2 text-xs text-brand-muted">Cancel any time.</p>
           </div>
         </div>
         <p className="mt-3 text-[11px] text-brand-muted">
