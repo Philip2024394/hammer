@@ -6,6 +6,7 @@
 // ESC closes the lightbox. Pure client component (lightbox state only).
 
 import { useEffect, useState } from "react";
+import { XRATED_BRAND } from "@/lib/xratedTrades";
 
 export function QrFooterDock({
   qrPngUrl,
@@ -99,14 +100,30 @@ export function QrFooterDock({
             >
               ×
             </button>
+            {/* QR — kept clean (no centre overlay so scanners aren't slowed
+                by additional masking). Xrated trademark sits below the
+                code as the small attribution mark. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrPngUrl}
               alt="Profile QR code"
               width={360}
               height={360}
-              className="block h-[300px] w-[300px] sm:h-[360px] sm:w-[360px]"
+              className="mx-auto block h-[300px] w-[300px] sm:h-[360px] sm:w-[360px]"
             />
+            <div className="mt-3 flex items-center justify-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={XRATED_BRAND.logoUrl}
+                alt={XRATED_BRAND.name}
+                width={20}
+                height={20}
+                className="h-5 w-auto object-contain"
+              />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-black/60">
+                {XRATED_BRAND.name}
+              </span>
+            </div>
             <div className="mt-4 flex items-center justify-between gap-3">
               <p className="text-[13px] font-semibold text-black">
                 Scan to open this profile
