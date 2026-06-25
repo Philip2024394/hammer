@@ -61,12 +61,24 @@ export function TradeAreaMap({
   lat,
   lng,
   city,
-  servicePostcodes
+  servicePostcodes,
+  accentColor = "#FFD400",
+  radiusMeters = 5000,
+  height = 260
 }: {
   lat: number | null;
   lng: number | null;
   city: string;
   servicePostcodes: string[];
+  /** Override the area-circle colour. Defaults to the brand yellow used
+   *  by the Standard-tier profile; the dedicated Services subpage passes
+   *  red so the catchment reads at a glance. */
+  accentColor?: string;
+  /** Catchment radius in metres. Default 5km. */
+  radiusMeters?: number;
+  /** Map height in px. Default 260; the Services subpage uses a larger
+   *  canvas for hero-level prominence. */
+  height?: number;
 }) {
   // Silence unused-prop warnings — kept on the API so the parent can pass
   // the full context without TypeScript complaining later.
@@ -85,7 +97,7 @@ export function TradeAreaMap({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-brand-line bg-brand-surface">
-      <div className="h-[260px] w-full">
+      <div style={{ height: `${height}px` }} className="w-full">
         <MapContainer
           center={center}
           zoom={11}
@@ -99,12 +111,12 @@ export function TradeAreaMap({
           />
           <Circle
             center={center}
-            radius={5000}
+            radius={radiusMeters}
             pathOptions={{
-              color: "#FFD400",
+              color: accentColor,
               weight: 2,
-              fillColor: "#FFD400",
-              fillOpacity: 0.12
+              fillColor: accentColor,
+              fillOpacity: 0.22
             }}
           />
           <Marker position={center} />

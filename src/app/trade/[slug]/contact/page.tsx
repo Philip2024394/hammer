@@ -5,6 +5,8 @@ import { XratedHeader } from "@/components/xrated/XratedHeader";
 import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { PremiumHero } from "@/components/xrated/profile/PremiumHero";
 import { FaqAccordion } from "@/components/xrated/profile/FaqAccordion";
+import { TrustAndLogisticsPanel } from "@/components/xrated/profile/TrustAndLogisticsPanel";
+import { OfficeHoursMarquee } from "@/components/xrated/profile/OfficeHoursMarquee";
 import { ContactFormPanel } from "@/components/xrated/profile/ContactFormPanel";
 import { tradeLabel, whatsappQuoteUrl } from "@/lib/tradeOff";
 
@@ -61,12 +63,17 @@ export default async function TradeContactPage({
           button in the PremiumHero CTA row. */}
       {hasFaq && (
         <section className="w-full px-4 pt-2 sm:px-6">
-          <p className="text-xs text-neutral-500">
-            Common questions answered first — tap to expand.
-          </p>
+          <OfficeHoursMarquee hours={listing.operating_hours ?? null} />
           <FaqAccordion items={listing.faq_items} themeColor="#FFB300" />
         </section>
       )}
+
+      {/* Full "What to know before you message" trust panel — surfaces
+          insurance £ cover, qualifications, memberships, DBS / transport
+          / tools / free-quote flags, years-in-trade and minimum job
+          right before the form. Hero already shows the headline trust
+          badges; this is the detailed breakdown. */}
+      <TrustAndLogisticsPanel listing={listing} />
 
       {/* CONTACT FORM — supports Email OR WhatsApp send. */}
       <ContactFormPanel

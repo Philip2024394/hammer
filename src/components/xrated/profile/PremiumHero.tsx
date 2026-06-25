@@ -11,6 +11,7 @@
 import type { HammerexTradeOffListing } from "@/lib/supabase";
 import { tradeLabel } from "@/lib/tradeOff";
 import { resolveAppHero } from "@/lib/tradeAppBanners";
+import { getTrustLevel, TRUST_LEVEL_META } from "@/lib/xratedTrustLevel";
 
 export function PremiumHero({
   listing,
@@ -38,7 +39,7 @@ export function PremiumHero({
       }
     : {
         href: `/trade/${listing.slug}/contact`,
-        label: "Message",
+        label: "Contact us",
         icon: (
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -76,6 +77,9 @@ export function PremiumHero({
     last_payment_plan: listing.last_payment_plan
   });
 
+  const trustLevel = getTrustLevel(listing);
+  const trustLabel = TRUST_LEVEL_META[trustLevel].label;
+
   return (
     <>
       <section className="relative h-[260px] w-full overflow-hidden bg-neutral-900 sm:h-[380px]">
@@ -112,19 +116,32 @@ export function PremiumHero({
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-black">
-                      <span className="text-3xl font-extrabold sm:text-4xl" style={{ color: "#FFB300" }}>X</span>
+                    <div
+                      className="flex h-full w-full items-center justify-center bg-black"
+                      aria-label={`X-Rated Level ${trustLevel} — ${trustLabel}`}
+                      title={`X-Rated Level ${trustLevel} — ${trustLabel}`}
+                    >
+                      <span
+                        className="text-2xl font-extrabold leading-none sm:text-3xl"
+                        style={{ color: "#FFB300", letterSpacing: "0.05em" }}
+                      >
+                        X{trustLevel}
+                      </span>
                     </div>
                   )}
                 </div>
+                {/* Trust-level badge — replaces the old verified-check
+                    badge. Anyone at Level 3+ is verified by definition,
+                    so combining them removes a duplicate signal. The
+                    native title attribute gives a tooltip with the
+                    descriptive label. */}
                 <span
-                  className="absolute -bottom-1 -right-1 inline-flex h-7 w-7 items-center justify-center rounded-full ring-2 ring-black"
-                  style={{ background: "#FFB300" }}
-                  aria-label="Verified"
+                  className="absolute -bottom-1 -right-1 inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded-full px-1.5 text-xs font-extrabold ring-2 ring-black sm:h-8 sm:min-w-[2rem]"
+                  style={{ background: "#FFB300", color: "#0A0A0A" }}
+                  aria-label={`X-Rated Level ${trustLevel} — ${trustLabel}`}
+                  title={`X-Rated Level ${trustLevel} — ${trustLabel}`}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
+                  X{trustLevel}
                 </span>
               </div>
 

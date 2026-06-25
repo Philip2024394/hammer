@@ -263,6 +263,12 @@ export type HammerexTradeOffListing = {
   priced_services: {
     name: string;
     image_url: string | null;
+    /** Up to 2 additional images (3 total with image_url). Each card on
+     *  the pricing carousel can show 3 photos that all open in the same
+     *  lightbox so customers can preview the workmanship before tapping
+     *  Enquire. Backwards compatible — empty/missing array means
+     *  single-image card. */
+    image_urls?: string[];
     price: number;
     unit: string;
     description?: string | null;
@@ -301,6 +307,15 @@ export type HammerexTradeOffListing = {
   // X-Rated trust level admin override (3-5). NULL = auto-derive from
   // current listing data (see src/lib/xratedTrustLevel.ts).
   trust_level_override: number | null;
+  // Optional 60-second-max intro video. YouTube watch / youtu.be / Shorts
+  // URL — shown as a thumbnail in the About section, opens a lightbox on
+  // click. `video_cover_url` overrides the auto-poster (falls back to a
+  // portfolio photo when null).
+  video_url: string | null;
+  video_cover_url: string | null;
+  // Short label rendered next to the video tile (e.g. "Level 5 skim
+  // example"). Editor caps to 60 chars.
+  video_caption: string | null;
   joined_at: string;
   created_at: string;
   updated_at: string;

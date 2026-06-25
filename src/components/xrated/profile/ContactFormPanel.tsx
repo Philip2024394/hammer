@@ -59,6 +59,12 @@ function formatPrice(price: number, unit: string): string {
 }
 
 function buildPrefillMessage(svc: EnquirySubject): string {
+  // price === 0 marks a project-style enquiry (Recent Work lightbox) — no
+  // listed price, so we leave the price tail off the message instead of
+  // surfacing "(£0)".
+  if (svc.price === 0) {
+    return `Hi, I saw ${svc.name} on your profile and would like to discuss a similar project. Can you arrange a quote?`;
+  }
   return `Hi, I'm interested in ${svc.name} (${formatPrice(svc.price, svc.unit)}). Can you confirm availability and arrange a quote?`;
 }
 

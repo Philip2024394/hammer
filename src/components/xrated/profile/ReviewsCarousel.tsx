@@ -1,0 +1,187 @@
+"use client";
+
+// Xrated Trades — public reviews carousel rendered on /trade/<slug>.
+// One review card visible at a time; previous/next arrows + dot indicator
+// step through. Hides workmanship/communication/value/timeliness sub-
+// ratings when null (existing reviews from before the structured-rating
+// schema landed). "Disputed" badge surfaces when the tradesperson has
+// flagged the review for moderation.
+
+import { useState } from "react";
+
+const PROJECT_TYPE_LABEL: Record<string, string> = {
+  new_build: "New build",
+  renovation: "Renovation",
+  repair: "Repair"
+};
+
+export type ReviewCard = {
+  id: string;
+  customer_name: string;
+  customer_postcode: string | null;
+  project_type: string | null;
+  overall_rating: number;
+  workmanship_rating: number | null;
+  communication_rating: number | null;
+  value_rating: number | null;
+  timeliness_rating: number | null;
+  body: string;
+  status: "live" | "disputed";
+  public_response: string | null;
+  submitted_at: string;
+};
+
+export function ReviewsCarousel({
+  reviews,
+  displayName,
+  city
+}: {
+  reviews: ReviewCard[];
+  displayName: string;
+  city: string;
+}) {
+  const [index, setIndex] = useState(0);
+  if (reviews.length === 0) return null;
+  const safe = Math.min(index, reviews.length - 1);
+  const r = reviews[safe];
+  const hasPrev = safe > 0;
+  const hasNext = safe < reviews.length - 1;
+
+  const outcode =
+    r.customer_postcode?.split(" ")[0] || null; // public-safe area only
+  const projectLabel = r.project_type ? PROJECT_TYPE_LABEL[r.project_type] : null;
+  const date = new Date(r.submitted_at).toLocaleDateString("en-GB", {
+    month: "short",
+    year: "numeric"
+  });
+  const subRatings = [
+    { label: "Workmanship", value: r.workmanship_rating },
+    { label: "Communication", value: r.communication_rating },
+    { label: "Value", value: r.value_rating },
+    { label: "Timeliness", value: r.timeliness_rating }
+  ].filter((s): s is { label: string; value: number } => typeof s.value === "number");
+
+  return (
+    <div className="mt-4 flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => setIndex(Math.max(0, safe - 1))}
+        disabled={!hasPrev}
+        aria-label="Previous review"
+        className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-500 transition hover:border-[#FFB300] hover:text-[#FFB300] disabled:opacity-30 sm:flex"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </button>
+
+      <div className="flex-1 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <svg
+                  key={i}
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill={i <= r.overall_rating ? "#FFB300" : "none"}
+                  stroke="#FFB300"
+                  strokeWidth="1.75"
+                  aria-hidden="true"
+                >
+                  <path d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+                </svg>
+              ))}
+            </div>
+            <span className="text-sm font-bold text-neutral-900">
+              {r.overall_rating.toFixed(1)}
+            </span>
+            {projectLabel && (
+              <span className="ml-1 inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-0.5 text-xs font-semibold text-neutral-700">
+                {projectLabel}
+              </span>
+            )}
+          </div>
+          {r.status === "disputed" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 ring-1 ring-amber-200">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12" y2="17" />
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              </svg>
+              Disputed — under review
+            </span>
+          )}
+        </div>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr,auto] sm:items-end sm:gap-6">
+          <p className="text-sm leading-relaxed text-neutral-700">{r.body}</p>
+          <div className="text-right">
+            <p className="text-sm font-bold text-neutral-900">{r.customer_name}</p>
+            <p className="text-xs text-neutral-500">{outcode ? `${outcode} · ${city}` : city}</p>
+            <p className="mt-0.5 text-xs text-neutral-400">{date}</p>
+          </div>
+        </div>
+
+        {subRatings.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-2 border-t border-neutral-100 pt-3 sm:grid-cols-4">
+            {subRatings.map((s) => (
+              <div key={s.label} className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-neutral-500">{s.label}</span>
+                <span className="font-bold text-neutral-900">{s.value.toFixed(1)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {r.public_response && (
+          <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+              Response from {displayName}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-neutral-700">
+              {r.public_response}
+            </p>
+          </div>
+        )}
+
+        {reviews.length > 1 && (
+          <div className="mt-4 flex items-center justify-center gap-1.5">
+            {reviews.slice(0, Math.min(reviews.length, 10)).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Review ${i + 1}`}
+                aria-current={i === safe ? "true" : "false"}
+                className="h-2 rounded-full transition"
+                style={{
+                  width: i === safe ? "20px" : "8px",
+                  background: i === safe ? "#FFB300" : "rgba(0,0,0,0.18)"
+                }}
+              />
+            ))}
+            {reviews.length > 10 && (
+              <span className="ml-1 text-xs font-bold text-neutral-400">
+                +{reviews.length - 10}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setIndex(Math.min(reviews.length - 1, safe + 1))}
+        disabled={!hasNext}
+        aria-label="Next review"
+        className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-500 transition hover:border-[#FFB300] hover:text-[#FFB300] disabled:opacity-30 sm:flex"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
