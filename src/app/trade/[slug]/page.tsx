@@ -319,8 +319,10 @@ export default async function TradiePublicProfilePage({
       />
       <XratedHeader />
 
-      {/* Per-trade default hero banner — sits directly under the header on
-          every tier. Annual paid members can override via custom_app_hero_url. */}
+      {/* Per-trade default hero banner — fixed-height crop with a soft
+          left-side gradient overlay so the profile card avatar reads
+          against the photo. Annual paid members can override via
+          custom_app_hero_url. */}
       {(() => {
         const heroUrl = resolveAppHero({
           custom_app_hero_url: listing.custom_app_hero_url,
@@ -330,12 +332,20 @@ export default async function TradiePublicProfilePage({
         });
         if (!heroUrl) return null;
         return (
-          <section className="w-full">
+          <section className="relative h-[320px] w-full overflow-hidden bg-neutral-900 sm:h-[480px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={heroUrl}
               alt={`${listing.display_name} — ${tradeLabel(listing.primary_trade)} hero`}
-              className="block w-full"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0) 60%)"
+              }}
             />
           </section>
         );
@@ -388,7 +398,10 @@ export default async function TradiePublicProfilePage({
 // PREMIUM layout — app_trial / app_paid tiers
 // ─────────────────────────────────────────────────────────────────────────
 
-function PremiumLayout(_props: {
+function PremiumLayout({
+  listing,
+  waUrl
+}: {
   listing: HammerexTradeOffListing;
   projects: HammerexTradeOffProject[];
   toolProducts: HammerexProduct[];
@@ -397,9 +410,178 @@ function PremiumLayout(_props: {
   waUrl: string;
   profileFullUrl: string;
 }) {
-  // Banner now rendered at the page level (above the tier branch) so all
-  // tiers see it. Body intentionally empty pending the new spec.
-  return <></>;
+  const primary = tradeLabel(listing.primary_trade);
+  const tradeServiceLabel = `${primary} Service`;
+  const subtitle =
+    (listing.services_offered ?? []).slice(0, 2).join(" & ") ||
+    (listing.trading_name ?? "");
+  const rating =
+    typeof listing.rating_avg === "number" && listing.rating_avg > 0
+      ? listing.rating_avg.toFixed(1)
+      : null;
+  const reviewCount = listing.rating_count ?? 0;
+  const phoneHref = listing.phone
+    ? `tel:${listing.phone.replace(/[^0-9+]/g, "")}`
+    : null;
+
+  const trustBadges = [
+    listing.is_insured ? { label: "Fully insured", icon: "shield" } : null,
+    listing.qualifications && listing.qualifications.length > 0
+      ? { label: "Licensed", icon: "license" }
+      : null,
+    listing.trade_memberships && listing.trade_memberships.length > 0
+      ? { label: "Registered", icon: "check" }
+      : null
+  ].filter((b): b is { label: string; icon: string } => b !== null);
+
+  return (
+    <>
+      <section className="relative z-10 mx-auto -mt-14 max-w-3xl px-4 sm:-mt-20">
+        <div className="rounded-2xl bg-white p-4 shadow-xl ring-1 ring-neutral-200 sm:p-5">
+          <div className="flex items-start gap-4 sm:gap-5">
+            {/* LEFT — round avatar with white ring */}
+            <div className="shrink-0">
+              <div
+                className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-white sm:h-24 sm:w-24"
+                style={{ boxShadow: "0 6px 16px rgba(0,0,0,0.15)" }}
+              >
+                {listing.avatar_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={listing.avatar_url}
+                    alt={listing.display_name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-400">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT — content stack */}
+            <div className="min-w-0 flex-1">
+              {listing.accepting_jobs && (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
+                  style={{ background: "#0F7A3F" }}
+                >
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-white/90" />
+                  Available
+                </span>
+              )}
+
+              <h1 className="mt-2 text-lg font-extrabold leading-tight text-neutral-900 sm:text-xl">
+                {tradeServiceLabel}
+              </h1>
+              {subtitle && (
+                <p className="mt-0.5 truncate text-xs text-neutral-500 sm:text-sm">
+                  {subtitle}
+                </p>
+              )}
+
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-700">
+                <span className="inline-flex items-center gap-1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFB300" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="font-semibold">{listing.city}</span>
+                </span>
+                {rating && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#FFB300" aria-hidden="true">
+                      <path d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+                    </svg>
+                    <span className="font-semibold text-neutral-900">{rating}</span>
+                    <span className="text-neutral-500">({reviewCount})</span>
+                  </span>
+                )}
+              </div>
+
+              {trustBadges.length > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-700">
+                  {trustBadges.map((b) => (
+                    <span key={b.label} className="inline-flex items-center gap-1">
+                      <TrustIcon name={b.icon} />
+                      <span className="font-semibold">{b.label}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Three-button row — Message yellow primary, Call/WA outlined */}
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <a
+              href="#contact-panel"
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-bold text-neutral-900 transition active:scale-[0.97] sm:text-sm"
+              style={{ background: "#FFB300" }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              Message
+            </a>
+            <a
+              href={phoneHref ?? "#"}
+              aria-disabled={!phoneHref}
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 border-neutral-200 bg-white text-xs font-bold text-neutral-900 transition hover:border-neutral-400 active:scale-[0.97] sm:text-sm"
+              style={!phoneHref ? { opacity: 0.4, pointerEvents: "none" } : {}}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
+              </svg>
+              Call now
+            </a>
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 border-neutral-200 bg-white text-xs font-bold text-neutral-900 transition hover:border-neutral-400 active:scale-[0.97] sm:text-sm"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
+              </svg>
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function TrustIcon({ name }: { name: string }) {
+  const stroke = "#FFB300";
+  if (name === "shield") {
+    return (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    );
+  }
+  if (name === "license") {
+    return (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M7 8h4" />
+        <path d="M7 12h10" />
+        <path d="M7 16h10" />
+      </svg>
+    );
+  }
+  // check
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────
