@@ -5,10 +5,7 @@
 // tradie in their edit dashboard; this component only renders.
 
 import { TRADE_OFF_TRADES } from "@/lib/tradeOff";
-import {
-  AVAILABILITY_LABELS,
-  formatHeadlineRate
-} from "@/lib/xratedAvailability";
+import { AVAILABILITY_LABELS } from "@/lib/xratedAvailability";
 import type { HammerexTradeOffListing } from "@/lib/supabase";
 import { tradeIconFor } from "./tradeIcons";
 
@@ -57,7 +54,6 @@ export function TradesOnStandby({
             const availabilityLabel = l.availability
               ? AVAILABILITY_LABELS[l.availability] ?? null
               : null;
-            const rate = formatHeadlineRate(l.headline_rate);
             const isNow = l.availability === "now";
             const toneClass = availabilityToneClass(l.availability);
 
@@ -134,10 +130,17 @@ export function TradesOnStandby({
                     )}
                   </span>
 
-                  {/* RIGHT — starting price (hidden on very narrow screens) */}
-                  {rate && (
-                    <span className="hidden shrink-0 text-sm font-bold text-neutral-900 sm:block">
-                      {rate}
+                  {/* RIGHT — headline rate. Always visible: amount on top,
+                      unit (per day / per m² / per hour / per contract etc)
+                      underneath in muted text. */}
+                  {l.headline_rate && l.headline_rate.amount > 0 && (
+                    <span className="flex shrink-0 flex-col items-end leading-tight">
+                      <span className="text-sm font-extrabold text-neutral-900 sm:text-base">
+                        £{l.headline_rate.amount.toLocaleString("en-GB")}
+                      </span>
+                      <span className="text-[11px] font-semibold text-neutral-500">
+                        {l.headline_rate.unit}
+                      </span>
                     </span>
                   )}
 
