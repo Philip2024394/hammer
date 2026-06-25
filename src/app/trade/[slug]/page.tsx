@@ -589,13 +589,6 @@ function PremiumLayout({
         />
       </section>
 
-      {/* Share strip anchor — referenced by the action triple's Share button */}
-      <section id="share" className="mx-auto max-w-3xl px-4 pt-6 scroll-mt-20">
-        <XratedSocialShareStrip
-          url={profileFullUrl}
-          displayName={listing.display_name}
-        />
-      </section>
 
       {/* Report */}
       <section className="mx-auto max-w-3xl px-4 pb-8 pt-6">
