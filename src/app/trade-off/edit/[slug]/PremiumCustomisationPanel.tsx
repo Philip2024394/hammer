@@ -5,8 +5,12 @@
 // by the main form. Server gates whether this renders at all; the panel
 // itself just collects + posts.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AVAILABILITY_OPTIONS } from "@/lib/xratedAvailability";
+import {
+  PRICING_UNIT_OTHER_VALUE,
+  unitsForTrade
+} from "@/lib/tradePricingUnits";
 
 type HoursSlot = { open: string; close: string } | null;
 type HoursMap = Record<string, HoursSlot>;
@@ -50,14 +54,6 @@ type Patch = {
   headline_rate: HeadlineRate;
 };
 
-const HEADLINE_UNIT_OPTIONS = [
-  "per day",
-  "per m²",
-  "per hour",
-  "per project",
-  "from"
-] as const;
-
 const DAY_ROW: { key: keyof HoursMap; label: string }[] = [
   { key: "mon", label: "Mon" },
   { key: "tue", label: "Tue" },
@@ -71,13 +67,34 @@ const DAY_ROW: { key: keyof HoursMap; label: string }[] = [
 export function PremiumCustomisationPanel({
   slug,
   editToken,
+  primaryTrade,
   initial
 }: {
   slug: string;
   editToken: string;
+  // The tradie picks their primary_trade in the main form above this panel —
+  // we just read it to tailor the pricing-unit dropdown. Null falls back to
+  // the generic unit set.
+  primaryTrade: string | null;
   initial: Patch;
 }) {
   const [state, setState] = useState<Patch>(initial);
+  // Trade-aware pricing units. When the saved unit isn't in the curated list,
+  // we render an "Other (custom)" sentinel and let the tradie type freely so
+  // existing data is never silently dropped.
+  const unitOptions = useMemo(() => unitsForTrade(primaryTrade), [primaryTrade]);
+  const initialUnit = (initial.headline_rate.unit || "").trim();
+  const initialUnitIsCurated = unitOptions.some((o) => o.value === initialUnit);
+  const [unitSentinel, setUnitSentinel] = useState<string>(
+    initialUnit.length === 0
+      ? unitOptions[0]?.value ?? PRICING_UNIT_OTHER_VALUE
+      : initialUnitIsCurated
+        ? initialUnit
+        : PRICING_UNIT_OTHER_VALUE
+  );
+  const [customUnit, setCustomUnit] = useState<string>(
+    initialUnitIsCurated ? "" : initialUnit
+  );
   // Services editor binds to a single comma-separated string for ergonomics.
   const [servicesText, setServicesText] = useState<string>(
     (initial.services_offered ?? []).join(", ")
@@ -364,22 +381,53 @@ export function PremiumCustomisationPanel({
             />
           </Field>
           <Field label="Headline rate unit">
+            <p className="mb-1.5 text-[11px] text-brand-muted">
+              Pricing units common in your trade — pick the closest or use
+              &lsquo;Other&rsquo;.
+            </p>
             <select
-              value={state.headline_rate.unit}
-              onChange={(e) =>
-                set("headline_rate", {
-                  ...state.headline_rate,
-                  unit: e.target.value
-                })
-              }
+              value={unitSentinel}
+              onChange={(e) => {
+                const next = e.target.value;
+                setUnitSentinel(next);
+                if (next === PRICING_UNIT_OTHER_VALUE) {
+                  set("headline_rate", {
+                    ...state.headline_rate,
+                    unit: customUnit.trim()
+                  });
+                } else {
+                  set("headline_rate", {
+                    ...state.headline_rate,
+                    unit: next
+                  });
+                }
+              }}
               className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
             >
-              {HEADLINE_UNIT_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
+              {unitOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
+              <option value={PRICING_UNIT_OTHER_VALUE}>Other (custom)…</option>
             </select>
+            {unitSentinel === PRICING_UNIT_OTHER_VALUE && (
+              <input
+                type="text"
+                value={customUnit}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setCustomUnit(next);
+                  set("headline_rate", {
+                    ...state.headline_rate,
+                    unit: next.trim()
+                  });
+                }}
+                placeholder="e.g. per fitting, per visit"
+                maxLength={30}
+                className="mt-2 h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+              />
+            )}
           </Field>
           <Field label="Currency">
             {/* v1: GBP only — the column accepts any 3-letter code so the

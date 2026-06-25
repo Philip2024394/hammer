@@ -162,6 +162,9 @@ export default async function TradeOffEditPage({
           <PremiumCustomisationPanel
             slug={slug}
             editToken={token}
+            primaryTrade={
+              typeof row.data.primary_trade === "string" ? row.data.primary_trade : null
+            }
             initial={{
               theme_color: row.data.theme_color ?? "#FFB300",
               button_text_color: row.data.button_text_color ?? "#FFFFFF",
