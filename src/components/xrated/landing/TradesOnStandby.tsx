@@ -67,10 +67,10 @@ export function TradesOnStandby({
                   aria-label={`${l.display_name} — ${tradeLabel} in ${l.city}`}
                   className="flex w-full items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3 transition active:scale-[0.997] hover:border-neutral-300 sm:p-4"
                 >
-                  {/* LEFT — black square with yellow icon */}
+                  {/* LEFT — large black square with yellow icon */}
                   <span
                     aria-hidden="true"
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"
+                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl [&_svg]:h-8 [&_svg]:w-8 sm:h-20 sm:w-20 sm:[&_svg]:h-10 sm:[&_svg]:w-10"
                     style={{ background: "#0a0a0a", color: "#FFB300" }}
                   >
                     <Icon />
