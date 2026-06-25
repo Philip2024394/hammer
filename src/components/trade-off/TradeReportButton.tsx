@@ -53,7 +53,7 @@ export function TradeReportButton({ listingId }: { listingId: string }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             disabled={status === "submitting"}
-            className="h-11 flex-1 rounded-lg border border-brand-line bg-white px-3 text-xs text-brand-text focus:border-[#F97316] focus:outline-none"
+            className="h-11 flex-1 rounded-lg border border-brand-line bg-white px-3 text-xs text-brand-text focus:border-[#FFB300] focus:outline-none"
           >
             {REASONS.map((r) => (
               <option key={r} value={r}>{r}</option>
@@ -63,7 +63,7 @@ export function TradeReportButton({ listingId }: { listingId: string }) {
             type="button"
             onClick={submit}
             disabled={status === "submitting"}
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-brand-line bg-white px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316] disabled:opacity-60"
+            className="inline-flex h-11 items-center justify-center rounded-lg border border-brand-line bg-white px-4 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300] disabled:opacity-60"
           >
             {status === "submitting" ? "Submitting…" : "Submit report"}
           </button>

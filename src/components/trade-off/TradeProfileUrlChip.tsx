@@ -37,7 +37,7 @@ export function TradeProfileUrlChip({
     <button
       type="button"
       onClick={copy}
-      className="inline-flex h-9 items-center gap-2 rounded-full border border-brand-line bg-neutral-50 px-3 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+      className="inline-flex h-9 items-center gap-2 rounded-full border border-brand-line bg-neutral-50 px-3 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
       aria-label={`Copy ${display}`}
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

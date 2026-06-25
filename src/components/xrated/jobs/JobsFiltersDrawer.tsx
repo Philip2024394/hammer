@@ -60,8 +60,8 @@ export function JobsFiltersDrawer({ trades, activeTradeSlug, activeCity }: Props
         aria-expanded={open}
         className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-xs font-semibold transition ${
           activeCount > 0
-            ? "border-[#F97316] bg-[#F97316] text-white"
-            : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316]"
+            ? "border-[#FFB300] bg-[#FFB300] text-white"
+            : "border-brand-line bg-brand-surface text-brand-text hover:border-[#FFB300]"
         }`}
       >
         <svg
@@ -101,7 +101,7 @@ export function JobsFiltersDrawer({ trades, activeTradeSlug, activeCity }: Props
             className="relative z-10 w-full max-w-2xl rounded-t-2xl border border-brand-line bg-brand-bg p-5 sm:rounded-2xl sm:p-6"
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-[#F97316]">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-[#FFB300]">
                 Filter live jobs
               </h2>
               <button
@@ -126,8 +126,8 @@ export function JobsFiltersDrawer({ trades, activeTradeSlug, activeCity }: Props
                   href={urlForTrade(null)}
                   className={`inline-flex h-10 items-center rounded-full border px-3 text-xs font-semibold transition ${
                     activeTradeSlug === null
-                      ? "border-[#F97316] bg-[#F97316] text-white"
-                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316] hover:text-[#F97316]"
+                      ? "border-[#FFB300] bg-[#FFB300] text-white"
+                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#FFB300] hover:text-[#FFB300]"
                   }`}
                 >
                   All trades
@@ -141,8 +141,8 @@ export function JobsFiltersDrawer({ trades, activeTradeSlug, activeCity }: Props
                       href={urlForTrade(t.slug)}
                       className={`inline-flex h-10 items-center rounded-full border px-3 text-xs font-semibold transition ${
                         on
-                          ? "border-[#F97316] bg-[#F97316] text-white"
-                          : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316] hover:text-[#F97316]"
+                          ? "border-[#FFB300] bg-[#FFB300] text-white"
+                          : "border-brand-line bg-brand-surface text-brand-text hover:border-[#FFB300] hover:text-[#FFB300]"
                       }`}
                     >
                       {t.label}
@@ -168,12 +168,12 @@ export function JobsFiltersDrawer({ trades, activeTradeSlug, activeCity }: Props
                 }}
                 placeholder="e.g. Manchester"
                 maxLength={80}
-                className="h-11 flex-1 rounded-lg border border-brand-line bg-brand-surface px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#F97316] focus:outline-none"
+                className="h-11 flex-1 rounded-lg border border-brand-line bg-brand-surface px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#FFB300] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={applyCity}
-                className="inline-flex h-11 items-center justify-center rounded-lg bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
+                className="inline-flex h-11 items-center justify-center rounded-lg bg-[#FFB300] px-5 text-xs font-bold text-white transition hover:bg-[#E5A500]"
               >
                 Apply city
               </button>

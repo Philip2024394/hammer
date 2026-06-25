@@ -150,7 +150,7 @@ export function JobPostForm() {
           <select
             value={state.trade_slug}
             onChange={(e) => update("trade_slug", e.target.value)}
-            className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text focus:border-[#F97316] focus:outline-none"
+            className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text focus:border-[#FFB300] focus:outline-none"
           >
             <option value="">— Select a trade —</option>
             {TRADE_OFF_TRADES.map((t) => (
@@ -188,7 +188,7 @@ export function JobPostForm() {
             placeholder="What needs doing, where, any access notes, when you'd like it done. Plain words."
             maxLength={XRATED_JOBS_MAX_DESCRIPTION}
             rows={6}
-            className="w-full rounded-lg border border-brand-line bg-brand-bg p-3 text-xs leading-relaxed text-brand-text focus:border-[#F97316] focus:outline-none"
+            className="w-full rounded-lg border border-brand-line bg-brand-bg p-3 text-xs leading-relaxed text-brand-text focus:border-[#FFB300] focus:outline-none"
           />
           {state.description && descLen < XRATED_JOBS_MIN_DESCRIPTION && (
             <p className="mt-1 text-xs text-brand-muted">
@@ -208,8 +208,8 @@ export function JobPostForm() {
                   onClick={() => toggleBudgetPreset(p)}
                   className={`h-11 rounded-full border px-4 text-xs font-semibold transition ${
                     on
-                      ? "border-[#F97316] bg-[#F97316] text-white"
-                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316]"
+                      ? "border-[#FFB300] bg-[#FFB300] text-white"
+                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#FFB300]"
                   }`}
                 >
                   {p}
@@ -223,7 +223,7 @@ export function JobPostForm() {
             onChange={(e) => update("budget_hint", e.target.value)}
             placeholder="Or type your own: e.g. £450 ish"
             maxLength={80}
-            className="mt-3 h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#F97316] focus:outline-none"
+            className="mt-3 h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#FFB300] focus:outline-none"
           />
         </Field>
       </Section>
@@ -251,7 +251,7 @@ export function JobPostForm() {
             </div>
           ))}
           {state.photos.length < XRATED_JOBS_MAX_PHOTOS && (
-            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-brand-line bg-brand-surface p-4 text-center text-xs text-brand-muted transition hover:border-[#F97316] hover:text-[#F97316]">
+            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-brand-line bg-brand-surface p-4 text-center text-xs text-brand-muted transition hover:border-[#FFB300] hover:text-[#FFB300]">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -304,7 +304,7 @@ export function JobPostForm() {
           type="button"
           onClick={submit}
           disabled={submitting || !canSubmit}
-          className="h-12 flex-1 rounded-lg bg-[#F97316] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#EA580C] disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-12 flex-1 rounded-lg bg-[#FFB300] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#E5A500] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Submitting…" : "Post my job"}
         </button>
@@ -320,7 +320,7 @@ export function JobPostForm() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4 rounded-2xl border border-brand-line bg-brand-surface/40 p-5">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[#F97316]">{title}</h2>
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">{title}</h2>
       <div className="space-y-4">{children}</div>
     </section>
   );
@@ -355,7 +355,7 @@ function Input({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       maxLength={maxLength}
-      className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#F97316] focus:outline-none"
+      className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#FFB300] focus:outline-none"
     />
   );
 }

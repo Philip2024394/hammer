@@ -190,7 +190,7 @@ export default async function TradeOffLandingPage() {
               </p>
               <a
                 href="/trade-off/search"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#F97316] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98] sm:w-auto"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#FFB300] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#E5A500] active:scale-[0.98] sm:w-auto"
               >
                 Find a tradesperson
               </a>
@@ -211,7 +211,7 @@ export default async function TradeOffLandingPage() {
               </p>
               <a
                 href="/trade-off/signup"
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-6 text-sm font-bold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] active:scale-[0.98] sm:w-auto"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-6 text-sm font-bold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] active:scale-[0.98] sm:w-auto"
               >
                 List your trade — free
               </a>

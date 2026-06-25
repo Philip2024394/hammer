@@ -24,9 +24,8 @@ export default function TradeSlugLayout({
           "--brand-surface": "249 250 251",
           "--brand-line": "229 231 235",
           "--brand-text": "17 24 39",
-          "--brand-muted": "107 114 128",
-          // Match Xrated orange for any `text-brand-accent` consumers.
-          "--brand-accent": "249 115 22"
+          "--brand-muted": "107 114 128"
+          // --brand-accent intentionally inherited from globals.css (Hammerex yellow).
         } as CSSProperties
       }
     >

@@ -30,7 +30,7 @@ export function FeaturedTradiesRail({ tradies }: Props) {
           </div>
           <a
             href="/trade-off/jobs"
-            className="hidden h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] sm:inline-flex"
+            className="hidden h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] sm:inline-flex"
           >
             See all →
           </a>
@@ -48,7 +48,7 @@ export function FeaturedTradiesRail({ tradies }: Props) {
                   key={t.id}
                   className="w-[78vw] max-w-[320px] shrink-0 snap-start sm:w-[300px] sm:max-w-none"
                 >
-                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#F97316]">
+                  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#FFB300]">
                     <a
                       href={`/trade/${t.slug}`}
                       className="group relative block aspect-[4/3] overflow-hidden bg-neutral-100"
@@ -62,7 +62,7 @@ export function FeaturedTradiesRail({ tradies }: Props) {
                         className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                       />
                       {t.hammerex_standard_verified && (
-                        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
+                        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#FFB300] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
                           </svg>
@@ -80,7 +80,7 @@ export function FeaturedTradiesRail({ tradies }: Props) {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-[#F97316] text-base font-bold text-white">
+                          <div className="flex h-full w-full items-center justify-center bg-[#FFB300] text-base font-bold text-white">
                             {initial}
                           </div>
                         )}

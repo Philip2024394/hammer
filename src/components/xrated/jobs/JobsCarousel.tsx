@@ -37,7 +37,7 @@ export async function JobsCarousel() {
           </div>
           <a
             href="/trade-off/jobs"
-            className="inline-flex h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316]"
+            className="inline-flex h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300]"
           >
             See all jobs →
           </a>

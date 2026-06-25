@@ -132,7 +132,7 @@ export default async function JobDetailPage({
         <article className="rounded-2xl border border-brand-line bg-brand-surface/60 p-5 sm:p-7">
           <div className="flex flex-wrap items-center gap-2">
             {job.is_example && <ExamplePill />}
-            <span className="inline-flex items-center rounded-full bg-[#F97316] px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+            <span className="inline-flex items-center rounded-full bg-[#FFB300] px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
               {label}
             </span>
             <span className="inline-flex items-center gap-1 text-xs text-brand-muted">
@@ -195,7 +195,7 @@ export default async function JobDetailPage({
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F97316] px-6 font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FFB300] px-6 font-bold text-white shadow-lg transition hover:bg-[#E5A500] active:scale-[0.98]"
             style={{ minHeight: 56 }}
           >
             <svg

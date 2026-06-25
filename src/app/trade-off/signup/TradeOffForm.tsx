@@ -342,7 +342,7 @@ export function TradeOffForm({
             placeholder="your-trade-name"
           />
           {mode.kind === "edit" && state.slug && state.slug !== mode.slug && (
-            <p className="mt-1 text-xs text-[#F97316]">
+            <p className="mt-1 text-xs text-[#FFB300]">
               Heads up — changing your URL will break any links or QR codes you've already shared.
             </p>
           )}
@@ -354,13 +354,13 @@ export function TradeOffForm({
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={state.avatar_url} alt="Profile" className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[#F97316]">
+                <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[#FFB300]">
                   {(state.display_name.trim().charAt(0) || "?").toUpperCase()}
                 </div>
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]">
+              <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg border border-brand-line bg-brand-surface px-4 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]">
                 <input
                   ref={avatarInputRef}
                   type="file"
@@ -390,7 +390,7 @@ export function TradeOffForm({
           <select
             value={state.primary_trade}
             onChange={(e) => update("primary_trade", e.target.value)}
-            className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text focus:border-[#F97316] focus:outline-none"
+            className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text focus:border-[#FFB300] focus:outline-none"
           >
             <option value="">— Select a trade —</option>
             {TRADE_OFF_TRADES.map((t) => (
@@ -411,8 +411,8 @@ export function TradeOffForm({
                   onClick={() => toggleSecondary(t.slug)}
                   className={`h-11 rounded-full border px-4 text-xs font-semibold transition ${
                     on
-                      ? "border-[#F97316] bg-[#F97316] text-white"
-                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#F97316]"
+                      ? "border-[#FFB300] bg-[#FFB300] text-white"
+                      : "border-brand-line bg-brand-surface text-brand-text hover:border-[#FFB300]"
                   }`}
                 >
                   {t.label}
@@ -513,7 +513,7 @@ export function TradeOffForm({
             placeholder="What you do, who you work for, what you take pride in. Plain words. No salesy fluff."
             maxLength={1200}
             rows={6}
-            className="w-full rounded-lg border border-brand-line bg-brand-bg p-3 text-xs leading-relaxed text-brand-text focus:border-[#F97316] focus:outline-none"
+            className="w-full rounded-lg border border-brand-line bg-brand-bg p-3 text-xs leading-relaxed text-brand-text focus:border-[#FFB300] focus:outline-none"
           />
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -552,7 +552,7 @@ export function TradeOffForm({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt="" className="aspect-square w-full object-cover" />
               {i === 0 && (
-                <span className="absolute left-2 top-2 rounded-full bg-[#F97316] px-2 py-0.5 text-[11px] font-bold text-black">
+                <span className="absolute left-2 top-2 rounded-full bg-[#FFB300] px-2 py-0.5 text-[11px] font-bold text-black">
                   Cover
                 </span>
               )}
@@ -587,7 +587,7 @@ export function TradeOffForm({
             </div>
           ))}
           {state.photos.length < 6 && (
-            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-brand-line bg-brand-surface p-4 text-center text-xs text-brand-muted transition hover:border-[#F97316] hover:text-[#F97316]">
+            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-brand-line bg-brand-surface p-4 text-center text-xs text-brand-muted transition hover:border-[#FFB300] hover:text-[#FFB300]">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -615,7 +615,7 @@ export function TradeOffForm({
           type="button"
           onClick={() => submit(false)}
           disabled={submitting || !wouldBeLive}
-          className="h-11 flex-1 rounded-lg bg-[#F97316] px-6 text-xs font-bold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-11 flex-1 rounded-lg bg-[#FFB300] px-6 text-xs font-bold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting
             ? "Saving…"
@@ -627,7 +627,7 @@ export function TradeOffForm({
           type="button"
           onClick={() => submit(true)}
           disabled={submitting}
-          className="h-11 flex-1 rounded-lg border border-brand-line bg-brand-surface px-6 text-xs font-semibold text-brand-text transition hover:border-[#F97316] disabled:opacity-40"
+          className="h-11 flex-1 rounded-lg border border-brand-line bg-brand-surface px-6 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] disabled:opacity-40"
         >
           {submitting ? "Saving…" : "Save as draft"}
         </button>
@@ -642,7 +642,7 @@ export function TradeOffForm({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4 rounded-2xl border border-brand-line bg-brand-surface/40 p-5">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-[#F97316]">{title}</h2>
+      <h2 className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">{title}</h2>
       <div className="space-y-4">{children}</div>
     </section>
   );
@@ -677,7 +677,7 @@ function Input({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       maxLength={maxLength}
-      className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#F97316] focus:outline-none"
+      className="h-11 w-full rounded-lg border border-brand-line bg-brand-bg px-3 text-xs text-brand-text placeholder:text-brand-muted focus:border-[#FFB300] focus:outline-none"
     />
   );
 }

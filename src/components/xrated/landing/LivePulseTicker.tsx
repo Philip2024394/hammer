@@ -52,7 +52,7 @@ export function LivePulseTicker({ jobs, tradies }: Props) {
 
   return (
     <section
-      className="relative overflow-hidden border-y border-[#F97316]/30"
+      className="relative overflow-hidden border-y border-[#FFB300]/30"
       style={{ background: `${XRATED_BRAND.accent}14` }}
       aria-label="Live activity ticker"
     >

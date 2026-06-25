@@ -143,7 +143,7 @@ export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
           </p>
           <a
             href="/trade-off/jobs/post"
-            className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
+            className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#FFB300] px-5 text-xs font-bold text-white transition hover:bg-[#E5A500]"
           >
             Post a job
           </a>
@@ -204,7 +204,7 @@ export function AutoFlipJobsSpotlight({ jobs, userCountry }: Props) {
                 onClick={() => setIndex(i)}
                 aria-label={`Go to job ${i + 1} of ${count}`}
                 className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-8 bg-[#F97316]" : "w-2 bg-neutral-300 hover:bg-neutral-400"
+                  i === index ? "w-8 bg-[#FFB300]" : "w-2 bg-neutral-300 hover:bg-neutral-400"
                 }`}
               />
             ))}
@@ -239,7 +239,7 @@ function SpotlightHeader() {
       </div>
       <a
         href="/trade-off/jobs"
-        className="hidden h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] sm:inline-flex"
+        className="hidden h-11 items-center rounded-lg border border-neutral-300 bg-white px-4 text-xs font-semibold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] sm:inline-flex"
       >
         See all jobs →
       </a>
@@ -280,7 +280,7 @@ function SpotlightSlide({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="1.5" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#FFB300" strokeWidth="1.5" aria-hidden="true">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
             </div>
@@ -303,7 +303,7 @@ function SpotlightSlide({
         </div>
         <div className="flex flex-1 flex-col p-4 sm:p-6 md:p-7">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[#F97316] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
+            <span className="inline-flex items-center rounded-full bg-[#FFB300] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
               {label}
             </span>
             <span className="inline-flex items-center gap-1 text-xs text-neutral-500">
@@ -334,7 +334,7 @@ function SpotlightSlide({
             {job.is_example || !waUrl ? (
               <a
                 href={`/trade-off/jobs/${job.slug}`}
-                className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-bold text-neutral-900 transition hover:border-[#F97316] hover:text-[#F97316] sm:w-auto sm:px-7"
+                className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 text-sm font-bold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] sm:w-auto sm:px-7"
               >
                 View job →
               </a>

@@ -86,7 +86,7 @@ export default async function JobsFeedPage({
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <a
               href="/trade-off/jobs/post"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-[#F97316] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98]"
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-[#FFB300] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#E5A500] active:scale-[0.98]"
             >
               Post your project (free)
             </a>
@@ -105,12 +105,12 @@ export default async function JobsFeedPage({
             activeCity={cityFilter}
           />
           {activeTradeLabel && (
-            <span className="inline-flex h-11 items-center rounded-full border border-[#F97316]/40 bg-[#F97316]/10 px-4 text-xs font-semibold text-[#F97316]">
+            <span className="inline-flex h-11 items-center rounded-full border border-[#FFB300]/40 bg-[#FFB300]/10 px-4 text-xs font-semibold text-[#FFB300]">
               {activeTradeLabel}
             </span>
           )}
           {cityFilter && (
-            <span className="inline-flex h-11 items-center rounded-full border border-[#F97316]/40 bg-[#F97316]/10 px-4 text-xs font-semibold text-[#F97316]">
+            <span className="inline-flex h-11 items-center rounded-full border border-[#FFB300]/40 bg-[#FFB300]/10 px-4 text-xs font-semibold text-[#FFB300]">
               {cityFilter}
             </span>
           )}
@@ -148,7 +148,7 @@ export default async function JobsFeedPage({
             </p>
             <a
               href="/trade-off/jobs/post"
-              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
+              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#FFB300] px-5 text-xs font-bold text-white transition hover:bg-[#E5A500]"
             >
               Post your project (free)
             </a>

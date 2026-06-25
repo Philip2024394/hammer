@@ -40,7 +40,7 @@ export function TradeShowcaseGrid({ countsBySlug }: Props) {
               <a
                 href={`/trade-off/${slug}`}
                 aria-label={`Browse ${label} — ${count} ${count === 1 ? "tradie" : "tradies"} on Xrated`}
-                className="group flex flex-row items-stretch overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#F97316]"
+                className="group flex flex-row items-stretch overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#FFB300]"
               >
                 <div className="relative aspect-[4/3] w-[38%] shrink-0 overflow-hidden bg-neutral-100 sm:w-[34%]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -63,7 +63,7 @@ export function TradeShowcaseGrid({ countsBySlug }: Props) {
                   </div>
                   <span
                     aria-hidden="true"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F97316] text-white transition group-hover:bg-[#EA580C]"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FFB300] text-white transition group-hover:bg-[#E5A500]"
                   >
                     <svg
                       width="16"

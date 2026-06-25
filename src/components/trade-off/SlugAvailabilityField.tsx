@@ -75,7 +75,7 @@ export function SlugAvailabilityField({
 
   return (
     <div>
-      <div className="flex items-stretch overflow-hidden rounded-lg border border-brand-line bg-brand-bg focus-within:border-[#F97316]">
+      <div className="flex items-stretch overflow-hidden rounded-lg border border-brand-line bg-brand-bg focus-within:border-[#FFB300]">
         <span className="inline-flex items-center bg-neutral-100 px-3 text-xs text-brand-muted">
           hammerex.com/trade/
         </span>

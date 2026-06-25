@@ -177,7 +177,7 @@ export function PremiumCustomisationPanel({
 
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Theme colour picker removed — all tradies are locked to the
-            Xrated brand orange (#F97316). The DB column stays so existing
+            Hammerex brand yellow (#FFB300). The DB column stays so existing
             data doesn't break, but the form no longer exposes it. */}
         <Field label="Button text colour">
           <input
@@ -221,7 +221,7 @@ export function PremiumCustomisationPanel({
         <Field label="Hero line 2 colour">
           <input
             type="color"
-            value={state.hero_text_line2_color || "#F97316"}
+            value={state.hero_text_line2_color || "#FFB300"}
             onChange={(e) => set("hero_text_line2_color", e.target.value)}
             className="h-11 w-full cursor-pointer rounded-md border border-brand-line bg-brand-bg p-1"
           />

@@ -47,7 +47,7 @@ export function StickyMobileLandingBar() {
         </a>
         <a
           href="/trade-off/jobs/post"
-          className="inline-flex h-14 flex-1 items-center justify-center rounded-xl bg-[#F97316] px-3 text-xs font-bold text-white shadow-lg transition hover:bg-[#EA580C] active:scale-[0.98]"
+          className="inline-flex h-14 flex-1 items-center justify-center rounded-xl bg-[#FFB300] px-3 text-xs font-bold text-white shadow-lg transition hover:bg-[#E5A500] active:scale-[0.98]"
         >
           Post job
         </a>

@@ -28,7 +28,7 @@ export function XratedSocialShareStrip({
   }
 
   const btnClass =
-    "inline-flex h-11 items-center gap-2 rounded-lg border border-brand-line bg-white px-3 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316] active:scale-95";
+    "inline-flex h-11 items-center gap-2 rounded-lg border border-brand-line bg-white px-3 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300] active:scale-95";
 
   return (
     <section aria-label="Share this tradesperson" className="mt-6 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:p-5">

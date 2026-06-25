@@ -1,6 +1,6 @@
 // Xrated Trades — brand wordmark for the public Trade Off surface.
-// Visually distinct from Hammerex core: orange accent instead of yellow,
-// own logo, own domain. Routes stay under /trade-off and /trade for now;
+// Shares the Hammerex yellow accent (#FFB300); has its own logo and
+// domain. Routes stay under /trade-off and /trade for now;
 // xratedtrade.com points at the Hammerex deployment via Vercel.
 
 import type { HammerexTradeOffListing } from "./supabase";
@@ -9,13 +9,14 @@ export const XRATED_BRAND = {
   name: "Xrated Trades",
   domain: "xratedtrade.com",
   tagline: "Find Trades. View Real Work. Get Quotes Fast.",
-  // Brand orange — visually distinct from Hammerex yellow `brand.accent`.
-  accent: "#F97316",
+  // Hammerex yellow accent — shared with the core Hammerex brand token.
+  accent: "#FFB300",
+  accentHover: "#E5A500",
   accentInk: "#FFFFFF",
   logoUrl:
-    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated_logo.png",
+    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated_logo_v2.png",
   heroImageUrl:
-    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated_hero.png"
+    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated-whatsapp-hero.png"
 } as const;
 
 // Tier system — Standard is free for life, App is a 30-day trial then £8/mo.

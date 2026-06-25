@@ -1,7 +1,7 @@
 // Xrated Trades — standalone footer for /trade-off* and /trade/* routes.
 // Only one link back to Hammerex (the "Hammerex shop →" bottom-row link),
 // so tradies and customers who want the parent shop can find it, but the
-// focus stays on Xrated. Uses orange accent (#F97316) for headings.
+// focus stays on Xrated. Uses Hammerex yellow accent (#FFB300) for headings.
 
 import { XRATED_BRAND } from "@/lib/xratedTrades";
 

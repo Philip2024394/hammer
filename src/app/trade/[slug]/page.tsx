@@ -15,7 +15,6 @@ import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { AvatarFrame } from "@/components/xrated/AvatarFrame";
 import { HeroTextOverlay } from "@/components/xrated/HeroTextOverlay";
 import { XratedCtaButton } from "@/components/xrated/XratedCtaButton";
-import { RunningMarquee } from "@/components/xrated/RunningMarquee";
 import { XratedSocialShareStrip } from "@/components/xrated/XratedSocialShareStrip";
 import { PortfolioCarousel } from "@/components/xrated/profile/PortfolioCarousel";
 import { OperatingHoursPanel } from "@/components/xrated/profile/OperatingHoursPanel";
@@ -365,7 +364,7 @@ function PremiumLayout({
 }) {
   const primary = tradeLabel(listing.primary_trade);
   const cover = listing.photos[0] ?? listing.avatar_url ?? BRAND.logo;
-  const theme = listing.theme_color || "#F97316";
+  const theme = listing.theme_color || "#FFB300";
   const ctaInk = listing.button_text_color || inkForTheme(theme);
   const qrPngUrl = `/trade/${listing.slug}/qr.png`;
 
@@ -558,13 +557,6 @@ function PremiumLayout({
         themeColor={theme}
       />
 
-      {/* 7. Running marquee — uses the new promo_text column */}
-      {listing.promo_text && (
-        <div className="mt-8">
-          <RunningMarquee text={listing.promo_text} themeColor={theme} />
-        </div>
-      )}
-
       {/* 10. Portfolio carousel */}
       {projects.length > 0 && (
         <PortfolioCarousel projects={projects} themeColor={theme} />
@@ -624,7 +616,7 @@ function StandardLayout({
       <div className="mx-auto max-w-6xl px-4 pt-3">
         <div className="rounded-full bg-neutral-100 px-3 py-1.5 text-center text-[13px] text-brand-muted">
           <span aria-hidden="true">⚡</span> Powered by{" "}
-          <a href="/trade-off" className="font-semibold text-brand-text hover:text-[#F97316]">
+          <a href="/trade-off" className="font-semibold text-brand-text hover:text-[#FFB300]">
             Hammerex Trade Off
           </a>{" "}
           · Free UK trade directory
@@ -863,7 +855,7 @@ function StandardLayout({
             href={`/trade/${listing.slug}/qr.png?download=1`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-11 items-center gap-2 rounded-lg border border-brand-line bg-neutral-50 px-4 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+            className="inline-flex h-11 items-center gap-2 rounded-lg border border-brand-line bg-neutral-50 px-4 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2h-4" />

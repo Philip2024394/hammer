@@ -37,7 +37,7 @@ export function flagFor(cc: string): string {
 
 function tradeIconPlaceholder() {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-black/60 text-[#F97316]">
+    <div className="flex h-full w-full items-center justify-center bg-black/60 text-[#FFB300]">
       <svg
         width="36"
         height="36"
@@ -64,7 +64,7 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
   return (
     <a
       href={`/trade-off/jobs/${job.slug}`}
-      className="group relative flex h-full flex-row overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#F97316]"
+      className="group relative flex h-full flex-row overflow-hidden rounded-2xl border border-neutral-200 bg-white transition hover:border-[#FFB300]"
     >
       <div className="relative aspect-[4/3] w-[42%] shrink-0 overflow-hidden bg-neutral-100 sm:w-[44%]">
         {photo ? (
@@ -94,7 +94,7 @@ export function JobCard({ job }: { job: HammerexXratedJob }) {
       </div>
       <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center rounded-full bg-[#F97316] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
+          <span className="inline-flex items-center rounded-full bg-[#FFB300] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
             {label}
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-brand-muted">

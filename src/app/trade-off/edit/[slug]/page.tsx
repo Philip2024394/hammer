@@ -163,12 +163,12 @@ export default async function TradeOffEditPage({
             slug={slug}
             editToken={token}
             initial={{
-              theme_color: row.data.theme_color ?? "#F97316",
+              theme_color: row.data.theme_color ?? "#FFB300",
               button_text_color: row.data.button_text_color ?? "#FFFFFF",
               cta_button_effect: row.data.cta_button_effect ?? "none",
               hero_text_line1: row.data.hero_text_line1 ?? "",
               hero_text_line2: row.data.hero_text_line2 ?? "",
-              hero_text_line2_color: row.data.hero_text_line2_color ?? "#F97316",
+              hero_text_line2_color: row.data.hero_text_line2_color ?? "#FFB300",
               hero_text_tagline: row.data.hero_text_tagline ?? "",
               hero_text_effect: row.data.hero_text_effect ?? "none",
               avatar_frame_style: row.data.avatar_frame_style ?? "none",

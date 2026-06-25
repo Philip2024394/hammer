@@ -40,21 +40,21 @@ function Inner() {
         <div className="mt-6 flex flex-wrap gap-3">
           <a
             href="/trade-off/jobs"
-            className="inline-flex h-11 items-center rounded-lg bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
+            className="inline-flex h-11 items-center rounded-lg bg-[#FFB300] px-5 text-xs font-bold text-white transition hover:bg-[#E5A500]"
           >
             See live jobs
           </a>
           {slug && (
             <a
               href={trackingPath}
-              className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+              className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
             >
               Preview my job page
             </a>
           )}
           <a
             href="/trade-off"
-            className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+            className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
           >
             Browse tradies
           </a>

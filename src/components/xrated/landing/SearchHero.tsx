@@ -32,7 +32,7 @@ export function SearchHero({ defaultQuery = "" }: { defaultQuery?: string } = {}
           <label htmlFor="xrated-hero-search" className="sr-only">
             Search Xrated Trades
           </label>
-          <div className="relative flex w-full items-stretch overflow-hidden rounded-2xl border border-neutral-300 bg-white focus-within:border-[#F97316]">
+          <div className="relative flex w-full items-stretch overflow-hidden rounded-2xl border border-neutral-300 bg-white focus-within:border-[#FFB300]">
             <input
               id="xrated-hero-search"
               type="search"
@@ -47,7 +47,7 @@ export function SearchHero({ defaultQuery = "" }: { defaultQuery?: string } = {}
             <button
               type="submit"
               aria-label="Search Xrated Trades"
-              className="flex shrink-0 items-center justify-center bg-[#F97316] px-5 text-white transition hover:bg-[#EA580C] active:scale-[0.98] sm:px-7"
+              className="flex shrink-0 items-center justify-center bg-[#FFB300] px-5 text-white transition hover:bg-[#E5A500] active:scale-[0.98] sm:px-7"
               style={{ minHeight: 56, minWidth: 56 }}
             >
               {/* Hammer icon — inline SVG, 24x24, clean stroke. */}

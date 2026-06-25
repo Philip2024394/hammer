@@ -27,12 +27,8 @@ export default function TradeOffLayout({
           "--brand-line": "229 231 235",
           // Body copy + headings + muted secondary copy.
           "--brand-text": "17 24 39",
-          "--brand-muted": "107 114 128",
-          // Swap the Hammerex yellow accent for the Xrated orange (#F97316)
-          // so any `text-brand-accent` / `bg-brand-accent` utilities used
-          // inside Xrated components flip to the right brand colour on
-          // the light surface (yellow-on-white would not be readable).
-          "--brand-accent": "249 115 22"
+          "--brand-muted": "107 114 128"
+          // --brand-accent intentionally inherited from globals.css (Hammerex yellow).
         } as CSSProperties
       }
     >

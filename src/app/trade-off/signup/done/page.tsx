@@ -65,7 +65,7 @@ function Inner() {
         >
           <p
             className={`text-xs font-bold uppercase tracking-widest ${
-              isLive ? "text-brand-success" : "text-[#F97316]"
+              isLive ? "text-brand-success" : "text-[#FFB300]"
             }`}
           >
             {isLive
@@ -91,8 +91,8 @@ function Inner() {
 
         {/* Public link — the share URL is the star of this page */}
         {isLive && (
-          <div className="mt-6 rounded-2xl border-2 border-[#F97316]/60 bg-[#F97316]/5 p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+          <div className="mt-6 rounded-2xl border-2 border-[#FFB300]/60 bg-[#FFB300]/5 p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">
               Your share URL
             </p>
             <p className="mt-2 break-all font-mono text-lg font-bold text-brand-text sm:text-xl">
@@ -105,13 +105,13 @@ function Inner() {
               <button
                 type="button"
                 onClick={copyProfile}
-                className="h-11 rounded-lg bg-[#F97316] px-5 text-xs font-bold text-black transition hover:opacity-90"
+                className="h-11 rounded-lg bg-[#FFB300] px-5 text-xs font-bold text-black transition hover:opacity-90"
               >
                 {profileCopied ? "Copied!" : "Copy share URL"}
               </button>
               <a
                 href={profilePath}
-                className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316]"
+                className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300]"
               >
                 View my profile
               </a>
@@ -119,7 +119,7 @@ function Inner() {
                 href={`/trade/${slug}/qr.png?download=1`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316]"
+                className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300]"
               >
                 Download QR
               </a>
@@ -129,7 +129,7 @@ function Inner() {
 
         {/* Edit link */}
         <div className="mt-6 rounded-2xl border border-brand-line bg-brand-surface/40 p-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">
             Save this link — it's your edit pass
           </p>
           <p className="mt-2 text-xs text-brand-muted">
@@ -144,13 +144,13 @@ function Inner() {
             <button
               type="button"
               onClick={copyLink}
-              className="h-11 rounded-lg bg-[#F97316] px-5 text-xs font-bold text-black transition hover:opacity-90"
+              className="h-11 rounded-lg bg-[#FFB300] px-5 text-xs font-bold text-black transition hover:opacity-90"
             >
               {copied ? "Copied!" : "Copy edit link"}
             </button>
             <a
               href={editPath}
-              className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316]"
+              className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300]"
             >
               Open editor now
             </a>

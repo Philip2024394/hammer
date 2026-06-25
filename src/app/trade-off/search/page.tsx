@@ -179,13 +179,13 @@ export default async function XratedSearchPage({
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
               <a
                 href="/trade-off"
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 text-xs font-bold text-white transition hover:bg-[#EA580C]"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#FFB300] px-5 text-xs font-bold text-white transition hover:bg-[#E5A500]"
               >
                 Browse all tradies
               </a>
               <a
                 href="/trade-off/jobs"
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
               >
                 Browse live jobs
               </a>
@@ -216,7 +216,7 @@ export default async function XratedSearchPage({
                 </p>
                 <a
                   href="/trade-off"
-                  className="mt-4 inline-flex h-11 items-center justify-center rounded-xl border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+                  className="mt-4 inline-flex h-11 items-center justify-center rounded-xl border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
                 >
                   Back to /trade-off
                 </a>
@@ -255,7 +255,7 @@ export default async function XratedSearchPage({
                 </p>
                 <a
                   href="/trade-off/jobs"
-                  className="mt-4 inline-flex h-11 items-center justify-center rounded-xl border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#F97316] hover:text-[#F97316]"
+                  className="mt-4 inline-flex h-11 items-center justify-center rounded-xl border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300] hover:text-[#FFB300]"
                 >
                   Browse all live jobs
                 </a>
@@ -288,7 +288,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
   return (
     <a
       href={`/trade/${listing.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#F97316]"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-line bg-brand-surface transition hover:border-[#FFB300]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
         <img
@@ -299,7 +299,7 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
           className="h-full w-full object-cover transition group-hover:scale-[1.02]"
         />
         {listing.hammerex_standard_verified && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#F97316] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#FFB300] px-2.5 py-1 text-xs font-bold text-white shadow-lg">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
             </svg>
@@ -316,14 +316,14 @@ function ListingCard({ listing }: { listing: HammerexTradeOffListing }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[#F97316] text-base font-bold text-white">
+            <div className="flex h-full w-full items-center justify-center bg-[#FFB300] text-base font-bold text-white">
               {initial}
             </div>
           )}
         </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-base font-semibold text-brand-text group-hover:text-[#F97316]">
+        <h3 className="text-base font-semibold text-brand-text group-hover:text-[#FFB300]">
           {listing.display_name}
         </h3>
         {listing.trading_name && (

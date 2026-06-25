@@ -33,7 +33,7 @@ export default function TradeOffSignupPage() {
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/0" />
           <div className="absolute inset-x-0 bottom-0 mx-auto max-w-3xl px-4 pb-5 sm:pb-7">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F97316]">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">
               Xrated Trades · Sign up
             </p>
             <h1 className="mt-1.5 text-2xl font-extrabold leading-tight text-white drop-shadow-md sm:text-4xl">
