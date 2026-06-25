@@ -112,7 +112,7 @@ export default async function TradeOffLandingPage() {
             >
               {XRATED_BRAND.name}
             </p>
-            <h1 className="mt-2 text-2xl font-extrabold leading-[1.05] text-neutral-900 sm:text-4xl md:text-5xl">
+            <h1 className="mt-2 text-2xl font-extrabold leading-[1.05] text-white drop-shadow-lg sm:text-4xl md:text-5xl">
               Find Trades.
               <br />
               View Real Work.
