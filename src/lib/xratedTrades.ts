@@ -16,7 +16,7 @@ export const XRATED_BRAND = {
   logoUrl:
     "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated_logo_v3.png",
   heroImageUrl:
-    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated-landing-hero-v3.png"
+    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/branding/xrated-landing-hero-v4.png"
 } as const;
 
 // Tier system — Standard is free for life, App is a 30-day trial then £8/mo.
