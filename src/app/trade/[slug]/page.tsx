@@ -302,7 +302,6 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }}
       />
       <XratedHeader />
-      <AcceptingBanner accepting={listing.accepting_jobs} />
 
       {isPremium ? (
         <PremiumLayout
@@ -392,16 +391,21 @@ function PremiumLayout({
             tagline={listing.hero_text_tagline}
             effect={listing.hero_text_effect}
           />
+
+          {/* 3 button-icons sitting INSIDE the banner, under the smaller
+              tagline text on the left. Translucent overlay variant so they
+              read against any photo. */}
+          <div className="absolute bottom-4 left-4 z-10 sm:bottom-6 sm:left-6">
+            <ProfileActionTriple
+              whatsappHref={waUrl}
+              visitHref="#visit"
+              shareHref="#share"
+              themeColor={theme}
+              variant="overlay"
+            />
+          </div>
         </div>
       </section>
-
-      {/* 2. Three button-icons row — Contact / Visit us / Share */}
-      <ProfileActionTriple
-        whatsappHref={waUrl}
-        visitHref="#visit"
-        shareHref="#share"
-        themeColor={theme}
-      />
 
       {/* 3. Profile container — avatar, name + rating + service area, CTA right */}
       <section className="mx-auto mt-6 max-w-6xl px-4">
@@ -431,7 +435,6 @@ function PremiumLayout({
                   </svg>
                 </span>
               )}
-              {listing.accepting_jobs && <AvailablePill themeColor={theme} />}
             </div>
             <div className="mt-1.5">
               <StarRatingRow
@@ -439,22 +442,14 @@ function PremiumLayout({
                 rating_count={listing.rating_count}
               />
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span
-                className="inline-flex h-7 items-center gap-1 rounded-full border bg-brand-bg/40 px-2.5 text-[13px] font-semibold text-brand-text"
-                style={{ borderColor: theme }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
                 {listing.city}
                 {listing.country ? `, ${listing.country}` : ""}
-              </span>
-              <span
-                className="inline-flex h-7 items-center rounded-full bg-brand-bg/40 px-2.5 text-[13px] font-semibold text-brand-muted"
-              >
-                {primary}
               </span>
             </div>
           </div>
@@ -488,9 +483,6 @@ function PremiumLayout({
       <div className="mx-auto max-w-6xl px-4 pt-3">
         <TradeProfileUrlChip slug={listing.slug} fullUrl={profileFullUrl} />
       </div>
-
-      {/* Hammerex Standard badge — sits just below the profile container */}
-      <HammerexStandardBadge listing={listing} tierLabel={tierLabel} blurb={blurb} />
 
       {/* 4. About + Visit Us split row */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
@@ -760,12 +752,6 @@ function StandardLayout({
               <p className="text-xs font-bold uppercase tracking-widest text-brand-accent">
                 Hammerex Trade Off
               </p>
-              {listing.accepting_jobs && (
-                <span className="inline-flex h-6 items-center gap-1 rounded-full bg-emerald-500/15 px-2 text-[11px] font-bold text-emerald-300">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
-                  Available for new jobs
-                </span>
-              )}
             </div>
             <h1 className="mt-2 text-2xl font-bold leading-tight text-brand-text sm:text-4xl">
               {listing.display_name}

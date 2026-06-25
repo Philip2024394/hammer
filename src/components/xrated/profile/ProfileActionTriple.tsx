@@ -6,12 +6,20 @@ export function ProfileActionTriple({
   whatsappHref,
   visitHref,
   shareHref,
-  themeColor
+  themeColor,
+  variant = "below"
 }: {
   whatsappHref: string;
   visitHref: string;
   shareHref: string;
   themeColor: string;
+  /**
+   * "below" — renders as a standalone section below the banner with surface
+   * backgrounds. "overlay" — renders as a tight 3-up row designed to sit
+   * INSIDE the banner image (caller positions it), with translucent dark
+   * pill backgrounds so the buttons read against the photo.
+   */
+  variant?: "below" | "overlay";
 }) {
   const buttons = [
     {
@@ -50,6 +58,32 @@ export function ProfileActionTriple({
       )
     }
   ];
+
+  if (variant === "overlay") {
+    return (
+      <ul className="flex gap-2 sm:gap-3">
+        {buttons.map((b) => (
+          <li key={b.label}>
+            <a
+              href={b.href}
+              {...(b.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="flex min-w-[64px] flex-col items-center gap-1 rounded-xl bg-black/55 px-2.5 py-2 backdrop-blur-sm transition hover:bg-black/70 sm:min-w-[76px] sm:px-3 sm:py-2.5"
+            >
+              <span
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10"
+                style={{ background: themeColor, color: "#FFFFFF" }}
+              >
+                {b.icon}
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white drop-shadow">
+                {b.label}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-3xl px-4 pt-6">
