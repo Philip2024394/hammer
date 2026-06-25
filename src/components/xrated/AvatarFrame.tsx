@@ -18,8 +18,6 @@ export function AvatarFrame({
   style: AvatarFrameStyle;
   themeColor: string;
 }) {
-  // If no avatar uploaded, render nothing — no orange-initial fallback.
-  if (!src) return null;
   const ink = inkForTheme(themeColor);
   // Stable animation name per instance so multiple avatars on a page don't
   // collide on keyframe identifiers.
@@ -77,13 +75,37 @@ export function AvatarFrame({
     >
       {frameLayer}
       <span className={imgWrapperClass} style={imgWrapperStyle}>
-        <img
-          src={src}
-          alt={`${name} profile photo`}
-          className="block h-full w-full object-cover"
-          width={size}
-          height={size}
-        />
+        {src ? (
+          <img
+            src={src}
+            alt={`${name} profile photo`}
+            className="block h-full w-full object-cover"
+            width={size}
+            height={size}
+          />
+        ) : (
+          // Soft neutral placeholder when no avatar uploaded — a generic
+          // person silhouette on a muted grey rather than a coloured initial.
+          <span
+            className="flex h-full w-full items-center justify-center bg-brand-bg"
+            aria-hidden="true"
+          >
+            <svg
+              width={Math.round(size * 0.55)}
+              height={Math.round(size * 0.55)}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-brand-muted"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </span>
+        )}
       </span>
       <style>{`
         @keyframes xaf-pulse {

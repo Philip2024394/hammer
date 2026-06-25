@@ -427,71 +427,78 @@ function PremiumLayout({
       </section>
 
       {/* 3. Profile container — overlaps the bottom 20% of the banner so
-          the card straddles the photo (LinkedIn-style overlay). Compact
-          "Contact us" pill at the TOP-RIGHT. */}
+          the card straddles the photo (LinkedIn-style overlay).
+          Layout: Name + verified mark + AVATAR sit on the top row; stars
+          and location underneath the name on the left; Contact us button
+          anchored to the BOTTOM-RIGHT of the card. */}
       <section className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 sm:-mt-20">
-        <div className="relative flex items-center gap-3 rounded-2xl bg-brand-surface p-4 shadow-2xl sm:gap-4 sm:p-5">
-          {/* Top-right compact Contact us pill */}
-          <a
-            href="#contact-panel"
-            className="absolute right-3 top-3 inline-flex h-8 items-center gap-1 rounded-full px-3 text-[11px] font-bold uppercase tracking-wider transition active:scale-[0.97] sm:right-4 sm:top-4 sm:h-9 sm:text-[12px]"
-            style={{ background: theme, color: ctaInk }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
-            </svg>
-            Contact us
-          </a>
-
-          <div className="shrink-0">
-            <AvatarFrame
-              src={listing.avatar_url}
-              name={listing.display_name}
-              size={80}
-              style={listing.avatar_frame_style}
-              themeColor={theme}
-            />
-          </div>
-          <div className="min-w-0 flex-1 pr-24 sm:pr-32">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h1 className="truncate text-lg font-bold leading-tight text-brand-text sm:text-2xl">
-                {listing.display_name}
-              </h1>
-              {listing.hammerex_standard_verified && (
-                <span
-                  className="inline-block align-middle"
-                  title="Hammerex Standard verified"
-                  aria-label="Verified"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#facc15" aria-hidden="true">
-                    <path d="m12 1 3 5 6 1-4.5 4.5L18 18l-6-3-6 3 1.5-6.5L3 7l6-1Z" />
+        <div className="relative rounded-2xl bg-brand-surface p-4 shadow-2xl sm:p-5">
+          {/* Top row: name (left) + avatar (right) */}
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h1 className="truncate text-lg font-bold leading-tight text-brand-text sm:text-2xl">
+                  {listing.display_name}
+                </h1>
+                {listing.hammerex_standard_verified && (
+                  <span
+                    className="inline-block align-middle"
+                    title="Hammerex Standard verified"
+                    aria-label="Verified"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#facc15" aria-hidden="true">
+                      <path d="m12 1 3 5 6 1-4.5 4.5L18 18l-6-3-6 3 1.5-6.5L3 7l6-1Z" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <div className="mt-1">
+                <StarRatingRow
+                  rating_avg={listing.rating_avg}
+                  rating_count={listing.rating_count}
+                />
+              </div>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
                   </svg>
+                  {listing.city}
+                  {listing.country ? `, ${listing.country}` : ""}
                 </span>
-              )}
+                <a
+                  href="#visit-panel"
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text underline-offset-4 hover:underline"
+                >
+                  Visit us
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
             </div>
-            <div className="mt-1">
-              <StarRatingRow
-                rating_avg={listing.rating_avg}
-                rating_count={listing.rating_count}
+            <div className="shrink-0">
+              <AvatarFrame
+                src={listing.avatar_url}
+                name={listing.display_name}
+                size={72}
+                style={listing.avatar_frame_style}
+                themeColor={theme}
               />
             </div>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                {listing.city}
-                {listing.country ? `, ${listing.country}` : ""}
-              </span>
-              <a
-                href="#visit-panel"
-                className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text underline-offset-4 hover:underline"
-              >
-                Visit us
-                <span aria-hidden="true">→</span>
-              </a>
-            </div>
+          </div>
+
+          {/* Bottom row: Contact us pill anchored to the right */}
+          <div className="mt-3 flex justify-end">
+            <a
+              href="#contact-panel"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[12px] font-bold uppercase tracking-wider transition active:scale-[0.97]"
+              style={{ background: theme, color: ctaInk }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
+              </svg>
+              Contact us
+            </a>
           </div>
         </div>
       </section>
