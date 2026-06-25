@@ -142,7 +142,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
               decoding="async"
               width={1200}
               height={630}
-              className="block aspect-[1.91/1] h-auto w-full object-cover"
+              className="block aspect-[16/9] h-auto w-full object-cover sm:aspect-[2/1]"
             />
           </figure>
         )}
