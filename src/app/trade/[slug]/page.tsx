@@ -86,7 +86,7 @@ async function loadListing(slug: string) {
   const reviewsRes = await supabase
     .from("hammerex_xrated_reviews")
     .select(
-      "id, customer_name, customer_postcode, project_type, overall_rating, workmanship_rating, communication_rating, value_rating, timeliness_rating, body, status, public_response, submitted_at"
+      "id, customer_name, customer_postcode, project_type, service_name, overall_rating, workmanship_rating, communication_rating, value_rating, timeliness_rating, body, status, public_response, submitted_at"
     )
     .eq("listing_id", listing.id)
     .in("status", ["live", "disputed"])
@@ -104,6 +104,7 @@ type XratedReviewPublic = {
   customer_name: string;
   customer_postcode: string | null;
   project_type: string | null;
+  service_name: string | null;
   overall_rating: number;
   workmanship_rating: number | null;
   communication_rating: number | null;
@@ -610,17 +611,9 @@ function ClientsCarousel({
   if (reviews.length === 0) {
     return (
       <section className="w-full px-4 pt-8 sm:px-6">
-        <div className="flex items-end justify-between">
-          <h2 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
-            What Our Clients Say
-          </h2>
-          <a
-            href={`/trade/${listing.slug}/review`}
-            className="text-xs font-bold text-[#FFB300] hover:underline"
-          >
-            Leave a review &rsaquo;
-          </a>
-        </div>
+        <h2 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
+          Customers say it best…
+        </h2>
         <div className="mt-4 rounded-2xl border border-dashed border-neutral-300 bg-white p-6 text-center">
           <p className="text-sm font-bold text-neutral-900">
             No customer reviews yet.
@@ -630,10 +623,14 @@ function ClientsCarousel({
           </p>
           <a
             href={`/trade/${listing.slug}/review`}
-            className="mt-3 inline-flex h-10 items-center justify-center gap-1.5 rounded-lg px-4 text-xs font-extrabold text-neutral-900 transition active:scale-[0.97]"
+            className="mt-3 inline-flex h-10 items-center justify-center gap-1.5 rounded-lg px-5 text-xs font-extrabold text-neutral-900 shadow-sm transition active:scale-[0.97]"
             style={{ background: "#FFB300" }}
           >
-            Leave a review &rsaquo;
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add review
           </a>
         </div>
       </section>
@@ -642,21 +639,14 @@ function ClientsCarousel({
 
   return (
     <section className="w-full px-4 pt-8 sm:px-6">
-      <div className="flex items-end justify-between">
-        <h2 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
-          What Our Clients Say
-        </h2>
-        <a
-          href={`/trade/${listing.slug}/review`}
-          className="text-xs font-bold text-[#FFB300] hover:underline"
-        >
-          Leave a review &rsaquo;
-        </a>
-      </div>
+      <h2 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
+        Customers say it best…
+      </h2>
       <ReviewsCarousel
         reviews={reviews}
         displayName={listing.display_name}
         city={listing.city}
+        slug={listing.slug}
       />
     </section>
   );

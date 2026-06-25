@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
   const customer_postcode = s(body.customer_postcode).toUpperCase().replace(/\s+/g, " ");
   const project_type = s(body.project_type);
   const project_finish = s(body.project_finish);
+  const service_name = s(body.service_name);
   const review_body = s(body.body);
   const attempted_resolution =
     typeof body.attempted_resolution === "boolean" ? body.attempted_resolution : null;
@@ -139,6 +140,7 @@ export async function POST(req: NextRequest) {
       customer_postcode: customer_postcode || null,
       project_type: project_type || null,
       project_finish: project_finish || null,
+      service_name: service_name || null,
       timeframe_quoted_days: quoted_days,
       timeframe_actual_days: actual_days,
       attempted_resolution,

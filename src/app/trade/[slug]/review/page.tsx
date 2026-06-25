@@ -55,6 +55,7 @@ export default async function TradeReviewPage({
       <ReviewFormPanel
         listingId={listing.id}
         displayName={listing.display_name}
+        pricedServices={listing.priced_services ?? []}
       />
 
       <div className="mt-auto">

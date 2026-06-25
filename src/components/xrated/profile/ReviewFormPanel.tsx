@@ -17,15 +17,29 @@ const UK_POSTCODE_RE = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/;
 
 type ProjectType = "" | "new_build" | "renovation" | "repair";
 
+type PricedService = {
+  name: string;
+  image_url: string | null;
+  image_urls?: string[];
+  price: number;
+  unit: string;
+  description?: string | null;
+};
+
 export function ReviewFormPanel({
   listingId,
-  displayName
+  displayName,
+  pricedServices
 }: {
   listingId: string;
   displayName: string;
+  pricedServices: PricedService[];
 }) {
   const themeColor = "#FFB300";
 
+  // "" = nothing picked yet, "__general__" = customer chose Other / General,
+  // anything else is the priced_service.name the review is about.
+  const [serviceName, setServiceName] = useState<string>("");
   const [overall, setOverall] = useState(0);
   const [workmanship, setWorkmanship] = useState(0);
   const [communication, setCommunication] = useState(0);
@@ -112,6 +126,8 @@ export function ReviewFormPanel({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           listing_id: listingId,
+          service_name:
+            serviceName && serviceName !== "__general__" ? serviceName : null,
           customer_name: name.trim(),
           customer_email: email.trim(),
           customer_postcode: postcode.trim() || null,
@@ -178,6 +194,14 @@ export function ReviewFormPanel({
         onSubmit={submit}
         className="mt-4 space-y-5 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:p-5"
       >
+        {/* Service-picker step — at the top so the reviewer anchors
+            their rating to a specific job before they pick stars. */}
+        <ServicePicker
+          services={pricedServices}
+          value={serviceName}
+          onChange={setServiceName}
+        />
+
         {/* Overall rating — big and unmissable. */}
         <div>
           <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-muted">
@@ -461,6 +485,108 @@ function CategoryRating({
         {label}
       </p>
       <StarRow value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+// Service-picker grid: thumbnail tile per priced_service + a final
+// "Other / general review" tile so customers writing a non-specific
+// review never get gated. Selected service routes into the POST
+// payload as `service_name`; "__general__" maps to null.
+function ServicePicker({
+  services,
+  value,
+  onChange
+}: {
+  services: PricedService[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-muted">
+        Which service is this review about?
+      </span>
+      <p className="mt-1 text-[11px] text-brand-muted">
+        Tap the service you had carried out — it gets attached to your
+        review so future customers can see what you actually rated. Pick
+        Other if it was general work.
+      </p>
+      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        {services.map((svc) => {
+          const isPicked = value === svc.name;
+          return (
+            <li key={svc.name}>
+              <button
+                type="button"
+                onClick={() => onChange(isPicked ? "" : svc.name)}
+                aria-pressed={isPicked}
+                className={`group relative block w-full overflow-hidden rounded-xl border-2 text-left transition active:scale-[0.98] ${
+                  isPicked
+                    ? "border-[#FFB300]"
+                    : "border-transparent ring-1 ring-brand-line hover:ring-[#FFB300]"
+                }`}
+              >
+                <span className="block aspect-video w-full overflow-hidden bg-neutral-100">
+                  {svc.image_url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={svc.image_url}
+                      alt={svc.name}
+                      className="h-full w-full object-cover transition group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
+                      No image
+                    </span>
+                  )}
+                </span>
+                <span className="block px-2.5 py-2">
+                  <span className="block truncate text-xs font-extrabold text-brand-text">
+                    {svc.name}
+                  </span>
+                  <span className="block text-[11px] text-brand-muted">
+                    £{svc.price.toLocaleString("en-GB")} {svc.unit}
+                  </span>
+                </span>
+                {isPicked && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full"
+                    style={{ background: "#FFB300" }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+        <li>
+          <button
+            type="button"
+            onClick={() =>
+              onChange(value === "__general__" ? "" : "__general__")
+            }
+            aria-pressed={value === "__general__"}
+            className={`flex h-full min-h-[7.5rem] w-full flex-col items-center justify-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition active:scale-[0.98] ${
+              value === "__general__"
+                ? "border-[#FFB300] bg-[#FFB300]/10"
+                : "border-dashed border-brand-line bg-brand-bg hover:border-[#FFB300]"
+            }`}
+          >
+            <span className="text-xl">💬</span>
+            <span className="text-xs font-extrabold text-brand-text">
+              Other / general review
+            </span>
+            <span className="text-[11px] text-brand-muted">
+              Not tied to a listed service
+            </span>
+          </button>
+        </li>
+      </ul>
     </div>
   );
 }

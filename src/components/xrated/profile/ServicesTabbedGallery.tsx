@@ -14,7 +14,6 @@
 // a quote" card so the section never looks empty.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TradeIcon } from "@/lib/tradeIcons";
 import { EnquireButton } from "./EnquireButton";
 
 export type PricedService = {
@@ -86,9 +85,14 @@ export function ServicesTabbedGallery({
   return (
     <section className="w-full px-4 pt-8 sm:px-6">
       <div className="flex items-end justify-between">
-        <h2 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
-          Our Services
-        </h2>
+        <div>
+          <h2 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">
+            Our Services
+          </h2>
+          <p className="mt-1 text-xs text-neutral-500">
+            Example of projects and finishes we offer.
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => setGridMode((v) => !v)}
@@ -113,45 +117,9 @@ export function ServicesTabbedGallery({
         </button>
       </div>
 
-      {/* Tab row */}
-      <div className="mt-4 flex flex-wrap gap-3 sm:gap-4">
-        {tabs.map((t, i) => {
-          const isActive = !gridMode && i === safeActive;
-          return (
-            <button
-              key={t.name}
-              type="button"
-              onClick={() => {
-                setGridMode(false);
-                setActive(i);
-              }}
-              aria-pressed={isActive}
-              className="flex flex-col items-center gap-2 text-center transition"
-            >
-              <span
-                className={`flex h-14 w-14 items-center justify-center rounded-xl transition ${
-                  isActive
-                    ? "bg-[#FFB300] text-neutral-900 ring-2 ring-[#FFB300]"
-                    : "bg-neutral-900 text-white hover:bg-neutral-700"
-                }`}
-              >
-                <span className="h-7 w-7">
-                  <TradeIcon name={t.name} />
-                </span>
-              </span>
-              <span
-                className={`max-w-[5.5rem] truncate text-xs font-semibold ${
-                  isActive
-                    ? "text-neutral-900 underline decoration-[#FFB300] decoration-2 underline-offset-4"
-                    : "text-neutral-700"
-                }`}
-              >
-                {t.name}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab row removed — section heading subtitle ("Example of
+          projects and finishes we offer") now sets the context, and
+          the cards auto-scroll continuously on the marquee below. */}
 
       {/* Body */}
       {gridMode ? (
@@ -207,9 +175,14 @@ function ServiceCarousel({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const programmaticScroll = useRef(false);
+  const [paused, setPaused] = useState(false);
 
-  // Scroll the carousel so the active card is centered. Triggered when
-  // the customer taps a tab or the gallery first mounts.
+  // Cards are rendered twice so the auto-scroll can loop seamlessly —
+  // when scrollLeft passes half the width we snap back by the same
+  // amount and the duplicated set hides the seam.
+  const looped = tabs.length >= 2 ? [...tabs, ...tabs] : tabs;
+
+  // Tab-driven scroll: centre the picked card (first copy only).
   const scrollToActive = useCallback(() => {
     const scroller = scrollerRef.current;
     const target = cardRefs.current[activeIndex];
@@ -219,7 +192,6 @@ function ServiceCarousel({
     const next = cardCenter - scrollerCenter;
     programmaticScroll.current = true;
     scroller.scrollTo({ left: Math.max(0, next), behavior: "smooth" });
-    // Programmatic-scroll flag lifts after the smooth animation settles.
     window.setTimeout(() => {
       programmaticScroll.current = false;
     }, 600);
@@ -229,8 +201,50 @@ function ServiceCarousel({
     scrollToActive();
   }, [scrollToActive]);
 
-  // While the user drags the carousel by hand, sync the active tab to
-  // whichever card sits closest to centre.
+  // Auto-scroll left at a gentle pace — like the Recent Work and
+  // Pricing marquees. Pauses on hover (desktop) and on touch (mobile,
+  // 1.5s resume after lift). Skipped entirely if there's only one
+  // card, since loop has nothing to chase.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || paused || tabs.length < 2) return;
+    let raf = 0;
+    let last = performance.now();
+    const SPEED_PX_PER_SEC = 22;
+    function tick(now: number) {
+      const el = scrollerRef.current;
+      if (!el) return;
+      // Skip frames during programmatic tab-scroll so the two don't
+      // fight each other; the smooth-scroll runs for ~600ms.
+      if (!programmaticScroll.current) {
+        const dt = (now - last) / 1000;
+        el.scrollLeft += SPEED_PX_PER_SEC * dt;
+        const half = el.scrollWidth / 2;
+        if (el.scrollLeft >= half) el.scrollLeft -= half;
+      }
+      last = now;
+      raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [paused, tabs.length]);
+
+  const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function pauseNow() {
+    if (resumeTimer.current) {
+      clearTimeout(resumeTimer.current);
+      resumeTimer.current = null;
+    }
+    setPaused(true);
+  }
+  function scheduleResume(delayMs: number) {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setPaused(false), delayMs);
+  }
+
+  // While the user drags by hand, sync the active tab to whichever
+  // first-copy card sits closest to centre. We skip during programmatic
+  // scrolls (tab clicks) so they don't ping-pong the active state.
   function onScroll() {
     if (programmaticScroll.current) return;
     const scroller = scrollerRef.current;
@@ -251,41 +265,50 @@ function ServiceCarousel({
   }
 
   return (
-    <div className="relative mt-5">
+    <div
+      className="relative mt-5"
+      onMouseEnter={pauseNow}
+      onMouseLeave={() => scheduleResume(300)}
+    >
       <div
         ref={scrollerRef}
         onScroll={onScroll}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onTouchStart={pauseNow}
+        onTouchEnd={() => scheduleResume(1500)}
+        className="flex gap-4 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {/* Lead spacer so the first card can sit centered. */}
         <span aria-hidden="true" className="shrink-0 basis-[8%] sm:basis-[18%]" />
-        {tabs.map((t, i) => (
-          <div
-            key={t.name}
-            ref={(node) => {
-              cardRefs.current[i] = node;
-            }}
-            className="w-[78%] shrink-0 snap-center sm:w-[60%] lg:w-[44%]"
-          >
-            <ServiceCard
-              tab={t}
-              slug={slug}
-              onOpenLightbox={onOpenLightbox}
-              large={i === activeIndex}
-            />
-          </div>
-        ))}
+        {looped.map((t, i) => {
+          // Only store the ref + bind the active-large state to the
+          // FIRST copy of each tab. Onscreen there are two copies (so
+          // the loop is seamless), but the cardRefs array stays length
+          // tabs.length.
+          const firstCopyIndex = i;
+          const isFirstCopy = i < tabs.length;
+          const tabIndex = i % tabs.length;
+          return (
+            <div
+              key={`${t.name}-${i}`}
+              ref={(node) => {
+                if (isFirstCopy) cardRefs.current[firstCopyIndex] = node;
+              }}
+              className="w-[78%] shrink-0 sm:w-[60%] lg:w-[44%]"
+            >
+              <ServiceCard
+                tab={t}
+                slug={slug}
+                onOpenLightbox={onOpenLightbox}
+                large={tabIndex === activeIndex}
+              />
+            </div>
+          );
+        })}
         {/* Trailing spacer so the last card can sit centered too. */}
         <span aria-hidden="true" className="shrink-0 basis-[8%] sm:basis-[18%]" />
       </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent"
-      />
+      {/* Edge fade gradients removed — cards run clean to the screen
+          edge with no white wash at either end. */}
     </div>
   );
 }

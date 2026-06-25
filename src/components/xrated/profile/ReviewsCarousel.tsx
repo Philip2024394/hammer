@@ -20,6 +20,7 @@ export type ReviewCard = {
   customer_name: string;
   customer_postcode: string | null;
   project_type: string | null;
+  service_name: string | null;
   overall_rating: number;
   workmanship_rating: number | null;
   communication_rating: number | null;
@@ -34,11 +35,13 @@ export type ReviewCard = {
 export function ReviewsCarousel({
   reviews,
   displayName,
-  city
+  city,
+  slug
 }: {
   reviews: ReviewCard[];
   displayName: string;
   city: string;
+  slug: string;
 }) {
   const [index, setIndex] = useState(0);
   if (reviews.length === 0) return null;
@@ -68,9 +71,10 @@ export function ReviewsCarousel({
         onClick={() => setIndex(Math.max(0, safe - 1))}
         disabled={!hasPrev}
         aria-label="Previous review"
-        className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-500 transition hover:border-[#FFB300] hover:text-[#FFB300] disabled:opacity-30 sm:flex"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-900 shadow-sm transition active:scale-[0.97] disabled:opacity-30"
+        style={{ background: "#FFB300" }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="m15 18-6-6 6-6" />
         </svg>
       </button>
@@ -100,6 +104,18 @@ export function ReviewsCarousel({
             {projectLabel && (
               <span className="ml-1 inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-0.5 text-xs font-semibold text-neutral-700">
                 {projectLabel}
+              </span>
+            )}
+            {r.service_name && (
+              <span
+                className="ml-1 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-extrabold text-neutral-900"
+                style={{ background: "#FFB300" }}
+                title={`Review of: ${r.service_name}`}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                {r.service_name}
               </span>
             )}
           </div>
@@ -169,6 +185,22 @@ export function ReviewsCarousel({
             )}
           </div>
         )}
+
+        {/* Add review CTA — sits inside the card body, under the dot
+            indicator. Replaces the old top-right text link. */}
+        <div className="mt-4 flex justify-center border-t border-neutral-100 pt-4">
+          <a
+            href={`/trade/${slug}/review`}
+            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg px-5 text-xs font-extrabold text-neutral-900 shadow-sm transition active:scale-[0.97]"
+            style={{ background: "#FFB300" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add review
+          </a>
+        </div>
       </div>
 
       <button
@@ -176,9 +208,10 @@ export function ReviewsCarousel({
         onClick={() => setIndex(Math.min(reviews.length - 1, safe + 1))}
         disabled={!hasNext}
         aria-label="Next review"
-        className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-500 transition hover:border-[#FFB300] hover:text-[#FFB300] disabled:opacity-30 sm:flex"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-neutral-900 shadow-sm transition active:scale-[0.97] disabled:opacity-30"
+        style={{ background: "#FFB300" }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="m9 18 6-6-6-6" />
         </svg>
       </button>
