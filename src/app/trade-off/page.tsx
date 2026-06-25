@@ -22,7 +22,6 @@ import { LandingSearchBar } from "@/components/xrated/landing/LandingSearchBar";
 import { TradeIconChips } from "@/components/xrated/landing/TradeIconChips";
 import { TradesOnStandby } from "@/components/xrated/landing/TradesOnStandby";
 import { availabilityRank } from "@/lib/xratedAvailability";
-import { TradeShowcaseGrid } from "@/components/xrated/landing/TradeShowcaseGrid";
 import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
 import { HowItWorks } from "@/components/xrated/landing/HowItWorks";
 import { StickyMobileLandingBar } from "@/components/xrated/landing/StickyMobileLandingBar";
@@ -91,17 +90,6 @@ export default async function TradeOffLandingPage() {
     if (c) citySet.add(c);
   }
   const cityCount = citySet.size;
-
-  // Per-trade tradie count for the showcase tiles. Counts a tradie under
-  // every trade they list (primary + secondary) so the badge reflects
-  // searchable supply, not just the primary heading.
-  const countsBySlug: Record<string, number> = {};
-  for (const l of listings) {
-    countsBySlug[l.primary_trade] = (countsBySlug[l.primary_trade] ?? 0) + 1;
-    for (const s of l.secondary_trades ?? []) {
-      countsBySlug[s] = (countsBySlug[s] ?? 0) + 1;
-    }
-  }
 
   // Featured tradies — app_paid first, then verified Standard, then the rest.
   // Top 6 of whatever survives.
@@ -222,8 +210,6 @@ export default async function TradeOffLandingPage() {
           </p>
         </div>
       </section>
-
-      <TradeShowcaseGrid countsBySlug={countsBySlug} />
 
       <FeaturedTradiesRail tradies={featured} />
 
