@@ -160,6 +160,33 @@ export default async function TradeOffLandingPage() {
             <p className="mt-3 max-w-sm text-xs leading-relaxed text-neutral-700 sm:text-sm">
               Free UK directory of working tradespeople — message direct on WhatsApp, no middleman.
             </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2 sm:gap-3">
+              {/* Primary — yellow Find Trades with magnifying glass */}
+              <a
+                href="#search"
+                className="inline-flex h-11 items-center gap-2 rounded-lg px-4 text-xs font-bold uppercase tracking-wider text-neutral-900 transition active:scale-[0.98] sm:h-12 sm:px-5 sm:text-sm"
+                style={{
+                  background: XRATED_BRAND.accent,
+                  boxShadow: `0 4px 14px ${XRATED_BRAND.accent}55`
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+                Find Trades
+              </a>
+
+              {/* Secondary — white with yellow border ring */}
+              <a
+                href="/trade-off/signup"
+                className="inline-flex h-11 items-center gap-2 rounded-lg border-2 bg-white px-4 text-xs font-bold uppercase tracking-wider text-neutral-900 transition active:scale-[0.98] sm:h-12 sm:px-5 sm:text-sm"
+                style={{ borderColor: XRATED_BRAND.accent }}
+              >
+                List trade
+              </a>
+            </div>
           </div>
         </div>
       </section>
