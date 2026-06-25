@@ -140,12 +140,21 @@ export default async function TradeOffLandingPage() {
                 Find Trades
               </a>
 
-              {/* Secondary — white with yellow border ring */}
+              {/* Secondary — yellow with plus-user icon */}
               <a
                 href="/trade-off/signup"
-                className="inline-flex h-11 items-center gap-2 rounded-lg border-2 bg-white px-4 text-xs font-bold uppercase tracking-wider text-neutral-900 transition active:scale-[0.98] sm:h-12 sm:px-5 sm:text-sm"
-                style={{ borderColor: XRATED_BRAND.accent }}
+                className="inline-flex h-11 items-center gap-2 rounded-lg px-4 text-xs font-bold uppercase tracking-wider text-neutral-900 transition active:scale-[0.98] sm:h-12 sm:px-5 sm:text-sm"
+                style={{
+                  background: XRATED_BRAND.accent,
+                  boxShadow: `0 4px 14px ${XRATED_BRAND.accent}55`
+                }}
               >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <line x1="19" y1="8" x2="19" y2="14" />
+                  <line x1="22" y1="11" x2="16" y2="11" />
+                </svg>
                 List trade
               </a>
             </div>
