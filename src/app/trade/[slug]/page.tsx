@@ -480,6 +480,12 @@ function PremiumLayout({
         </div>
       </section>
 
+      {/* "What to know before you message" — trust & logistics summary.
+          Renders only when at least one trust field is populated, otherwise
+          the section is omitted entirely so unconfigured listings don't
+          show an empty card. */}
+      <TrustAndLogisticsPanel listing={listing} />
+
       {/* Inline expand panel sits right under the profile container. */}
       <ProfileExpandPanels
         contactPanel={
@@ -873,5 +879,179 @@ function StandardLayout({
         <TradeReportButton listingId={listing.id} />
       </section>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Trust & logistics summary panel — only renders on the premium profile
+// when at least one trust signal is populated. Designed to fit between
+// the profile card and the Company Details / About row.
+// ─────────────────────────────────────────────────────────────────────────
+
+function TrustAndLogisticsPanel({ listing }: { listing: HammerexTradeOffListing }) {
+  const hasAnyTrust =
+    listing.is_insured ||
+    listing.has_own_transport ||
+    listing.has_own_tools ||
+    listing.dbs_checked ||
+    listing.free_site_visits ||
+    (listing.qualifications && listing.qualifications.length > 0) ||
+    (listing.trade_memberships && listing.trade_memberships.length > 0) ||
+    typeof listing.minimum_job_gbp === "number" ||
+    typeof listing.years_in_trade === "number" ||
+    (listing.current_status_note && listing.current_status_note.trim().length > 0) ||
+    (listing.quote_availability && listing.quote_availability.trim().length > 0);
+
+  if (!hasAnyTrust) return null;
+
+  const insuredLabel =
+    listing.is_insured && typeof listing.insurance_cover_gbp === "number"
+      ? `£${Math.round(listing.insurance_cover_gbp / 1_000_000) >= 1 && listing.insurance_cover_gbp % 1_000_000 === 0
+          ? `${listing.insurance_cover_gbp / 1_000_000}M`
+          : listing.insurance_cover_gbp.toLocaleString("en-GB")} cover`
+      : listing.is_insured
+        ? "Insured"
+        : "Not confirmed";
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-6 sm:pt-8">
+      <h2 className="text-lg font-bold text-neutral-900">
+        What to know before you message
+      </h2>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <TrustCard
+          label="Insured"
+          status={listing.is_insured ? "yes" : "no"}
+          detail={insuredLabel}
+        />
+        <TrustCard
+          label="Own transport"
+          status={listing.has_own_transport ? "yes" : "no"}
+          detail={listing.has_own_transport ? "Has own van / vehicle" : "Not confirmed"}
+        />
+        <TrustCard
+          label="Own tools"
+          status={listing.has_own_tools ? "yes" : "no"}
+          detail={listing.has_own_tools ? "Brings own kit" : "Not confirmed"}
+        />
+        <TrustCard
+          label="DBS checked"
+          status={listing.dbs_checked ? "yes" : "no"}
+          detail={listing.dbs_checked ? "Background-checked" : "Not confirmed"}
+        />
+        <TrustCard
+          label="Free site visits"
+          status={listing.free_site_visits ? "yes" : "no"}
+          detail={
+            listing.quote_availability && listing.quote_availability.trim().length > 0
+              ? listing.quote_availability
+              : listing.free_site_visits
+                ? "Free quote visit"
+                : "Not confirmed"
+          }
+        />
+      </div>
+
+      {(listing.qualifications?.length > 0 || listing.trade_memberships?.length > 0) && (
+        <div className="mt-4 space-y-3">
+          {listing.qualifications?.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+                Qualifications
+              </p>
+              <ul className="mt-1.5 flex flex-wrap gap-1.5">
+                {listing.qualifications.map((q) => (
+                  <li key={q}>
+                    <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] font-semibold text-neutral-900">
+                      {q}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {listing.trade_memberships?.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+                Memberships
+              </p>
+              <ul className="mt-1.5 flex flex-wrap gap-1.5">
+                {listing.trade_memberships.map((m) => (
+                  <li key={m}>
+                    <span className="inline-flex items-center rounded-full border border-neutral-200 bg-[#FFB300]/10 px-3 py-1 text-[11px] font-semibold text-neutral-900">
+                      {m}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {(typeof listing.years_in_trade === "number" ||
+        typeof listing.minimum_job_gbp === "number") && (
+        <ul className="mt-4 flex flex-wrap gap-1.5">
+          {typeof listing.years_in_trade === "number" && (
+            <li>
+              <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] font-semibold text-neutral-900">
+                {listing.years_in_trade}+ yrs in trade
+              </span>
+            </li>
+          )}
+          {typeof listing.minimum_job_gbp === "number" && (
+            <li>
+              <span className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-[11px] font-semibold text-neutral-900">
+                Minimum job £{listing.minimum_job_gbp.toLocaleString("en-GB")}
+              </span>
+            </li>
+          )}
+        </ul>
+      )}
+
+      {listing.current_status_note && listing.current_status_note.trim().length > 0 && (
+        <p className="mt-3 text-[13px] italic text-neutral-500">
+          {`💼 ${listing.current_status_note.trim()}`}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function TrustCard({
+  label,
+  status,
+  detail
+}: {
+  label: string;
+  status: "yes" | "no" | "muted";
+  detail: string;
+}) {
+  const tickColor = "#10B981";
+  const crossColor = "#9CA3AF";
+  const isYes = status === "yes";
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-neutral-200 bg-white p-3">
+      <span
+        className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+        style={{ background: isYes ? `${tickColor}1A` : `${crossColor}1A` }}
+        aria-hidden="true"
+      >
+        {isYes ? (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={tickColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        ) : (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={crossColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        )}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[13px] font-semibold text-neutral-900">{label}</p>
+        <p className="text-[12px] text-neutral-500">{detail}</p>
+      </div>
+    </div>
   );
 }

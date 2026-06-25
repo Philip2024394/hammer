@@ -81,24 +81,55 @@ const UPDATABLE_STRING_FIELDS = [
   // "Trades On Standby" advertised availability. Editor enforces the
   // allowed values; we accept any non-empty string and let the editor
   // own validation (so adding a new option doesn't need an API change).
-  "availability"
+  "availability",
+  // Trust & logistics — free-text fields. The numeric / boolean / array
+  // counterparts live in their respective field lists below.
+  "quote_availability",
+  "current_status_note"
 ] as const;
+
+// String fields with their own maximum-length cap (max 500 chars).
+const STRING_FIELD_MAX_LENGTH: Partial<Record<(typeof UPDATABLE_STRING_FIELDS)[number], number>> = {
+  quote_availability: 500,
+  current_status_note: 500
+};
 
 const UPDATABLE_ARRAY_FIELDS = [
   "secondary_trades",
   "service_postcodes",
   "photos",
-  "services_offered"
+  "services_offered",
+  // Trust & logistics — curated multi-select chips, sanitised below.
+  "qualifications",
+  "trade_memberships"
 ] as const;
 
 const UPDATABLE_INT_FIELDS = ["years_in_trade", "start_year"] as const;
+
+// Trust & logistics — positive-integer fields, capped at 100,000,000.
+const UPDATABLE_NUMBER_FIELDS = [
+  "insurance_cover_gbp",
+  "minimum_job_gbp",
+  "quote_turnaround_hours"
+] as const;
+const NUMBER_FIELD_MAX = 100_000_000;
 
 // Booleans accepted through the customisation panel.
 const UPDATABLE_BOOL_FIELDS = [
   "accepting_jobs",
   "contact_form_enabled",
-  "visit_us_enabled"
+  "visit_us_enabled",
+  // Trust & logistics flags.
+  "is_insured",
+  "has_own_transport",
+  "has_own_tools",
+  "dbs_checked",
+  "free_site_visits"
 ] as const;
+
+// ISO-date fields (YYYY-MM-DD). Null clears the column.
+const UPDATABLE_DATE_FIELDS = ["ready_date"] as const;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Premium mini-app JSON fields. Shape:
 //  - operating_hours: Record<dayKey, { open, close } | null>
@@ -224,7 +255,9 @@ export async function POST(req: NextRequest) {
 
   for (const f of UPDATABLE_STRING_FIELDS) {
     if (f in fieldsIn) {
-      const v = s(fieldsIn[f]);
+      let v = s(fieldsIn[f]);
+      const cap = STRING_FIELD_MAX_LENGTH[f];
+      if (typeof cap === "number" && v.length > cap) v = v.slice(0, cap);
       patch[f] = v.length === 0 ? null : v;
     }
   }
@@ -233,16 +266,36 @@ export async function POST(req: NextRequest) {
       const arr = arrStr(fieldsIn[f]);
       if (f === "secondary_trades") patch[f] = arr.slice(0, 3);
       else if (f === "photos") patch[f] = arr.slice(0, 6);
-      else patch[f] = arr.slice(0, 40);
+      else if (f === "qualifications" || f === "trade_memberships") {
+        // Curated chips — at most 20 entries, each 1–80 chars.
+        patch[f] = arr
+          .map((x) => x.slice(0, 80))
+          .filter((x) => x.length > 0)
+          .slice(0, 20);
+      } else patch[f] = arr.slice(0, 40);
     }
   }
   for (const f of UPDATABLE_INT_FIELDS) {
     if (f in fieldsIn) patch[f] = intOrNull(fieldsIn[f]);
   }
+  for (const f of UPDATABLE_NUMBER_FIELDS) {
+    if (f in fieldsIn) {
+      const n = intOrNull(fieldsIn[f]);
+      if (n === null || n <= 0) patch[f] = null;
+      else if (n > NUMBER_FIELD_MAX) patch[f] = NUMBER_FIELD_MAX;
+      else patch[f] = n;
+    }
+  }
   for (const f of UPDATABLE_BOOL_FIELDS) {
     if (f in fieldsIn) {
       const v = fieldsIn[f];
       patch[f] = v === true || v === "true" || v === 1 || v === "1";
+    }
+  }
+  for (const f of UPDATABLE_DATE_FIELDS) {
+    if (f in fieldsIn) {
+      const v = s(fieldsIn[f]);
+      patch[f] = v.length > 0 && ISO_DATE_RE.test(v) ? v : null;
     }
   }
   for (const f of UPDATABLE_JSON_FIELDS) {

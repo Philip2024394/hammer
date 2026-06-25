@@ -273,6 +273,22 @@ export type HammerexTradeOffListing = {
   // Headline starting rate shown on the standby card. Separate from
   // priced_services so the tradie can advertise a single from-price.
   headline_rate: { amount: number; unit: string; currency: string } | null;
+  // Trust & logistics — surfaced on the "What to know" panel of the
+  // premium profile. All nullable / defaulted false so legacy rows
+  // render as "Not confirmed".
+  is_insured: boolean;
+  insurance_cover_gbp: number | null;
+  qualifications: string[];
+  trade_memberships: string[];
+  dbs_checked: boolean;
+  has_own_transport: boolean;
+  has_own_tools: boolean;
+  minimum_job_gbp: number | null;
+  free_site_visits: boolean;
+  quote_availability: string | null;
+  quote_turnaround_hours: number | null;
+  current_status_note: string | null;
+  ready_date: string | null;
   promo_text: string | null;
   joined_at: string;
   created_at: string;

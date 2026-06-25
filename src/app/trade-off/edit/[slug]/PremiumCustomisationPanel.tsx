@@ -11,6 +11,11 @@ import {
   PRICING_UNIT_OTHER_VALUE,
   unitsForTrade
 } from "@/lib/tradePricingUnits";
+import {
+  INSURANCE_AMOUNTS,
+  TRADE_MEMBERSHIPS,
+  qualificationsForTrade
+} from "@/lib/tradeCredentials";
 
 type HoursSlot = { open: string; close: string } | null;
 type HoursMap = Record<string, HoursSlot>;
@@ -52,6 +57,21 @@ type Patch = {
   // "Trades On Standby" feed — empty string = not opted in.
   availability: "" | "now" | "tomorrow" | "this_week" | "next_week" | "two_weeks" | "later";
   headline_rate: HeadlineRate;
+  // Trust & logistics — null for numeric "not set"; empty string for
+  // text "not set" so the form binds cleanly to native HTML inputs.
+  is_insured: boolean;
+  insurance_cover_gbp: number | null;
+  qualifications: string[];
+  trade_memberships: string[];
+  dbs_checked: boolean;
+  has_own_transport: boolean;
+  has_own_tools: boolean;
+  minimum_job_gbp: number | null;
+  free_site_visits: boolean;
+  quote_availability: string;
+  quote_turnaround_hours: number | null;
+  current_status_note: string;
+  ready_date: string;
 };
 
 const DAY_ROW: { key: keyof HoursMap; label: string }[] = [
@@ -99,9 +119,56 @@ export function PremiumCustomisationPanel({
   const [servicesText, setServicesText] = useState<string>(
     (initial.services_offered ?? []).join(", ")
   );
+  // Trust & logistics — curated chip option lists.
+  const qualificationOptions = useMemo(
+    () => qualificationsForTrade(primaryTrade),
+    [primaryTrade]
+  );
+  const [qualificationInput, setQualificationInput] = useState<string>("");
+  const [membershipInput, setMembershipInput] = useState<string>("");
+  // Insurance amount uses a sentinel-driven dropdown + a "custom" input,
+  // mirroring the headline-rate pattern. We keep the raw string text in
+  // a custom field so the user can type "750000" without forcing a NaN.
+  const initialInsuranceAmount = initial.insurance_cover_gbp;
+  const initialInsuranceCurated =
+    typeof initialInsuranceAmount === "number" &&
+    INSURANCE_AMOUNTS.some((o) => o.value === initialInsuranceAmount);
+  const [insuranceSentinel, setInsuranceSentinel] = useState<string>(
+    typeof initialInsuranceAmount !== "number"
+      ? ""
+      : initialInsuranceCurated
+        ? String(initialInsuranceAmount)
+        : "__other"
+  );
+  const [customInsurance, setCustomInsurance] = useState<string>(
+    typeof initialInsuranceAmount === "number" && !initialInsuranceCurated
+      ? String(initialInsuranceAmount)
+      : ""
+  );
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+
+  function toggleChip(field: "qualifications" | "trade_memberships", value: string) {
+    setState((s) => {
+      const existing = s[field];
+      const next = existing.includes(value)
+        ? existing.filter((x) => x !== value)
+        : [...existing, value];
+      return { ...s, [field]: next.slice(0, 20) };
+    });
+  }
+  function addCustomChip(field: "qualifications" | "trade_memberships", raw: string) {
+    const value = raw.trim().slice(0, 80);
+    if (!value) return;
+    setState((s) => {
+      if (s[field].includes(value)) return s;
+      return { ...s, [field]: [...s[field], value].slice(0, 20) };
+    });
+  }
+  function removeChip(field: "qualifications" | "trade_memberships", value: string) {
+    setState((s) => ({ ...s, [field]: s[field].filter((x) => x !== value) }));
+  }
 
   function set<K extends keyof Patch>(key: K, value: Patch[K]) {
     setState((s) => ({ ...s, [key]: value }));
@@ -189,6 +256,24 @@ export function PremiumCustomisationPanel({
               currency: state.headline_rate.currency || "GBP"
             }
           : null;
+      // Trust & logistics — only persist the insurance amount when the
+      // tradie has marked themselves insured AND given a positive number;
+      // the API also enforces positive-int + cap. Memberships and quals
+      // already enforce their own caps via the chip helpers.
+      const insurance_cover_gbp = state.is_insured
+        ? (() => {
+            const n = Number(state.insurance_cover_gbp);
+            return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+          })()
+        : null;
+      const minimum_job_gbp = (() => {
+        const n = Number(state.minimum_job_gbp);
+        return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+      })();
+      const quote_turnaround_hours = (() => {
+        const n = Number(state.quote_turnaround_hours);
+        return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+      })();
       const payload = {
         ...state,
         services_offered,
@@ -197,7 +282,22 @@ export function PremiumCustomisationPanel({
         // The API treats empty-string strings as "set to null", which is
         // exactly the semantics we want for availability (opt-out).
         availability: state.availability,
-        headline_rate
+        headline_rate,
+        // Pass through the trust & logistics fields. The API sanitises
+        // each (positive ints, max-len strings, chip cap, ISO date).
+        is_insured: state.is_insured,
+        insurance_cover_gbp,
+        qualifications: state.qualifications,
+        trade_memberships: state.trade_memberships,
+        dbs_checked: state.dbs_checked,
+        has_own_transport: state.has_own_transport,
+        has_own_tools: state.has_own_tools,
+        minimum_job_gbp,
+        free_site_visits: state.free_site_visits,
+        quote_availability: state.quote_availability.trim().slice(0, 500),
+        quote_turnaround_hours,
+        current_status_note: state.current_status_note.trim().slice(0, 500),
+        ready_date: state.ready_date || null
       };
 
       const res = await fetch("/api/trade-off/update", {
@@ -332,6 +432,245 @@ export function PremiumCustomisationPanel({
             />
             <span>{state.accepting_jobs ? "Yes — show as accepting" : "No — show as paused"}</span>
           </label>
+        </Field>
+      </div>
+
+      {/* ─── Trust & logistics ─── */}
+      <div className="space-y-3 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+            Trust & logistics
+          </h3>
+          <p className="mt-1 text-[11px] text-brand-muted">
+            What UK customers want to know before they message — insurance,
+            transport, qualifications, minimum job size and your current
+            availability.
+          </p>
+        </div>
+        {/* Yes/no flag grid */}
+        <div className="grid gap-2 sm:grid-cols-2">
+          <TrustFlag
+            label="Insured (public liability)"
+            checked={state.is_insured}
+            onChange={(v) => set("is_insured", v)}
+          />
+          <TrustFlag
+            label="Own transport"
+            checked={state.has_own_transport}
+            onChange={(v) => set("has_own_transport", v)}
+          />
+          <TrustFlag
+            label="Own tools"
+            checked={state.has_own_tools}
+            onChange={(v) => set("has_own_tools", v)}
+          />
+          <TrustFlag
+            label="DBS checked"
+            checked={state.dbs_checked}
+            onChange={(v) => set("dbs_checked", v)}
+          />
+          <TrustFlag
+            label="Free site visits"
+            checked={state.free_site_visits}
+            onChange={(v) => set("free_site_visits", v)}
+          />
+        </div>
+
+        {/* Insurance amount — only when insured is on */}
+        {state.is_insured && (
+          <Field label="Public liability cover">
+            <select
+              value={insuranceSentinel}
+              onChange={(e) => {
+                const next = e.target.value;
+                setInsuranceSentinel(next);
+                if (next === "") {
+                  set("insurance_cover_gbp", null);
+                } else if (next === "__other") {
+                  const n = Number(customInsurance);
+                  set(
+                    "insurance_cover_gbp",
+                    Number.isFinite(n) && n > 0 ? Math.round(n) : null
+                  );
+                } else {
+                  set("insurance_cover_gbp", Number(next));
+                }
+              }}
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+            >
+              <option value="">— Not specified —</option>
+              {INSURANCE_AMOUNTS.map((opt) => (
+                <option key={opt.value} value={String(opt.value)}>
+                  {opt.label}
+                </option>
+              ))}
+              <option value="__other">Other (£) …</option>
+            </select>
+            {insuranceSentinel === "__other" && (
+              <input
+                type="number"
+                min={0}
+                step={1000}
+                value={customInsurance}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setCustomInsurance(next);
+                  const n = Number(next);
+                  set(
+                    "insurance_cover_gbp",
+                    Number.isFinite(n) && n > 0 ? Math.round(n) : null
+                  );
+                }}
+                placeholder="e.g. 750000"
+                className="mt-2 h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+              />
+            )}
+          </Field>
+        )}
+
+        {/* Qualifications chips */}
+        <Field label="Qualifications" full>
+          <p className="mb-1.5 text-[11px] text-brand-muted">
+            Tap to select. Custom certs can be typed in — press Enter to add.
+          </p>
+          <ChipMultiSelect
+            options={qualificationOptions}
+            selected={state.qualifications}
+            onToggle={(v) => toggleChip("qualifications", v)}
+            onRemove={(v) => removeChip("qualifications", v)}
+          />
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={qualificationInput}
+              onChange={(e) => setQualificationInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustomChip("qualifications", qualificationInput);
+                  setQualificationInput("");
+                }
+              }}
+              placeholder="Add a custom cert (e.g. WaterSafe)"
+              maxLength={80}
+              className="h-11 flex-1 rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                addCustomChip("qualifications", qualificationInput);
+                setQualificationInput("");
+              }}
+              className="inline-flex h-11 items-center rounded-md border border-brand-accent bg-brand-accent/10 px-3 text-[11px] font-bold text-brand-accent transition hover:bg-brand-accent hover:text-black"
+            >
+              Add
+            </button>
+          </div>
+        </Field>
+
+        {/* Memberships chips */}
+        <Field label="Trade memberships" full>
+          <ChipMultiSelect
+            options={TRADE_MEMBERSHIPS}
+            selected={state.trade_memberships}
+            onToggle={(v) => toggleChip("trade_memberships", v)}
+            onRemove={(v) => removeChip("trade_memberships", v)}
+          />
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={membershipInput}
+              onChange={(e) => setMembershipInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustomChip("trade_memberships", membershipInput);
+                  setMembershipInput("");
+                }
+              }}
+              placeholder="Add a custom membership"
+              maxLength={80}
+              className="h-11 flex-1 rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                addCustomChip("trade_memberships", membershipInput);
+                setMembershipInput("");
+              }}
+              className="inline-flex h-11 items-center rounded-md border border-brand-accent bg-brand-accent/10 px-3 text-[11px] font-bold text-brand-accent transition hover:bg-brand-accent hover:text-black"
+            >
+              Add
+            </button>
+          </div>
+        </Field>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Minimum job (£)">
+            <input
+              type="number"
+              min={0}
+              step={10}
+              value={state.minimum_job_gbp ?? ""}
+              onChange={(e) =>
+                set(
+                  "minimum_job_gbp",
+                  e.target.value === "" ? null : Number(e.target.value) || 0
+                )
+              }
+              placeholder="e.g. 150"
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+            />
+          </Field>
+          <Field label="Quote turnaround (hours)">
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={state.quote_turnaround_hours ?? ""}
+              onChange={(e) =>
+                set(
+                  "quote_turnaround_hours",
+                  e.target.value === "" ? null : Number(e.target.value) || 0
+                )
+              }
+              placeholder="e.g. 24"
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+            />
+          </Field>
+        </div>
+
+        <Field label="Quote availability" full>
+          <Text
+            value={state.quote_availability}
+            onChange={(v) => set("quote_availability", v)}
+            placeholder="e.g. Weekday evenings + Saturdays"
+          />
+        </Field>
+
+        <Field label="Current status note" full>
+          <textarea
+            rows={2}
+            value={state.current_status_note}
+            onChange={(e) =>
+              set("current_status_note", e.target.value.slice(0, 500))
+            }
+            placeholder="e.g. Finishing extension in Salford — ready 14 Nov"
+            maxLength={500}
+            className="w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+          />
+          <p className="mt-1 text-right text-[10px] text-brand-muted">
+            {state.current_status_note.length}/500
+          </p>
+        </Field>
+
+        <Field label="Ready date (optional)">
+          <input
+            type="date"
+            value={state.ready_date || ""}
+            onChange={(e) => set("ready_date", e.target.value)}
+            className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+          />
         </Field>
       </div>
 
@@ -761,5 +1100,90 @@ function Select({
         </option>
       ))}
     </select>
+  );
+}
+
+function TrustFlag({
+  label,
+  checked,
+  onChange
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="inline-flex items-center gap-2 rounded-md border border-brand-line bg-brand-bg/40 px-3 py-2 text-sm">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 accent-brand-accent"
+      />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+function ChipMultiSelect({
+  options,
+  selected,
+  onToggle,
+  onRemove
+}: {
+  options: { value: string; label: string }[];
+  selected: string[];
+  onToggle: (v: string) => void;
+  onRemove: (v: string) => void;
+}) {
+  // Render every curated option as a toggleable chip — selected chips get
+  // the brand-accent fill; unselected stay outlined. Custom-typed entries
+  // that aren't in `options` render as removable selected chips below.
+  const customSelected = selected.filter(
+    (v) => !options.some((o) => o.value === v)
+  );
+  return (
+    <div className="space-y-2">
+      <ul className="flex flex-wrap gap-1.5">
+        {options.map((opt) => {
+          const isOn = selected.includes(opt.value);
+          return (
+            <li key={opt.value}>
+              <button
+                type="button"
+                onClick={() => onToggle(opt.value)}
+                className={
+                  "inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold transition " +
+                  (isOn
+                    ? "border-brand-accent bg-brand-accent text-black"
+                    : "border-brand-line bg-brand-bg text-brand-text hover:border-brand-accent")
+                }
+              >
+                {opt.label}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {customSelected.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5">
+          {customSelected.map((v) => (
+            <li key={v}>
+              <span className="inline-flex items-center gap-1 rounded-full border border-brand-accent bg-brand-accent/10 px-3 py-1 text-[11px] font-semibold text-brand-accent">
+                {v}
+                <button
+                  type="button"
+                  onClick={() => onRemove(v)}
+                  aria-label={`Remove ${v}`}
+                  className="ml-0.5 text-[11px] text-brand-accent/70 hover:text-brand-accent"
+                >
+                  ×
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

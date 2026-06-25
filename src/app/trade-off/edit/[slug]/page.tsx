@@ -224,7 +224,42 @@ export default async function TradeOffEditPage({
                           ? ((row.data.headline_rate as { currency: string }).currency)
                           : "GBP"
                     }
-                  : { amount: 0, unit: "per day", currency: "GBP" }
+                  : { amount: 0, unit: "per day", currency: "GBP" },
+              // Trust & logistics — null-safe coercion (legacy rows have
+              // undefined for the trust columns until they save once).
+              is_insured: row.data.is_insured === true,
+              insurance_cover_gbp:
+                typeof row.data.insurance_cover_gbp === "number"
+                  ? row.data.insurance_cover_gbp
+                  : null,
+              qualifications: Array.isArray(row.data.qualifications)
+                ? row.data.qualifications.filter((x: unknown): x is string => typeof x === "string")
+                : [],
+              trade_memberships: Array.isArray(row.data.trade_memberships)
+                ? row.data.trade_memberships.filter((x: unknown): x is string => typeof x === "string")
+                : [],
+              dbs_checked: row.data.dbs_checked === true,
+              has_own_transport: row.data.has_own_transport === true,
+              has_own_tools: row.data.has_own_tools === true,
+              minimum_job_gbp:
+                typeof row.data.minimum_job_gbp === "number"
+                  ? row.data.minimum_job_gbp
+                  : null,
+              free_site_visits: row.data.free_site_visits === true,
+              quote_availability:
+                typeof row.data.quote_availability === "string"
+                  ? row.data.quote_availability
+                  : "",
+              quote_turnaround_hours:
+                typeof row.data.quote_turnaround_hours === "number"
+                  ? row.data.quote_turnaround_hours
+                  : null,
+              current_status_note:
+                typeof row.data.current_status_note === "string"
+                  ? row.data.current_status_note
+                  : "",
+              ready_date:
+                typeof row.data.ready_date === "string" ? row.data.ready_date : ""
             }}
           />
         ) : (
