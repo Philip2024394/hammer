@@ -82,8 +82,8 @@ export function LandingSearchBar({ cities }: Props) {
   }
 
   return (
-    <section id="search" className="mx-auto -mt-7 max-w-6xl px-3 sm:-mt-9 sm:px-4">
-      <div className="flex items-center gap-1.5 rounded-2xl border border-neutral-200 bg-white p-1.5 shadow-xl sm:gap-2 sm:p-2.5">
+    <section id="search" className="relative z-20 mx-auto -mt-8 max-w-6xl px-3 sm:-mt-12 sm:px-4">
+      <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-black p-1.5 shadow-xl sm:gap-2 sm:p-2.5">
         {/* LEFT — search input */}
         <form
           className="flex flex-1 items-center gap-2"
@@ -94,7 +94,7 @@ export function LandingSearchBar({ cities }: Props) {
         >
           <div className="relative flex-1">
             <span
-              className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-neutral-400"
+              className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-white/50"
               aria-hidden="true"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
@@ -107,7 +107,7 @@ export function LandingSearchBar({ cities }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search trades…"
-              className="h-12 w-full rounded-xl border border-transparent bg-neutral-50 pl-9 pr-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#FFB300] focus:bg-white focus:outline-none"
+              className="h-12 w-full rounded-xl border border-transparent bg-white/5 pl-9 pr-3 text-sm text-white placeholder:text-white/50 focus:border-[#FFB300] focus:bg-white/10 focus:outline-none"
             />
           </div>
           <button
@@ -123,7 +123,7 @@ export function LandingSearchBar({ cities }: Props) {
           </button>
         </form>
 
-        <span className="hidden h-8 w-px bg-neutral-200 sm:block" aria-hidden="true" />
+        <span className="hidden h-8 w-px bg-white/15 sm:block" aria-hidden="true" />
 
         {/* MIDDLE — Near me city picker */}
         <div ref={cityRef} className="relative flex-1">
@@ -132,7 +132,7 @@ export function LandingSearchBar({ cities }: Props) {
             onClick={() => setCityOpen((v) => !v)}
             aria-expanded={cityOpen}
             aria-label="Filter by city"
-            className="flex h-12 w-full items-center gap-2 rounded-xl px-3 text-left text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50"
+            className="flex h-12 w-full items-center gap-2 rounded-xl px-3 text-left text-sm font-semibold text-white transition hover:bg-white/10"
           >
             <span
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
@@ -155,7 +155,7 @@ export function LandingSearchBar({ cities }: Props) {
                   e.stopPropagation();
                   clearCity();
                 }}
-                className="text-xs text-neutral-400 hover:text-neutral-700"
+                className="text-xs text-white/40 hover:text-white"
               >
                 ✕
               </span>
@@ -169,7 +169,7 @@ export function LandingSearchBar({ cities }: Props) {
                 strokeWidth="2.25"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-neutral-400"
+                className="text-white/50"
                 aria-hidden="true"
               >
                 <path d="m6 9 6 6 6-6" />
@@ -200,7 +200,7 @@ export function LandingSearchBar({ cities }: Props) {
                       <button
                         type="button"
                         onClick={() => chooseCity(city)}
-                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-neutral-900 transition hover:bg-neutral-50"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-white transition hover:bg-white/10"
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
@@ -216,7 +216,7 @@ export function LandingSearchBar({ cities }: Props) {
           )}
         </div>
 
-        <span className="hidden h-8 w-px bg-neutral-200 sm:block" aria-hidden="true" />
+        <span className="hidden h-8 w-px bg-white/15 sm:block" aria-hidden="true" />
 
         {/* RIGHT — Filter drawer trigger (icon-only) */}
         <button
