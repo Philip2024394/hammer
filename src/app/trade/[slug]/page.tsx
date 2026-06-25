@@ -426,10 +426,11 @@ function PremiumLayout({
         </div>
       </section>
 
-      {/* 3. Profile container — avatar LEFT, name + stars + location RIGHT.
-          Compact "Contact us" pill sits at the TOP-RIGHT of the card. */}
-      <section className="mx-auto mt-6 max-w-6xl px-4">
-        <div className="relative flex items-center gap-3 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:gap-4 sm:p-5">
+      {/* 3. Profile container — overlaps the bottom 20% of the banner so
+          the card straddles the photo (LinkedIn-style overlay). Compact
+          "Contact us" pill at the TOP-RIGHT. */}
+      <section className="relative z-10 mx-auto -mt-14 max-w-6xl px-4 sm:-mt-20">
+        <div className="relative flex items-center gap-3 rounded-2xl border border-brand-line bg-brand-surface p-4 shadow-2xl sm:gap-4 sm:p-5">
           {/* Top-right compact Contact us pill */}
           <a
             href="#contact-panel"
