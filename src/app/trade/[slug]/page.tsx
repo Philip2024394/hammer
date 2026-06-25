@@ -319,11 +319,9 @@ export default async function TradiePublicProfilePage({
       />
       <XratedHeader />
 
-      {/* Per-trade default hero banner — fixed-height crop with a soft
-          left-side gradient overlay so the profile card avatar reads
-          against the photo. Annual paid members can override via
-          custom_app_hero_url. */}
-      {(() => {
+      {/* Per-trade default hero banner — Standard tier only. PremiumLayout
+          renders its own banner WITH the profile card overlaid on the left. */}
+      {!isPremium && (() => {
         const heroUrl = resolveAppHero({
           custom_app_hero_url: listing.custom_app_hero_url,
           primary_trade: listing.primary_trade,
@@ -434,10 +432,37 @@ function PremiumLayout({
       : null
   ].filter((b): b is { label: string; icon: string } => b !== null);
 
+  const heroUrl = resolveAppHero({
+    custom_app_hero_url: listing.custom_app_hero_url,
+    primary_trade: listing.primary_trade,
+    tier: listing.tier,
+    last_payment_plan: listing.last_payment_plan
+  });
+
   return (
     <>
-      <section className="relative z-10 mx-auto -mt-14 max-w-3xl px-4 sm:-mt-20">
-        <div className="rounded-2xl bg-white p-4 shadow-xl ring-1 ring-neutral-200 sm:p-5">
+      {/* Banner with the profile card overlaid on the LEFT side. The card
+          sits absolutely positioned, vertically centred against the photo. */}
+      <section className="relative h-[320px] w-full overflow-hidden bg-neutral-900 sm:h-[480px]">
+        {heroUrl && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={heroUrl}
+            alt={`${listing.display_name} — ${primary} hero`}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0) 60%)"
+          }}
+        />
+
+        <div className="absolute inset-y-0 left-0 z-10 flex items-center px-4 sm:px-8">
+          <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-2xl ring-1 ring-black/10 sm:p-5">
           <div className="flex items-start gap-4 sm:gap-5">
             {/* LEFT — round avatar with white ring */}
             <div className="shrink-0">
@@ -550,6 +575,7 @@ function PremiumLayout({
               </svg>
               WhatsApp
             </a>
+          </div>
           </div>
         </div>
       </section>
