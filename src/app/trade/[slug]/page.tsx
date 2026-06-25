@@ -555,10 +555,6 @@ function PremiumLayout({
           · Free UK trade directory
         </div>
       </div>
-      <div className="mx-auto max-w-6xl px-4 pt-3">
-        <TradeProfileUrlChip slug={listing.slug} fullUrl={profileFullUrl} />
-      </div>
-
       {/* 4. About — eyebrow is the company name; bio capped at 5 lines. */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
         <h2
