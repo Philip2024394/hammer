@@ -48,7 +48,31 @@ const TRADIES = [
     hero_text_tagline: "Manchester · 14 yrs taping & finishing",
     cta_button_effect: "glow",
     avatar_frame_style: "ring",
-    accepting_jobs: true
+    accepting_jobs: true,
+    operating_hours: {
+      mon: { open: "08:00", close: "17:30" },
+      tue: { open: "08:00", close: "17:30" },
+      wed: { open: "08:00", close: "17:30" },
+      thu: { open: "08:00", close: "17:30" },
+      fri: { open: "08:00", close: "16:00" },
+      sat: { open: "09:00", close: "13:00" }
+    },
+    services_offered: [
+      "Level-5 skim",
+      "Knife taping",
+      "Mud-pan finish",
+      "Plasterboard supply + fit",
+      "Patch & make-good",
+      "Bay corner detailing"
+    ],
+    faq_items: [
+      { q: "Do you quote on-site?", a: "Yes — free same-week site visits inside the M60." },
+      { q: "Do you do small patch jobs?", a: "Small patches under £150 are fine; we'll quote a one-hit visit so you're not paying for half a day." },
+      { q: "Do you supply materials?", a: "Yes. We price boards, beads, and joint compound at trade — itemised so you can see exactly what's on the bill." },
+      { q: "How long does a level-5 finish take?", a: "Typical 4×3 m room: 2 days for boarding + taping, 1 day for finish, then 24 h to dry before paint." }
+    ],
+    contact_form_enabled: true,
+    visit_us_enabled: true
   },
   {
     slug: "demo-sara-khan-plastering-birmingham",
@@ -78,7 +102,29 @@ const TRADIES = [
     hero_text_tagline: "Birmingham · 9 yrs on the trowel",
     cta_button_effect: "pulse",
     avatar_frame_style: "ring",
-    accepting_jobs: true
+    accepting_jobs: true,
+    operating_hours: {
+      mon: { open: "08:30", close: "17:00" },
+      tue: { open: "08:30", close: "17:00" },
+      wed: { open: "08:30", close: "17:00" },
+      thu: { open: "08:30", close: "17:00" },
+      fri: { open: "08:30", close: "16:30" }
+    },
+    services_offered: [
+      "Skim & float",
+      "Float-and-set",
+      "K-rend rendering",
+      "Silicone systems",
+      "Patch repairs",
+      "Decorative finishes"
+    ],
+    faq_items: [
+      { q: "Do you do silicone systems?", a: "Yes — silicone topcoats on top of K-rend or insulated render boards. Colour matched on request." },
+      { q: "Same-day quotes?", a: "Same-day for Birmingham postcodes; usually next-day for the Black Country." },
+      { q: "Do you take card payments?", a: "Bank transfer preferred. Card via SumUp link for jobs under £500 if you need it." }
+    ],
+    contact_form_enabled: true,
+    visit_us_enabled: false
   },
   {
     slug: "demo-james-oconnor-electrical-london",
@@ -108,7 +154,30 @@ const TRADIES = [
     hero_text_tagline: "South London · NICEIC · EV chargers",
     cta_button_effect: "none",
     avatar_frame_style: "none",
-    accepting_jobs: true
+    accepting_jobs: true,
+    operating_hours: {
+      mon: { open: "07:30", close: "18:00" },
+      tue: { open: "07:30", close: "18:00" },
+      wed: { open: "07:30", close: "18:00" },
+      thu: { open: "07:30", close: "18:00" },
+      fri: { open: "07:30", close: "17:00" },
+      sat: { open: "09:00", close: "13:00" }
+    },
+    services_offered: [
+      "Full / partial rewires",
+      "EV charger installs",
+      "EICR reports",
+      "Fuseboard upgrades",
+      "Smart lighting",
+      "Emergency callouts"
+    ],
+    faq_items: [
+      { q: "Are you NICEIC registered?", a: "Yes — all certificates uploaded to the NICEIC portal and emailed to you on completion." },
+      { q: "Do you do EV chargers?", a: "Zappi, Ohme, and Pod Point — DNO notification handled. OZEV grant paperwork included if you qualify." },
+      { q: "Out of hours?", a: "24-hour emergency callout for South London — see the contact form." }
+    ],
+    contact_form_enabled: true,
+    visit_us_enabled: false
   },
   {
     slug: "demo-tom-bridges-scaffolding-leeds",
@@ -138,7 +207,30 @@ const TRADIES = [
     hero_text_tagline: "Leeds · CISRS Advanced · 18 yrs",
     cta_button_effect: "shake",
     avatar_frame_style: "pulse",
-    accepting_jobs: true
+    accepting_jobs: true,
+    operating_hours: {
+      mon: { open: "07:00", close: "17:00" },
+      tue: { open: "07:00", close: "17:00" },
+      wed: { open: "07:00", close: "17:00" },
+      thu: { open: "07:00", close: "17:00" },
+      fri: { open: "07:00", close: "16:00" }
+    },
+    services_offered: [
+      "Tube & fitting",
+      "System scaffolding",
+      "Chimney scaffolds",
+      "Tower hire",
+      "Loading bays",
+      "Emergency safety repairs"
+    ],
+    faq_items: [
+      { q: "How quick can you erect?", a: "Standard 2-storey domestic: same week if you call by Wednesday." },
+      { q: "Are you CISRS-carded?", a: "Yes — CISRS Advanced. Cards available for sign-off on commercial sites." },
+      { q: "Do you do edge protection?", a: "Yes — flat roofs and pitched. We supply edge guards as part of the standard erect, not as an extra." },
+      { q: "Hire periods?", a: "First 4 weeks included in the erect price; extensions billed weekly thereafter." }
+    ],
+    contact_form_enabled: true,
+    visit_us_enabled: true
   },
   {
     slug: "demo-lewis-carter-plumbing-bristol",
@@ -225,7 +317,30 @@ const TRADIES = [
     hero_text_tagline: "Sheffield · 22 yrs family business",
     cta_button_effect: "glow",
     avatar_frame_style: "ring",
-    accepting_jobs: true
+    accepting_jobs: true,
+    operating_hours: {
+      mon: { open: "07:30", close: "17:30" },
+      tue: { open: "07:30", close: "17:30" },
+      wed: { open: "07:30", close: "17:30" },
+      thu: { open: "07:30", close: "17:30" },
+      fri: { open: "07:30", close: "16:30" },
+      sat: { open: "09:00", close: "13:00" }
+    },
+    services_offered: [
+      "Loft conversions",
+      "Single-storey extensions",
+      "Full refurbs",
+      "Kitchen knock-throughs",
+      "Project management",
+      "Building-control liaison"
+    ],
+    faq_items: [
+      { q: "Do you handle building control?", a: "Yes — we submit to your council on your behalf and meet the inspector at each stage." },
+      { q: "Are you fully insured?", a: "£2 m public liability + £5 m employer's liability. Certificates available." },
+      { q: "Can I see recent jobs?", a: "Browse the verified work section above — we update after each completion." }
+    ],
+    contact_form_enabled: true,
+    visit_us_enabled: false
   },
   {
     slug: "demo-will-stone-masonry-newcastle",
@@ -308,6 +423,11 @@ for (const t of TRADIES) {
     profile_placement: "center",
     accepting_jobs: t.accepting_jobs,
     tier: t.tier,
+    operating_hours: t.operating_hours ?? {},
+    services_offered: t.services_offered ?? [],
+    faq_items: t.faq_items ?? [],
+    contact_form_enabled: t.contact_form_enabled ?? false,
+    visit_us_enabled: t.visit_us_enabled ?? false,
     ...tierExtras
   };
 

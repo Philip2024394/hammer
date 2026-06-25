@@ -15,7 +15,7 @@ export function TradeShowcaseGrid({ countsBySlug }: Props) {
   const tiles = Object.keys(TRADE_OFF_HERO_IMAGES);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 md:py-16">
+    <section className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-4 md:py-16">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p

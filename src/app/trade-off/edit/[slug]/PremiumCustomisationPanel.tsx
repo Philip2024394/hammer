@@ -7,6 +7,10 @@
 
 import { useState } from "react";
 
+type HoursSlot = { open: string; close: string } | null;
+type HoursMap = Record<string, HoursSlot>;
+type FaqItem = { q: string; a: string };
+
 type Patch = {
   theme_color: string;
   button_text_color: string;
@@ -20,7 +24,22 @@ type Patch = {
   profile_placement: "center" | "top-left" | "bottom-left";
   running_marquee: string;
   accepting_jobs: boolean;
+  services_offered: string[];
+  faq_items: FaqItem[];
+  operating_hours: HoursMap;
+  contact_form_enabled: boolean;
+  visit_us_enabled: boolean;
 };
+
+const DAY_ROW: { key: keyof HoursMap; label: string }[] = [
+  { key: "mon", label: "Mon" },
+  { key: "tue", label: "Tue" },
+  { key: "wed", label: "Wed" },
+  { key: "thu", label: "Thu" },
+  { key: "fri", label: "Fri" },
+  { key: "sat", label: "Sat" },
+  { key: "sun", label: "Sun" }
+];
 
 export function PremiumCustomisationPanel({
   slug,
@@ -32,6 +51,10 @@ export function PremiumCustomisationPanel({
   initial: Patch;
 }) {
   const [state, setState] = useState<Patch>(initial);
+  // Services editor binds to a single comma-separated string for ergonomics.
+  const [servicesText, setServicesText] = useState<string>(
+    (initial.services_offered ?? []).join(", ")
+  );
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -40,18 +63,51 @@ export function PremiumCustomisationPanel({
     setState((s) => ({ ...s, [key]: value }));
   }
 
+  function setHoursSlot(day: string, slot: HoursSlot) {
+    setState((s) => ({
+      ...s,
+      operating_hours: { ...s.operating_hours, [day]: slot }
+    }));
+  }
+
+  function updateFaq(i: number, patch: Partial<FaqItem>) {
+    setState((s) => {
+      const next = [...s.faq_items];
+      next[i] = { ...next[i], ...patch };
+      return { ...s, faq_items: next };
+    });
+  }
+  function addFaq() {
+    setState((s) => ({ ...s, faq_items: [...s.faq_items, { q: "", a: "" }] }));
+  }
+  function removeFaq(i: number) {
+    setState((s) => ({ ...s, faq_items: s.faq_items.filter((_, idx) => idx !== i) }));
+  }
+
   async function save() {
     setBusy(true);
     setMsg(null);
     setErr(null);
     try {
+      // Translate the services free-text into a clean array on save.
+      const services_offered = servicesText
+        .split(/[,\n]/)
+        .map((x) => x.trim())
+        .filter((x) => x.length > 0)
+        .slice(0, 30);
+      // Drop empty FAQ rows.
+      const faq_items = state.faq_items.filter(
+        (f) => f.q.trim().length > 0 && f.a.trim().length > 0
+      );
+      const payload: Patch = { ...state, services_offered, faq_items };
+
       const res = await fetch("/api/trade-off/update", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           slug,
           edit_token: editToken,
-          fields: state
+          fields: payload
         })
       });
       const json = await res.json();
@@ -170,6 +226,155 @@ export function PremiumCustomisationPanel({
             <span>{state.accepting_jobs ? "Yes — show as accepting" : "No — show as paused"}</span>
           </label>
         </Field>
+      </div>
+
+      {/* ─── Services offered ─── */}
+      <div className="space-y-2 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+          Services offered
+        </h3>
+        <p className="text-[11px] text-brand-muted">
+          Comma-separated. e.g. <em>Skim coat, Knife taping, Mud-pan finish</em>.
+        </p>
+        <textarea
+          rows={2}
+          value={servicesText}
+          onChange={(e) => setServicesText(e.target.value)}
+          placeholder="Service 1, Service 2, Service 3"
+          className="w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+        />
+      </div>
+
+      {/* ─── Operating hours ─── */}
+      <div className="space-y-2 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+          Operating hours
+        </h3>
+        <p className="text-[11px] text-brand-muted">
+          Leave blank or tick "Closed" for days you're off.
+        </p>
+        <ul className="space-y-2">
+          {DAY_ROW.map(({ key, label }) => {
+            const slot = state.operating_hours?.[key] ?? null;
+            const closed = !slot;
+            return (
+              <li key={key} className="grid grid-cols-12 items-center gap-2">
+                <span className="col-span-2 text-xs font-bold text-brand-text">{label}</span>
+                <label className="col-span-2 inline-flex items-center gap-1.5 text-[11px] text-brand-muted">
+                  <input
+                    type="checkbox"
+                    checked={closed}
+                    onChange={(e) =>
+                      setHoursSlot(key, e.target.checked ? null : { open: "09:00", close: "17:00" })
+                    }
+                    className="h-3.5 w-3.5 accent-brand-accent"
+                  />
+                  Closed
+                </label>
+                <input
+                  type="time"
+                  disabled={closed}
+                  value={slot?.open ?? ""}
+                  onChange={(e) =>
+                    setHoursSlot(key, { open: e.target.value, close: slot?.close ?? "17:00" })
+                  }
+                  className="col-span-4 h-10 rounded-md border border-brand-line bg-brand-bg px-2 text-xs text-brand-text disabled:opacity-40 focus:border-brand-accent focus:outline-none"
+                />
+                <input
+                  type="time"
+                  disabled={closed}
+                  value={slot?.close ?? ""}
+                  onChange={(e) =>
+                    setHoursSlot(key, { open: slot?.open ?? "09:00", close: e.target.value })
+                  }
+                  className="col-span-4 h-10 rounded-md border border-brand-line bg-brand-bg px-2 text-xs text-brand-text disabled:opacity-40 focus:border-brand-accent focus:outline-none"
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* ─── FAQ items ─── */}
+      <div className="space-y-2 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+            FAQ items
+          </h3>
+          <button
+            type="button"
+            onClick={addFaq}
+            className="inline-flex h-9 items-center rounded-md border border-brand-accent bg-brand-accent/10 px-3 text-[11px] font-bold text-brand-accent transition hover:bg-brand-accent hover:text-black"
+          >
+            + Add FAQ
+          </button>
+        </div>
+        {state.faq_items.length === 0 ? (
+          <p className="text-[11px] text-brand-muted">No FAQ items yet — add one above.</p>
+        ) : (
+          <ul className="space-y-3">
+            {state.faq_items.map((f, i) => (
+              <li key={i} className="space-y-1.5 rounded-md border border-brand-line bg-brand-surface/40 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-brand-muted">
+                    Q{i + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeFaq(i)}
+                    className="text-[11px] font-semibold text-red-300 hover:text-red-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <Text
+                  value={f.q}
+                  onChange={(v) => updateFaq(i, { q: v })}
+                  placeholder="Question — e.g. Do you offer free quotes?"
+                />
+                <textarea
+                  rows={3}
+                  value={f.a}
+                  onChange={(e) => updateFaq(i, { a: e.target.value })}
+                  placeholder="Answer"
+                  className="w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* ─── Visibility toggles ─── */}
+      <div className="grid gap-3 rounded-lg border border-brand-line bg-brand-bg/40 p-4 sm:grid-cols-2">
+        <label className="inline-flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={state.contact_form_enabled}
+            onChange={(e) => set("contact_form_enabled", e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-brand-accent"
+          />
+          <span>
+            <span className="block font-semibold">Contact form</span>
+            <span className="block text-[11px] text-brand-muted">
+              Adds an email contact form to your profile.
+            </span>
+          </span>
+        </label>
+        <label className="inline-flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={state.visit_us_enabled}
+            onChange={(e) => set("visit_us_enabled", e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-brand-accent"
+          />
+          <span>
+            <span className="block font-semibold">Visit us</span>
+            <span className="block text-[11px] text-brand-muted">
+              Shows a "Get directions" button using your map pin.
+            </span>
+          </span>
+        </label>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

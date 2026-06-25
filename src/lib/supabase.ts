@@ -253,9 +253,25 @@ export type HammerexTradeOffListing = {
   running_marquee: string | null;
   paid_expires_at: string | null;
   last_payment_plan: "monthly" | "annual" | null;
+  operating_hours: Record<string, { open: string; close: string } | null>;
+  faq_items: { q: string; a: string }[];
+  services_offered: string[];
+  contact_form_enabled: boolean;
+  visit_us_enabled: boolean;
   joined_at: string;
   created_at: string;
   updated_at: string;
+};
+
+export type HammerexTradeOffMessage = {
+  id: string;
+  listing_id: string;
+  sender_name: string;
+  sender_email: string;
+  sender_phone: string | null;
+  message: string;
+  ip_hash: string | null;
+  created_at: string;
 };
 
 export type HammerexXratedView = {

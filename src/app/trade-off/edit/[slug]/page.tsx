@@ -174,7 +174,19 @@ export default async function TradeOffEditPage({
               avatar_frame_style: row.data.avatar_frame_style ?? "none",
               profile_placement: row.data.profile_placement ?? "center",
               running_marquee: row.data.running_marquee ?? "",
-              accepting_jobs: row.data.accepting_jobs ?? true
+              accepting_jobs: row.data.accepting_jobs ?? true,
+              services_offered: Array.isArray(row.data.services_offered)
+                ? row.data.services_offered
+                : [],
+              faq_items: Array.isArray(row.data.faq_items)
+                ? row.data.faq_items
+                : [],
+              operating_hours:
+                row.data.operating_hours && typeof row.data.operating_hours === "object"
+                  ? row.data.operating_hours
+                  : {},
+              contact_form_enabled: row.data.contact_form_enabled ?? false,
+              visit_us_enabled: row.data.visit_us_enabled ?? false
             }}
           />
         ) : (

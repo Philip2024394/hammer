@@ -82,13 +82,62 @@ const UPDATABLE_STRING_FIELDS = [
 const UPDATABLE_ARRAY_FIELDS = [
   "secondary_trades",
   "service_postcodes",
-  "photos"
+  "photos",
+  "services_offered"
 ] as const;
 
 const UPDATABLE_INT_FIELDS = ["years_in_trade", "start_year"] as const;
 
 // Booleans accepted through the customisation panel.
-const UPDATABLE_BOOL_FIELDS = ["accepting_jobs"] as const;
+const UPDATABLE_BOOL_FIELDS = [
+  "accepting_jobs",
+  "contact_form_enabled",
+  "visit_us_enabled"
+] as const;
+
+// Premium mini-app JSON fields. Shape:
+//  - operating_hours: Record<dayKey, { open, close } | null>
+//  - faq_items: { q, a }[]
+// We sanitise both before persisting.
+const UPDATABLE_JSON_FIELDS = ["operating_hours", "faq_items"] as const;
+
+const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const TIME_RE = /^[0-2]\d:[0-5]\d$/;
+
+function sanitiseOperatingHours(v: unknown): Record<string, { open: string; close: string } | null> {
+  const out: Record<string, { open: string; close: string } | null> = {};
+  if (!v || typeof v !== "object" || Array.isArray(v)) return out;
+  for (const day of DAY_KEYS) {
+    const slot = (v as Record<string, unknown>)[day];
+    if (!slot || typeof slot !== "object") continue;
+    const open = typeof (slot as Record<string, unknown>).open === "string"
+      ? ((slot as Record<string, unknown>).open as string).trim()
+      : "";
+    const close = typeof (slot as Record<string, unknown>).close === "string"
+      ? ((slot as Record<string, unknown>).close as string).trim()
+      : "";
+    if (TIME_RE.test(open) && TIME_RE.test(close)) {
+      out[day] = { open, close };
+    }
+  }
+  return out;
+}
+
+function sanitiseFaqItems(v: unknown): { q: string; a: string }[] {
+  if (!Array.isArray(v)) return [];
+  const out: { q: string; a: string }[] = [];
+  for (const item of v.slice(0, 20)) {
+    if (!item || typeof item !== "object") continue;
+    const q = typeof (item as Record<string, unknown>).q === "string"
+      ? ((item as Record<string, unknown>).q as string).trim().slice(0, 200)
+      : "";
+    const a = typeof (item as Record<string, unknown>).a === "string"
+      ? ((item as Record<string, unknown>).a as string).trim().slice(0, 1000)
+      : "";
+    if (q && a) out.push({ q, a });
+  }
+  return out;
+}
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
@@ -142,6 +191,15 @@ export async function POST(req: NextRequest) {
     if (f in fieldsIn) {
       const v = fieldsIn[f];
       patch[f] = v === true || v === "true" || v === 1 || v === "1";
+    }
+  }
+  for (const f of UPDATABLE_JSON_FIELDS) {
+    if (f in fieldsIn) {
+      if (f === "operating_hours") {
+        patch[f] = sanitiseOperatingHours(fieldsIn[f]);
+      } else if (f === "faq_items") {
+        patch[f] = sanitiseFaqItems(fieldsIn[f]);
+      }
     }
   }
 

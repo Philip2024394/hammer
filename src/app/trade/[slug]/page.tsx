@@ -18,6 +18,13 @@ import { ProfileInfoCard } from "@/components/xrated/ProfileInfoCard";
 import { XratedCtaButton } from "@/components/xrated/XratedCtaButton";
 import { RunningMarquee } from "@/components/xrated/RunningMarquee";
 import { XratedSocialShareStrip } from "@/components/xrated/XratedSocialShareStrip";
+import { ServiceLocationsStrip } from "@/components/xrated/profile/ServiceLocationsStrip";
+import { ServicesChips } from "@/components/xrated/profile/ServicesChips";
+import { PortfolioCarousel } from "@/components/xrated/profile/PortfolioCarousel";
+import { OperatingHoursPanel } from "@/components/xrated/profile/OperatingHoursPanel";
+import { VisitUsPanel } from "@/components/xrated/profile/VisitUsPanel";
+import { FaqAccordion } from "@/components/xrated/profile/FaqAccordion";
+import { ContactFormPanel } from "@/components/xrated/profile/ContactFormPanel";
 import {
   supabase,
   type HammerexTradeOffListing,
@@ -429,10 +436,13 @@ function PremiumLayout({
         <TradeProfileUrlChip slug={listing.slug} fullUrl={profileFullUrl} />
       </div>
 
-      {/* 5. Hammerex Standard badge */}
+      {/* Service Locations chip strip */}
+      <ServiceLocationsStrip themeColor={theme} />
+
+      {/* Hammerex Standard badge */}
       <HammerexStandardBadge listing={listing} tierLabel={tierLabel} blurb={blurb} />
 
-      {/* 6. Instant Quote form */}
+      {/* Instant Quote form — kept; contact form (if enabled) sits later */}
       <section className="mx-auto max-w-3xl px-4 pb-2 pt-8">
         <InstantQuoteForm
           slug={listing.slug}
@@ -442,7 +452,7 @@ function PremiumLayout({
         />
       </section>
 
-      {/* 7. About */}
+      {/* About */}
       {listing.bio && (
         <section className="mx-auto max-w-3xl px-4 pb-2 pt-8">
           <h2
@@ -457,7 +467,7 @@ function PremiumLayout({
         </section>
       )}
 
-      {/* 8. Trades offered */}
+      {/* Trades offered */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
         <h2
           className="text-xs font-bold uppercase tracking-widest"
@@ -487,22 +497,15 @@ function PremiumLayout({
         </ul>
       </section>
 
-      {/* 9. Verified projects */}
+      {/* Services offered chips (premium feature) */}
+      <ServicesChips services={listing.services_offered ?? []} themeColor={theme} />
+
+      {/* Verified work — polished portfolio carousel (premium variant) */}
       {projects.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-          <h2
-            className="text-xs font-bold uppercase tracking-widest"
-            style={{ color: theme }}
-          >
-            Verified work
-          </h2>
-          <div className="mt-3">
-            <ProjectGalleryGrid projects={projects} />
-          </div>
-        </section>
+        <PortfolioCarousel projects={projects} themeColor={theme} />
       )}
 
-      {/* 10. Photo gallery */}
+      {/* Photo gallery */}
       {gallery.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
           <h2
@@ -517,7 +520,13 @@ function PremiumLayout({
         </section>
       )}
 
-      {/* 11. Areas served */}
+      {/* Operating hours panel */}
+      <OperatingHoursPanel
+        hours={listing.operating_hours ?? {}}
+        themeColor={theme}
+      />
+
+      {/* Areas served */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
         <h2
           className="text-xs font-bold uppercase tracking-widest"
@@ -552,7 +561,32 @@ function PremiumLayout({
         </ul>
       </section>
 
-      {/* 12. Tools I use */}
+      {/* Visit us panel */}
+      {listing.visit_us_enabled &&
+        typeof listing.lat === "number" &&
+        typeof listing.lng === "number" && (
+          <VisitUsPanel
+            city={listing.city}
+            country={listing.country}
+            lat={listing.lat}
+            lng={listing.lng}
+            themeColor={theme}
+          />
+        )}
+
+      {/* FAQ accordion */}
+      <FaqAccordion items={listing.faq_items ?? []} themeColor={theme} />
+
+      {/* Contact form panel */}
+      {listing.contact_form_enabled && (
+        <ContactFormPanel
+          listingId={listing.id}
+          displayName={listing.display_name}
+          themeColor={theme}
+        />
+      )}
+
+      {/* Tools I use */}
       <ToolsIUseBlock toolProducts={toolProducts} tierLabel={tierLabel} />
 
       {/* 13. Social icons */}
