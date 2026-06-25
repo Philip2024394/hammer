@@ -72,19 +72,19 @@ export function HeroTextOverlay({
   }
 
   return (
-    <div className="absolute left-4 top-4 z-10 max-w-[80%] sm:left-6 sm:top-6">
+    <div className="absolute left-4 top-4 z-10 max-w-[70%] sm:left-6 sm:top-6 sm:max-w-[80%]">
       {line1 && (
-        <p className="text-xs font-bold uppercase tracking-widest text-white/80 drop-shadow">
+        <p className="text-[13px] font-bold uppercase tracking-widest text-white/80 drop-shadow">
           {line1}
         </p>
       )}
       {line2 && (
-        <h1 className="mt-1 text-3xl font-extrabold leading-[1.05] drop-shadow sm:text-5xl">
+        <h1 className="mt-1 text-2xl font-extrabold leading-[1.05] drop-shadow sm:text-5xl">
           {line2El}
         </h1>
       )}
       {tagline && (
-        <p className="mt-2 text-xs text-white/85 drop-shadow sm:text-sm">
+        <p className="mt-2 text-[13px] text-white/85 drop-shadow sm:text-sm">
           {tagline}
         </p>
       )}

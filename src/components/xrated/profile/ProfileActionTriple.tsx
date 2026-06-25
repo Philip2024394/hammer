@@ -60,14 +60,17 @@ export function ProfileActionTriple({
   ];
 
   if (variant === "overlay") {
+    // Share moves to its own icon-only button at the banner top-right.
+    // Overlay only renders Contact + Visit so the banner stays uncluttered.
+    const overlayButtons = buttons.filter((b) => b.label !== "Share");
     return (
-      <ul className="flex gap-2 sm:gap-3">
-        {buttons.map((b) => (
+      <ul className="flex gap-1.5 sm:gap-3">
+        {overlayButtons.map((b) => (
           <li key={b.label}>
             <a
               href={b.href}
               {...(b.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className="flex min-w-[64px] flex-col items-center gap-1 rounded-xl bg-black/55 px-2.5 py-2 backdrop-blur-sm transition hover:bg-black/70 sm:min-w-[76px] sm:px-3 sm:py-2.5"
+              className="flex min-w-[60px] flex-col items-center gap-1 rounded-xl bg-black/55 px-2 py-1.5 backdrop-blur-sm transition hover:bg-black/70 sm:min-w-[76px] sm:px-3 sm:py-2.5"
             >
               <span
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10"

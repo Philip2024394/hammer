@@ -35,11 +35,12 @@ export function QrFooterDock({
 
   return (
     <>
-      {/* Sticky dock — sits above the global XratedFooter, pushed off the
-          mobile sticky action bar by mb-[64px] on small screens. */}
+      {/* Sticky dock — sits above the global XratedFooter. The older
+          TradeMobileActionBar is suppressed on premium tier, so no
+          mb-[64px] spacer is needed here. */}
       <div
         data-qr-dock
-        className="sticky bottom-0 z-30 mt-8 border-t border-brand-line bg-brand-bg/95 backdrop-blur mb-[64px] md:mb-0"
+        className="sticky bottom-0 z-30 mt-8 border-t border-brand-line bg-brand-bg/95 backdrop-blur"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <button

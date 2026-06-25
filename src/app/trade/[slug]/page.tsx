@@ -20,13 +20,15 @@ import { XratedSocialShareStrip } from "@/components/xrated/XratedSocialShareStr
 import { ServicesChips } from "@/components/xrated/profile/ServicesChips";
 import { PortfolioCarousel } from "@/components/xrated/profile/PortfolioCarousel";
 import { OperatingHoursPanel } from "@/components/xrated/profile/OperatingHoursPanel";
-import { VisitUsPanel } from "@/components/xrated/profile/VisitUsPanel";
 import { FaqAccordion } from "@/components/xrated/profile/FaqAccordion";
 import { ContactFormPanel } from "@/components/xrated/profile/ContactFormPanel";
 import { StarRatingRow } from "@/components/xrated/profile/StarRatingRow";
 import { ProfileActionTriple } from "@/components/xrated/profile/ProfileActionTriple";
+import { ShareIconButton } from "@/components/xrated/profile/ShareIconButton";
 import { PricedServicesCarousel } from "@/components/xrated/profile/PricedServicesCarousel";
 import { QrFooterDock } from "@/components/xrated/profile/QrFooterDock";
+import { ProfileExpandPanels } from "@/components/xrated/profile/ProfileExpandPanels";
+import { AboutBio } from "@/components/xrated/profile/AboutBio";
 import {
   supabase,
   type HammerexTradeOffListing,
@@ -327,12 +329,17 @@ export default async function TradiePublicProfilePage({ params }: { params: Prom
 
       <XratedFooter />
 
-      <TradeMobileActionBar
-        waUrl={waUrl}
-        phone={listing.phone}
-        email={listing.email}
-        displayName={listing.display_name}
-      />
+      {/* Older mobile action bar — suppressed on premium tier because the
+          QrFooterDock already shows a big WhatsApp button on mobile, and
+          stacking both creates a double sticky bar. */}
+      {!isPremium && (
+        <TradeMobileActionBar
+          waUrl={waUrl}
+          phone={listing.phone}
+          email={listing.email}
+          displayName={listing.display_name}
+        />
+      )}
     </main>
   );
 }
@@ -367,9 +374,11 @@ function PremiumLayout({
 
   return (
     <>
-      {/* 1. Banner hero — left-aligned text overlay */}
+      {/* 1. Banner hero — left-aligned text overlay.
+          Mobile: 4:3 so the hero text + action buttons inside the banner
+          have room to breathe (16:9 was too short on 375 px). */}
       <section className="relative">
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-black sm:aspect-[21/9]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-black sm:aspect-[21/9]">
           <img
             src={cover}
             alt={listing.display_name}
@@ -392,13 +401,23 @@ function PremiumLayout({
             effect={listing.hero_text_effect}
           />
 
-          {/* 3 button-icons sitting INSIDE the banner, under the smaller
-              tagline text on the left. Translucent overlay variant so they
-              read against any photo. */}
+          {/* Share icon — top-right of the banner, icon-only (no label).
+              Tapping opens a popover with social platforms + copy link + WA. */}
+          <div className="absolute right-3 top-3 z-20 sm:right-5 sm:top-5">
+            <ShareIconButton
+              shareUrl={profileFullUrl}
+              shareTitle={`${listing.display_name} on Xrated Trades`}
+              themeColor={theme}
+            />
+          </div>
+
+          {/* Contact + Visit buttons sit INSIDE the banner under the tagline.
+              Anchor hrefs drive the expand panels below — no client state
+              passed across the server boundary. */}
           <div className="absolute bottom-4 left-4 z-10 sm:bottom-6 sm:left-6">
             <ProfileActionTriple
-              whatsappHref={waUrl}
-              visitHref="#visit"
+              whatsappHref="#contact-panel"
+              visitHref="#visit-panel"
               shareHref="#share"
               themeColor={theme}
               variant="overlay"
@@ -407,58 +426,69 @@ function PremiumLayout({
         </div>
       </section>
 
-      {/* 3. Profile container — avatar, name + rating + service area, CTA right */}
+      {/* 3. Profile container — avatar LEFT, name + stars + location RIGHT
+          of the avatar (always horizontal). "Contact us" CTA stays right on
+          desktop, drops below on mobile. All triggers use plain anchor hrefs
+          (#contact-panel / #visit-panel) so they cross the server boundary
+          cleanly; ProfileExpandPanels watches hashchange. */}
       <section className="mx-auto mt-6 max-w-6xl px-4">
-        <div className="flex flex-col gap-4 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
-          <div className="shrink-0">
-            <AvatarFrame
-              src={listing.avatar_url}
-              name={listing.display_name}
-              size={88}
-              style={listing.avatar_frame_style}
-              themeColor={theme}
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h1 className="truncate text-xl font-bold leading-tight text-brand-text sm:text-2xl">
-                {listing.display_name}
-              </h1>
-              {listing.hammerex_standard_verified && (
-                <span
-                  className="inline-block align-middle"
-                  title="Hammerex Standard verified"
-                  aria-label="Verified"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#facc15" aria-hidden="true">
-                    <path d="m12 1 3 5 6 1-4.5 4.5L18 18l-6-3-6 3 1.5-6.5L3 7l6-1Z" />
-                  </svg>
-                </span>
-              )}
-            </div>
-            <div className="mt-1.5">
-              <StarRatingRow
-                rating_avg={listing.rating_avg}
-                rating_count={listing.rating_count}
+        <div className="flex flex-col gap-3 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+            <div className="shrink-0">
+              <AvatarFrame
+                src={listing.avatar_url}
+                name={listing.display_name}
+                size={80}
+                style={listing.avatar_frame_style}
+                themeColor={theme}
               />
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                {listing.city}
-                {listing.country ? `, ${listing.country}` : ""}
-              </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h1 className="truncate text-lg font-bold leading-tight text-brand-text sm:text-2xl">
+                  {listing.display_name}
+                </h1>
+                {listing.hammerex_standard_verified && (
+                  <span
+                    className="inline-block align-middle"
+                    title="Hammerex Standard verified"
+                    aria-label="Verified"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#facc15" aria-hidden="true">
+                      <path d="m12 1 3 5 6 1-4.5 4.5L18 18l-6-3-6 3 1.5-6.5L3 7l6-1Z" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <div className="mt-1">
+                <StarRatingRow
+                  rating_avg={listing.rating_avg}
+                  rating_count={listing.rating_count}
+                />
+              </div>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {listing.city}
+                  {listing.country ? `, ${listing.country}` : ""}
+                </span>
+                <a
+                  href="#visit-panel"
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-text underline-offset-4 hover:underline"
+                >
+                  Visit us
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
             </div>
           </div>
           <div className="shrink-0 sm:self-center">
             <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-bold transition active:scale-[0.98] sm:w-auto"
+              href="#contact-panel"
+              className="inline-flex h-12 min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-bold transition active:scale-[0.98] sm:w-auto"
               style={{ background: theme, color: ctaInk }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -469,6 +499,51 @@ function PremiumLayout({
           </div>
         </div>
       </section>
+
+      {/* Inline expand panel sits right under the profile container. */}
+      <ProfileExpandPanels
+        contactPanel={
+          <>
+            <FaqAccordion items={listing.faq_items ?? []} themeColor={theme} />
+            {listing.contact_form_enabled && (
+              <ContactFormPanel
+                listingId={listing.id}
+                displayName={listing.display_name}
+                themeColor={theme}
+              />
+            )}
+          </>
+        }
+        visitPanel={
+          <>
+            {listing.visit_us_enabled &&
+              typeof listing.lat === "number" &&
+              typeof listing.lng === "number" && (
+                <div className="mx-auto max-w-3xl px-4 pt-6">
+                  <TradeAreaMap
+                    lat={listing.lat}
+                    lng={listing.lng}
+                    city={listing.city}
+                    servicePostcodes={listing.service_postcodes}
+                  />
+                  <p className="mt-3 text-[13px] font-semibold text-brand-text">
+                    {listing.city}
+                    {listing.country ? `, ${listing.country}` : ""}
+                    {listing.postcode_prefix ? ` · ${listing.postcode_prefix}` : ""}
+                  </p>
+                </div>
+              )}
+            <OperatingHoursPanel
+              hours={listing.operating_hours ?? {}}
+              themeColor={theme}
+              bare={false}
+            />
+            <div className="mx-auto max-w-3xl px-4 pt-4">
+              <TradeSocialIcons listing={listing} />
+            </div>
+          </>
+        }
+      />
 
       {/* Powered-by chip + URL chip */}
       <div className="mx-auto max-w-6xl px-4 pt-4">
@@ -484,40 +559,19 @@ function PremiumLayout({
         <TradeProfileUrlChip slug={listing.slug} fullUrl={profileFullUrl} />
       </div>
 
-      {/* 4. About + Visit Us split row */}
+      {/* 4. About — eyebrow is the company name; bio capped at 5 lines. */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-widest"
-              style={{ color: theme }}
-            >
-              About us
-            </h2>
-            <p className="mt-3 whitespace-pre-wrap text-[13px] leading-relaxed text-brand-text">
-              {listing.bio || "No bio provided yet."}
-            </p>
-          </div>
-          <aside className="md:col-span-1">
-            <a
-              href="#visit"
-              className="block h-full rounded-2xl border border-brand-line bg-brand-surface p-4 transition hover:border-brand-accent"
-            >
-              <h3
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: theme }}
-              >
-                Visit us
-              </h3>
-              <p className="mt-2 text-[13px] font-semibold text-brand-text">
-                View location, hours, and map →
-              </p>
-              <p className="mt-1 text-[13px] text-brand-muted">
-                {listing.city}
-                {listing.country ? `, ${listing.country}` : ""}
-              </p>
-            </a>
-          </aside>
+        <h2
+          className="text-xs font-bold uppercase tracking-widest"
+          style={{ color: theme }}
+        >
+          {listing.trading_name || listing.display_name}
+        </h2>
+        <div className="mt-3">
+          <AboutBio
+            text={listing.bio || "No bio provided yet."}
+            themeColor={theme}
+          />
         </div>
       </section>
 
@@ -538,55 +592,9 @@ function PremiumLayout({
         </div>
       )}
 
-      {/* 8. Visit Us anchor section — map + directions + socials */}
-      <section id="visit" className="scroll-mt-20">
-        {listing.visit_us_enabled &&
-          typeof listing.lat === "number" &&
-          typeof listing.lng === "number" && (
-            <>
-              <VisitUsPanel
-                city={listing.city}
-                country={listing.country}
-                lat={listing.lat}
-                lng={listing.lng}
-                themeColor={theme}
-              />
-              <div className="mx-auto max-w-3xl px-4 pb-2 pt-4">
-                <TradeAreaMap
-                  lat={listing.lat}
-                  lng={listing.lng}
-                  city={listing.city}
-                  servicePostcodes={listing.service_postcodes}
-                />
-              </div>
-            </>
-          )}
-        <div className="mx-auto max-w-3xl px-4 pt-4">
-          <TradeSocialIcons listing={listing} />
-        </div>
-      </section>
-
       {/* 10. Portfolio carousel */}
       {projects.length > 0 && (
         <PortfolioCarousel projects={projects} themeColor={theme} />
-      )}
-
-      {/* 11. Operating hours */}
-      <OperatingHoursPanel
-        hours={listing.operating_hours ?? {}}
-        themeColor={theme}
-      />
-
-      {/* 12. FAQ */}
-      <FaqAccordion items={listing.faq_items ?? []} themeColor={theme} />
-
-      {/* 13. Contact form (only when enabled) */}
-      {listing.contact_form_enabled && (
-        <ContactFormPanel
-          listingId={listing.id}
-          displayName={listing.display_name}
-          themeColor={theme}
-        />
       )}
 
       {/* 14. Tools I use cross-sell */}
