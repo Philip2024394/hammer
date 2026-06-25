@@ -9,7 +9,7 @@
 // `window`) doesn't blow up under SSR.
 
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import "leaflet/dist/leaflet.css";
 
 const MapContainer = dynamic(
@@ -29,6 +29,34 @@ const Circle = dynamic(
   { ssr: false }
 );
 
+// Leaflet ships its default marker as a JS image reference computed from
+// the page URL, which 404s under bundlers that don't expose the package's
+// `dist/images/` directory. Repoint the icon URLs at the unpkg CDN so the
+// marker actually renders. Runs once on the client only.
+function useFixLeafletDefaultIcon() {
+  useEffect(() => {
+    let cancelled = false;
+    import("leaflet").then((L) => {
+      if (cancelled) return;
+      const proto = (L.Icon.Default.prototype as unknown) as {
+        _getIconUrl?: unknown;
+      };
+      delete proto._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+}
+
 export function TradeAreaMap({
   lat,
   lng,
@@ -44,6 +72,8 @@ export function TradeAreaMap({
   // the full context without TypeScript complaining later.
   void city;
   void servicePostcodes;
+
+  useFixLeafletDefaultIcon();
 
   const center = useMemo<[number, number] | null>(() => {
     if (typeof lat !== "number" || typeof lng !== "number") return null;
