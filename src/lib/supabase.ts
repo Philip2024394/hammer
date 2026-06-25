@@ -295,6 +295,9 @@ export type HammerexTradeOffListing = {
   whatsapp_click_count: number;
   last_whatsapp_click_at: string | null;
   upgrade_nudge_dismissed_at: string | null;
+  // Annual paid members can upload a custom app-page hero banner that
+  // overrides the per-trade default. Null for everyone else.
+  custom_app_hero_url: string | null;
   joined_at: string;
   created_at: string;
   updated_at: string;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { XratedHeader } from "@/components/xrated/XratedHeader";
+import { resolveAppHero } from "@/lib/tradeAppBanners";
 import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { GuideShareBar } from "@/components/guides/GuideShareBar";
 import { TradePhotoGallery } from "@/components/trade-off/TradePhotoGallery";
@@ -365,7 +366,9 @@ export default async function TradiePublicProfilePage({
 // PREMIUM layout — app_trial / app_paid tiers
 // ─────────────────────────────────────────────────────────────────────────
 
-function PremiumLayout(_props: {
+function PremiumLayout({
+  listing
+}: {
   listing: HammerexTradeOffListing;
   projects: HammerexTradeOffProject[];
   toolProducts: HammerexProduct[];
@@ -374,10 +377,25 @@ function PremiumLayout(_props: {
   waUrl: string;
   profileFullUrl: string;
 }) {
-  // Premium body intentionally empty — header + footer only. The rebuild
-  // happens here once the new spec is agreed.
+  const heroUrl = resolveAppHero({
+    custom_app_hero_url: listing.custom_app_hero_url,
+    primary_trade: listing.primary_trade,
+    tier: listing.tier,
+    last_payment_plan: listing.last_payment_plan
+  });
+
   return (
     <>
+      {heroUrl && (
+        <section className="w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={heroUrl}
+            alt={`${listing.display_name} — ${tradeLabel(listing.primary_trade)} hero`}
+            className="block w-full"
+          />
+        </section>
+      )}
     </>
   );
 }
