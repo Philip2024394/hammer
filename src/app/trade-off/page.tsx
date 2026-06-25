@@ -119,7 +119,7 @@ export default async function TradeOffLandingPage() {
               <br />
               <span style={{ color: XRATED_BRAND.accent }}>Get Quotes Fast.</span>
             </h1>
-            <p className="mt-3 max-w-sm text-xs leading-relaxed text-neutral-700 sm:text-sm">
+            <p className="mt-3 max-w-sm text-xs leading-relaxed text-white drop-shadow sm:text-sm">
               Free UK directory of working tradespeople — message direct on WhatsApp, no middleman.
             </p>
 
