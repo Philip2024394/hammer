@@ -127,9 +127,9 @@ function sanitiseOperatingHours(v: unknown): Record<string, { open: string; clos
 
 function sanitisePricedServices(
   v: unknown
-): { name: string; image_url: string | null; price: number; unit: string }[] {
+): { name: string; image_url: string | null; price: number; unit: string; description: string | null }[] {
   if (!Array.isArray(v)) return [];
-  const out: { name: string; image_url: string | null; price: number; unit: string }[] = [];
+  const out: { name: string; image_url: string | null; price: number; unit: string; description: string | null }[] = [];
   for (const item of v.slice(0, 20)) {
     if (!item || typeof item !== "object") continue;
     const rec = item as Record<string, unknown>;
@@ -141,7 +141,9 @@ function sanitisePricedServices(
     const unit = typeof rec.unit === "string"
       ? rec.unit.trim().slice(0, 32) || "per project"
       : "per project";
-    if (name && price > 0) out.push({ name, image_url, price, unit });
+    const description_raw = typeof rec.description === "string" ? rec.description.trim() : "";
+    const description = description_raw.length > 0 ? description_raw.slice(0, 500) : null;
+    if (name && price > 0) out.push({ name, image_url, price, unit, description });
   }
   return out;
 }

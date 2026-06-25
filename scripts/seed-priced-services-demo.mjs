@@ -36,31 +36,41 @@ const UPDATES = [
         name: "Level-5 skim coat",
         image_url: HERO("drywaller"),
         price: 22,
-        unit: "per m²"
+        unit: "per m²",
+        description:
+          "Premium glass-smooth finish — three coats of joint compound sanded to a mirror polish. Ideal for feature walls, ceilings under raking light, and high-spec new builds."
       },
       {
         name: "Plasterboard supply + fit",
         image_url: HERO("plasterer"),
         price: 18,
-        unit: "per m²"
+        unit: "per m²",
+        description:
+          "Supply and fix 12.5mm British Gypsum board on timber or metal stud. Includes screws, joint scrim and a Level 3 tape-and-joint ready for paint or wallpaper."
       },
       {
         name: "Knife taping (single room)",
         image_url: HERO("drywaller"),
         price: 280,
-        unit: "per project"
+        unit: "per project",
+        description:
+          "Full knife-tape and three-coat finish on one average bedroom or living room (up to 25 m² wall surface). Includes corner beads, screw spots and final sand."
       },
       {
         name: "Patch & make-good (small jobs)",
         image_url: HERO("plasterer"),
         price: 150,
-        unit: "from"
+        unit: "from",
+        description:
+          "Quick callout for cracks, dents, doorway scuffs and small holes. Minimum half-day visit — most patches done same-day and left ready for paint."
       },
       {
         name: "Bay corner detailing",
         image_url: HERO("drywaller"),
         price: 85,
-        unit: "per corner"
+        unit: "per corner",
+        description:
+          "Specialist angle work on bay windows and obtuse corners. Metal bead, mesh tape and three-coat finish that holds a sharp line for years."
       }
     ]
   },
@@ -74,25 +84,33 @@ const UPDATES = [
         name: "Domestic tube & fitting (2-storey)",
         image_url: HERO("scaffolder"),
         price: 850,
-        unit: "from"
+        unit: "from",
+        description:
+          "Standard 2-storey terraced or semi front elevation. Includes erect, weekly inspection, and dismantle within 14 days. CISRS-certified crew."
       },
       {
         name: "Chimney scaffold",
         image_url: HERO("scaffolder"),
         price: 420,
-        unit: "per project"
+        unit: "per project",
+        description:
+          "Roof-saddle chimney access scaffold for roofers, sweeps and brickwork repointing. Built to BS EN 12811, sheeted on request for £50 extra."
       },
       {
         name: "System scaffolding (per lift)",
         image_url: HERO("scaffolder"),
         price: 320,
-        unit: "per lift"
+        unit: "per lift",
+        description:
+          "Layher AllRound system scaffolding priced per 2m lift. Best for commercial sites, refurb work and anywhere quick rotation matters."
       },
       {
         name: "Tower hire (weekly)",
         image_url: HERO("scaffolder"),
         price: 120,
-        unit: "per week"
+        unit: "per week",
+        description:
+          "Aluminium mobile tower delivered and assembled on site. 1.5m platform, 4m working height, four-week minimum hire. Great for soffits and gutter clearing."
       }
     ]
   }

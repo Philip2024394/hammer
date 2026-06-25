@@ -6,8 +6,34 @@
 //  - 50–500 char message floor enforced client-side AND server-side
 //  - On success, swap the panel for a thank-you confirmation
 //  - On failure, surface the server error inline
+//
+// Enquiry pre-fill: when the priced-services modal fires its "Enquire"
+// button, it writes a {name, price, unit} payload to sessionStorage and
+// navigates to #contact-panel. We read that on mount + on hashchange,
+// pre-populate the message textarea (only if the user hasn't typed yet),
+// and surface a small "Enquiring about: …" pill above the textarea.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const ENQUIRY_KEY = "xrated_enquiry_service";
+
+type EnquirySubject = {
+  name: string;
+  price: number;
+  unit: string;
+};
+
+function formatPrice(price: number, unit: string): string {
+  const amount = `£${price.toLocaleString("en-GB")}`;
+  if (!unit) return amount;
+  const u = unit.trim();
+  if (u.toLowerCase() === "from") return `From ${amount}`;
+  return `${amount} ${u}`;
+}
+
+function buildPrefillMessage(svc: EnquirySubject): string {
+  return `Hi, I'm interested in ${svc.name} (${formatPrice(svc.price, svc.unit)}). Can you confirm availability and arrange a quote?`;
+}
 
 export function ContactFormPanel({
   listingId,
@@ -25,9 +51,59 @@ export function ContactFormPanel({
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [subject, setSubject] = useState<EnquirySubject | null>(null);
+
+  // Read sessionStorage pre-fill on mount + whenever the hash flips to
+  // #contact-panel (which is what the carousel modal triggers). Only
+  // overwrite the textarea if the user hasn't typed anything yet so we
+  // never destroy in-progress drafts.
+  useEffect(() => {
+    function readPrefill() {
+      try {
+        const raw = sessionStorage.getItem(ENQUIRY_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw) as Partial<EnquirySubject>;
+        if (
+          !parsed ||
+          typeof parsed.name !== "string" ||
+          typeof parsed.price !== "number" ||
+          typeof parsed.unit !== "string"
+        ) {
+          return;
+        }
+        const svc: EnquirySubject = {
+          name: parsed.name,
+          price: parsed.price,
+          unit: parsed.unit
+        };
+        setSubject(svc);
+        setMessage((curr) => (curr.trim().length === 0 ? buildPrefillMessage(svc) : curr));
+        // Clear so a refresh / next visit doesn't re-prefill.
+        sessionStorage.removeItem(ENQUIRY_KEY);
+      } catch {
+        // Ignore JSON / storage errors.
+      }
+    }
+    readPrefill();
+    function onHash() {
+      if (window.location.hash === "#contact-panel") readPrefill();
+    }
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   function emailLooksValid(v: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  function clearSubject() {
+    setSubject(null);
+    // Also clear the prefilled message text if it still matches the auto
+    // prefill — don't wipe a draft the user has edited.
+    setMessage((curr) => {
+      if (!subject) return curr;
+      return curr === buildPrefillMessage(subject) ? "" : curr;
+    });
   }
 
   async function submit(e: React.FormEvent) {
@@ -156,10 +232,38 @@ export function ContactFormPanel({
             className="mt-1.5 h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-[13px] text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
           />
         </label>
-        <label className="block">
+        <div>
           <span className="text-xs font-bold uppercase tracking-widest text-brand-muted">
             Message ({message.trim().length}/500)
           </span>
+          {subject && (
+            <div className="mt-1.5">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold"
+                style={{
+                  background: `${themeColor}1F`,
+                  color: themeColor,
+                  border: `1px solid ${themeColor}`
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z" />
+                </svg>
+                Enquiring about: {subject.name}
+                <button
+                  type="button"
+                  onClick={clearSubject}
+                  aria-label="Clear enquiry subject"
+                  className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-current transition hover:bg-black/20"
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          )}
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -170,7 +274,7 @@ export function ContactFormPanel({
             rows={5}
             className="mt-1.5 w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-[13px] text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
           />
-        </label>
+        </div>
         {err && (
           <p className="text-[13px] font-semibold text-red-300" role="alert">
             {err}

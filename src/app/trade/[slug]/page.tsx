@@ -17,7 +17,6 @@ import { HeroTextOverlay } from "@/components/xrated/HeroTextOverlay";
 import { XratedCtaButton } from "@/components/xrated/XratedCtaButton";
 import { RunningMarquee } from "@/components/xrated/RunningMarquee";
 import { XratedSocialShareStrip } from "@/components/xrated/XratedSocialShareStrip";
-import { ServicesChips } from "@/components/xrated/profile/ServicesChips";
 import { PortfolioCarousel } from "@/components/xrated/profile/PortfolioCarousel";
 import { OperatingHoursPanel } from "@/components/xrated/profile/OperatingHoursPanel";
 import { FaqAccordion } from "@/components/xrated/profile/FaqAccordion";
@@ -48,7 +47,6 @@ import {
   STANDARD_TIER_LABELS,
   standardTierFor,
   tradeLabel,
-  whatsappDigits,
   whatsappQuoteUrl
 } from "@/lib/tradeOff";
 import { effectiveTier, inkForTheme } from "@/lib/xratedTrades";
@@ -369,7 +367,6 @@ function PremiumLayout({
   const cover = listing.photos[0] ?? listing.avatar_url ?? BRAND.logo;
   const theme = listing.theme_color || "#F97316";
   const ctaInk = listing.button_text_color || inkForTheme(theme);
-  const waBase = `https://wa.me/${whatsappDigits(listing.whatsapp)}`;
   const qrPngUrl = `/trade/${listing.slug}/qr.png`;
 
   return (
@@ -481,19 +478,6 @@ function PremiumLayout({
             </div>
           </div>
 
-          {/* Bottom row: Contact us pill anchored to the right */}
-          <div className="mt-3 flex justify-end">
-            <a
-              href="#contact-panel"
-              className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[12px] font-bold uppercase tracking-wider transition active:scale-[0.97]"
-              style={{ background: theme, color: ctaInk }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
-              </svg>
-              Contact us
-            </a>
-          </div>
         </div>
       </section>
 
@@ -568,13 +552,9 @@ function PremiumLayout({
         </div>
       </section>
 
-      {/* 5. Services badges */}
-      <ServicesChips services={listing.services_offered ?? []} themeColor={theme} />
-
-      {/* 6. Priced services carousel */}
+      {/* 5. Priced services carousel — single services surface */}
       <PricedServicesCarousel
         services={listing.priced_services ?? []}
-        whatsappBase={waBase}
         themeColor={theme}
       />
 

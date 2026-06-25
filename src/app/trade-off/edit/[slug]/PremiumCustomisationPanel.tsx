@@ -15,6 +15,7 @@ type PricedService = {
   image_url: string;
   price: number;
   unit: string;
+  description: string;
 };
 
 type Patch = {
@@ -104,7 +105,7 @@ export function PremiumCustomisationPanel({
       ...s,
       priced_services: [
         ...s.priced_services,
-        { name: "", image_url: "", price: 0, unit: "per project" }
+        { name: "", image_url: "", price: 0, unit: "per project", description: "" }
       ]
     }));
   }
@@ -136,7 +137,8 @@ export function PremiumCustomisationPanel({
           name: p.name.trim(),
           image_url: p.image_url.trim(),
           price: Number(p.price) || 0,
-          unit: p.unit.trim() || "per project"
+          unit: p.unit.trim() || "per project",
+          description: (p.description ?? "").trim().slice(0, 500)
         }))
         .filter((p) => p.name.length > 0 && p.price > 0);
       const payload: Patch = { ...state, services_offered, faq_items, priced_services };
@@ -363,6 +365,21 @@ export function PremiumCustomisationPanel({
                     onChange={(v) => updatePriced(i, { unit: v })}
                     placeholder="Unit (e.g. per m², per project, from)"
                   />
+                </div>
+                <div>
+                  <textarea
+                    rows={3}
+                    value={p.description ?? ""}
+                    onChange={(e) =>
+                      updatePriced(i, { description: e.target.value.slice(0, 500) })
+                    }
+                    placeholder="Short description — what's included, who it's for"
+                    maxLength={500}
+                    className="w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+                  />
+                  <p className="mt-1 text-right text-[10px] text-brand-muted">
+                    {(p.description ?? "").length}/500
+                  </p>
                 </div>
               </li>
             ))}
