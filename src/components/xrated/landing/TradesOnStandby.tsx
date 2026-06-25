@@ -18,8 +18,9 @@ function labelForTrade(slug: string): string {
 
 function availabilityToneClass(value: string | null | undefined): string {
   if (value === "now") return "text-emerald-700";
-  if (value === "tomorrow" || value === "this_week") return "text-amber-700";
-  return "text-neutral-600";
+  // Future starts use plain black so the calendar icon + label read as a
+  // schedule, not a warning state.
+  return "text-neutral-900";
 }
 
 export function TradesOnStandby({
@@ -102,7 +103,7 @@ export function TradesOnStandby({
                       <span
                         className={`mt-0.5 inline-flex items-center gap-1.5 text-xs font-semibold ${toneClass}`}
                       >
-                        {isNow && (
+                        {isNow ? (
                           <span
                             aria-hidden="true"
                             className="relative inline-flex h-2 w-2"
@@ -110,6 +111,23 @@ export function TradesOnStandby({
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                           </span>
+                        ) : (
+                          <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                          </svg>
                         )}
                         {availabilityLabel}
                       </span>
