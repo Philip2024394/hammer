@@ -10,6 +10,19 @@ import crypto from "crypto";
 export const WELCOME_KNIFE_PRODUCT_SLUG = "folding-safety-cutting-knife";
 export const WELCOME_KNIFE_NAME = "Hammerex Folding Safety Cutting Knife";
 
+// Static product reference used by the WelcomeKnifePopup so the done-page
+// client component can hand a CartLine straight to `cart.add()` without
+// having to fetch the product row at runtime. Refresh the constants if the
+// canonical knife product is ever moved or replaced.
+export const WELCOME_KNIFE_PRODUCT = {
+  id: "d1495eda-92de-4150-8f97-41d252bb5946",
+  slug: WELCOME_KNIFE_PRODUCT_SLUG,
+  name: WELCOME_KNIFE_NAME,
+  sku: "HX-FSCK-001",
+  image_url:
+    "https://msdonkkechxzgagyguoe.supabase.co/storage/v1/object/public/product-images/migrated/fa5b92ce94f3cb83.png"
+} as const;
+
 // Compact, readable code: XRATED-XXXX-XXXX (8 chars of base32-ish entropy
 // from random bytes). Reads cleanly on a phone screen, hard to typo.
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // omit 0/O/1/I for clarity
