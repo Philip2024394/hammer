@@ -76,7 +76,8 @@ const UPDATABLE_STRING_FIELDS = [
   "hero_text_effect",
   "avatar_frame_style",
   "profile_placement",
-  "running_marquee"
+  "running_marquee",
+  "promo_text"
 ] as const;
 
 const UPDATABLE_ARRAY_FIELDS = [
@@ -98,8 +99,9 @@ const UPDATABLE_BOOL_FIELDS = [
 // Premium mini-app JSON fields. Shape:
 //  - operating_hours: Record<dayKey, { open, close } | null>
 //  - faq_items: { q, a }[]
-// We sanitise both before persisting.
-const UPDATABLE_JSON_FIELDS = ["operating_hours", "faq_items"] as const;
+//  - priced_services: { name, image_url, price, unit }[]
+// We sanitise each before persisting.
+const UPDATABLE_JSON_FIELDS = ["operating_hours", "faq_items", "priced_services"] as const;
 
 const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 const TIME_RE = /^[0-2]\d:[0-5]\d$/;
@@ -119,6 +121,27 @@ function sanitiseOperatingHours(v: unknown): Record<string, { open: string; clos
     if (TIME_RE.test(open) && TIME_RE.test(close)) {
       out[day] = { open, close };
     }
+  }
+  return out;
+}
+
+function sanitisePricedServices(
+  v: unknown
+): { name: string; image_url: string | null; price: number; unit: string }[] {
+  if (!Array.isArray(v)) return [];
+  const out: { name: string; image_url: string | null; price: number; unit: string }[] = [];
+  for (const item of v.slice(0, 20)) {
+    if (!item || typeof item !== "object") continue;
+    const rec = item as Record<string, unknown>;
+    const name = typeof rec.name === "string" ? rec.name.trim().slice(0, 80) : "";
+    const image_url_raw = typeof rec.image_url === "string" ? rec.image_url.trim() : "";
+    const image_url = image_url_raw.length > 0 ? image_url_raw.slice(0, 400) : null;
+    const priceN = Number(rec.price);
+    const price = Number.isFinite(priceN) && priceN > 0 ? Math.round(priceN) : 0;
+    const unit = typeof rec.unit === "string"
+      ? rec.unit.trim().slice(0, 32) || "per project"
+      : "per project";
+    if (name && price > 0) out.push({ name, image_url, price, unit });
   }
   return out;
 }
@@ -199,6 +222,8 @@ export async function POST(req: NextRequest) {
         patch[f] = sanitiseOperatingHours(fieldsIn[f]);
       } else if (f === "faq_items") {
         patch[f] = sanitiseFaqItems(fieldsIn[f]);
+      } else if (f === "priced_services") {
+        patch[f] = sanitisePricedServices(fieldsIn[f]);
       }
     }
   }

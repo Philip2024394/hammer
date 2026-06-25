@@ -258,6 +258,10 @@ export type HammerexTradeOffListing = {
   services_offered: string[];
   contact_form_enabled: boolean;
   visit_us_enabled: boolean;
+  rating_avg: number | null;
+  rating_count: number;
+  priced_services: { name: string; image_url: string | null; price: number; unit: string }[];
+  promo_text: string | null;
   joined_at: string;
   created_at: string;
   updated_at: string;

@@ -14,17 +14,19 @@ import { TradeSocialIcons } from "@/components/trade-off/TradeSocialIcons";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { AvatarFrame } from "@/components/xrated/AvatarFrame";
 import { HeroTextOverlay } from "@/components/xrated/HeroTextOverlay";
-import { ProfileInfoCard } from "@/components/xrated/ProfileInfoCard";
 import { XratedCtaButton } from "@/components/xrated/XratedCtaButton";
 import { RunningMarquee } from "@/components/xrated/RunningMarquee";
 import { XratedSocialShareStrip } from "@/components/xrated/XratedSocialShareStrip";
-import { ServiceLocationsStrip } from "@/components/xrated/profile/ServiceLocationsStrip";
 import { ServicesChips } from "@/components/xrated/profile/ServicesChips";
 import { PortfolioCarousel } from "@/components/xrated/profile/PortfolioCarousel";
 import { OperatingHoursPanel } from "@/components/xrated/profile/OperatingHoursPanel";
 import { VisitUsPanel } from "@/components/xrated/profile/VisitUsPanel";
 import { FaqAccordion } from "@/components/xrated/profile/FaqAccordion";
 import { ContactFormPanel } from "@/components/xrated/profile/ContactFormPanel";
+import { StarRatingRow } from "@/components/xrated/profile/StarRatingRow";
+import { ProfileActionTriple } from "@/components/xrated/profile/ProfileActionTriple";
+import { PricedServicesCarousel } from "@/components/xrated/profile/PricedServicesCarousel";
+import { QrFooterDock } from "@/components/xrated/profile/QrFooterDock";
 import {
   supabase,
   type HammerexTradeOffListing,
@@ -44,6 +46,7 @@ import {
   STANDARD_TIER_LABELS,
   standardTierFor,
   tradeLabel,
+  whatsappDigits,
   whatsappQuoteUrl
 } from "@/lib/tradeOff";
 import { effectiveTier, inkForTheme } from "@/lib/xratedTrades";
@@ -358,26 +361,27 @@ function PremiumLayout({
 }) {
   const primary = tradeLabel(listing.primary_trade);
   const cover = listing.photos[0] ?? listing.avatar_url ?? BRAND.logo;
-  const gallery = listing.photos.slice(1);
   const theme = listing.theme_color || "#F97316";
   const ctaInk = listing.button_text_color || inkForTheme(theme);
+  const waBase = `https://wa.me/${whatsappDigits(listing.whatsapp)}`;
+  const qrPngUrl = `/trade/${listing.slug}/qr.png`;
 
   return (
     <>
-      {/* 1. Cover with hero overlay + service chip */}
+      {/* 1. Banner hero — left-aligned text overlay */}
       <section className="relative">
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-black">
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-black sm:aspect-[21/9]">
           <img
             src={cover}
             alt={listing.display_name}
             className="block h-full w-full object-cover"
           />
-          {/* dark gradient for hero readability */}
+          {/* Left-half dark gradient so hero text reads against the photo. */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 65%, rgba(0,0,0,0.55) 100%)"
+                "linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 75%)"
             }}
             aria-hidden="true"
           />
@@ -388,20 +392,21 @@ function PremiumLayout({
             tagline={listing.hero_text_tagline}
             effect={listing.hero_text_effect}
           />
-          {/* 3. Service location chip(s) overlay bottom-left of cover */}
-          <div className="absolute bottom-3 left-4 z-10 flex flex-wrap gap-2 sm:bottom-4 sm:left-6">
-            <span
-              className="inline-flex h-7 items-center rounded-full px-3 text-[11px] font-bold backdrop-blur"
-              style={{ background: `${theme}E6`, color: ctaInk }}
-            >
-              On-site service
-            </span>
-          </div>
         </div>
+      </section>
 
-        {/* 4. ProfileInfoCard overlapping cover bottom */}
-        <ProfileInfoCard
-          avatar={
+      {/* 2. Three button-icons row — Contact / Visit us / Share */}
+      <ProfileActionTriple
+        whatsappHref={waUrl}
+        visitHref="#visit"
+        shareHref="#share"
+        themeColor={theme}
+      />
+
+      {/* 3. Profile container — avatar, name + rating + service area, CTA right */}
+      <section className="mx-auto mt-6 max-w-6xl px-4">
+        <div className="flex flex-col gap-4 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
+          <div className="shrink-0">
             <AvatarFrame
               src={listing.avatar_url}
               name={listing.display_name}
@@ -409,20 +414,69 @@ function PremiumLayout({
               style={listing.avatar_frame_style}
               themeColor={theme}
             />
-          }
-          name={listing.display_name}
-          verified={listing.hammerex_standard_verified}
-          city={listing.city}
-          country={listing.country}
-          placement={listing.profile_placement}
-          rightSlot={
-            listing.accepting_jobs ? <AvailablePill themeColor={theme} /> : null
-          }
-        />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h1 className="truncate text-xl font-bold leading-tight text-brand-text sm:text-2xl">
+                {listing.display_name}
+              </h1>
+              {listing.hammerex_standard_verified && (
+                <span
+                  className="inline-block align-middle"
+                  title="Hammerex Standard verified"
+                  aria-label="Verified"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#facc15" aria-hidden="true">
+                    <path d="m12 1 3 5 6 1-4.5 4.5L18 18l-6-3-6 3 1.5-6.5L3 7l6-1Z" />
+                  </svg>
+                </span>
+              )}
+              {listing.accepting_jobs && <AvailablePill themeColor={theme} />}
+            </div>
+            <div className="mt-1.5">
+              <StarRatingRow
+                rating_avg={listing.rating_avg}
+                rating_count={listing.rating_count}
+              />
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex h-7 items-center gap-1 rounded-full border bg-brand-bg/40 px-2.5 text-[13px] font-semibold text-brand-text"
+                style={{ borderColor: theme }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                {listing.city}
+                {listing.country ? `, ${listing.country}` : ""}
+              </span>
+              <span
+                className="inline-flex h-7 items-center rounded-full bg-brand-bg/40 px-2.5 text-[13px] font-semibold text-brand-muted"
+              >
+                {primary}
+              </span>
+            </div>
+          </div>
+          <div className="shrink-0 sm:self-center">
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-bold transition active:scale-[0.98] sm:w-auto"
+              style={{ background: theme, color: ctaInk }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
+              </svg>
+              Contact us
+            </a>
+          </div>
+        </div>
       </section>
 
-      {/* Powered-by chip + breadcrumb */}
-      <div className="mx-auto max-w-6xl px-4 pt-6">
+      {/* Powered-by chip + URL chip */}
+      <div className="mx-auto max-w-6xl px-4 pt-4">
         <div className="rounded-full bg-black/40 px-3 py-1.5 text-center text-[13px] text-brand-muted">
           <span aria-hidden="true">⚡</span> Powered by{" "}
           <a href="/trade-off" className="font-semibold text-brand-text hover:text-brand-accent">
@@ -431,153 +485,110 @@ function PremiumLayout({
           · Free UK trade directory
         </div>
       </div>
-
       <div className="mx-auto max-w-6xl px-4 pt-3">
         <TradeProfileUrlChip slug={listing.slug} fullUrl={profileFullUrl} />
       </div>
 
-      {/* Service Locations chip strip */}
-      <ServiceLocationsStrip themeColor={theme} />
-
-      {/* Hammerex Standard badge */}
+      {/* Hammerex Standard badge — sits just below the profile container */}
       <HammerexStandardBadge listing={listing} tierLabel={tierLabel} blurb={blurb} />
 
-      {/* Instant Quote form — kept; contact form (if enabled) sits later */}
-      <section className="mx-auto max-w-3xl px-4 pb-2 pt-8">
-        <InstantQuoteForm
-          slug={listing.slug}
-          displayName={listing.display_name}
-          tradeLabel={primary}
-          whatsapp={listing.whatsapp}
-        />
-      </section>
-
-      {/* About */}
-      {listing.bio && (
-        <section className="mx-auto max-w-3xl px-4 pb-2 pt-8">
-          <h2
-            className="text-xs font-bold uppercase tracking-widest"
-            style={{ color: theme }}
-          >
-            About
-          </h2>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
-            {listing.bio}
-          </p>
-        </section>
-      )}
-
-      {/* Trades offered */}
+      {/* 4. About + Visit Us split row */}
       <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-        <h2
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: theme }}
-        >
-          Trades offered
-        </h2>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          <li>
-            <span
-              className="inline-flex h-9 items-center rounded-full px-3 text-xs font-bold"
-              style={{ background: theme, color: ctaInk }}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <h2
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: theme }}
             >
-              {primary}
-            </span>
-          </li>
-          {listing.secondary_trades.map((s) => (
-            <li key={s}>
-              <span
-                className="inline-flex h-9 items-center rounded-full border bg-black/40 px-3 text-xs font-semibold text-brand-text"
-                style={{ borderColor: theme }}
+              About us
+            </h2>
+            <p className="mt-3 whitespace-pre-wrap text-[13px] leading-relaxed text-brand-text">
+              {listing.bio || "No bio provided yet."}
+            </p>
+          </div>
+          <aside className="md:col-span-1">
+            <a
+              href="#visit"
+              className="block h-full rounded-2xl border border-brand-line bg-brand-surface p-4 transition hover:border-brand-accent"
+            >
+              <h3
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: theme }}
               >
-                {tradeLabel(s)}
-              </span>
-            </li>
-          ))}
-        </ul>
+                Visit us
+              </h3>
+              <p className="mt-2 text-[13px] font-semibold text-brand-text">
+                View location, hours, and map →
+              </p>
+              <p className="mt-1 text-[13px] text-brand-muted">
+                {listing.city}
+                {listing.country ? `, ${listing.country}` : ""}
+              </p>
+            </a>
+          </aside>
+        </div>
       </section>
 
-      {/* Services offered chips (premium feature) */}
+      {/* 5. Services badges */}
       <ServicesChips services={listing.services_offered ?? []} themeColor={theme} />
 
-      {/* Verified work — polished portfolio carousel (premium variant) */}
+      {/* 6. Priced services carousel */}
+      <PricedServicesCarousel
+        services={listing.priced_services ?? []}
+        whatsappBase={waBase}
+        themeColor={theme}
+      />
+
+      {/* 7. Running marquee — uses the new promo_text column */}
+      {listing.promo_text && (
+        <div className="mt-8">
+          <RunningMarquee text={listing.promo_text} themeColor={theme} />
+        </div>
+      )}
+
+      {/* 8. Visit Us anchor section — map + directions + socials */}
+      <section id="visit" className="scroll-mt-20">
+        {listing.visit_us_enabled &&
+          typeof listing.lat === "number" &&
+          typeof listing.lng === "number" && (
+            <>
+              <VisitUsPanel
+                city={listing.city}
+                country={listing.country}
+                lat={listing.lat}
+                lng={listing.lng}
+                themeColor={theme}
+              />
+              <div className="mx-auto max-w-3xl px-4 pb-2 pt-4">
+                <TradeAreaMap
+                  lat={listing.lat}
+                  lng={listing.lng}
+                  city={listing.city}
+                  servicePostcodes={listing.service_postcodes}
+                />
+              </div>
+            </>
+          )}
+        <div className="mx-auto max-w-3xl px-4 pt-4">
+          <TradeSocialIcons listing={listing} />
+        </div>
+      </section>
+
+      {/* 10. Portfolio carousel */}
       {projects.length > 0 && (
         <PortfolioCarousel projects={projects} themeColor={theme} />
       )}
 
-      {/* Photo gallery */}
-      {gallery.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-          <h2
-            className="text-xs font-bold uppercase tracking-widest"
-            style={{ color: theme }}
-          >
-            Work in progress
-          </h2>
-          <div className="mt-3">
-            <TradePhotoGallery photos={gallery} name={listing.display_name} />
-          </div>
-        </section>
-      )}
-
-      {/* Operating hours panel */}
+      {/* 11. Operating hours */}
       <OperatingHoursPanel
         hours={listing.operating_hours ?? {}}
         themeColor={theme}
       />
 
-      {/* Areas served */}
-      <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-        <h2
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: theme }}
-        >
-          Areas served
-        </h2>
-        {(typeof listing.lat === "number" && typeof listing.lng === "number") && (
-          <div className="mt-3">
-            <TradeAreaMap
-              lat={listing.lat}
-              lng={listing.lng}
-              city={listing.city}
-              servicePostcodes={listing.service_postcodes}
-            />
-          </div>
-        )}
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {(listing.service_postcodes.length > 0
-            ? listing.service_postcodes
-            : [listing.city]
-          ).map((area) => (
-            <li key={area}>
-              <span
-                className="inline-flex h-11 items-center rounded-full border bg-brand-surface px-4 text-xs font-semibold text-brand-text"
-                style={{ borderColor: theme }}
-              >
-                {area}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Visit us panel */}
-      {listing.visit_us_enabled &&
-        typeof listing.lat === "number" &&
-        typeof listing.lng === "number" && (
-          <VisitUsPanel
-            city={listing.city}
-            country={listing.country}
-            lat={listing.lat}
-            lng={listing.lng}
-            themeColor={theme}
-          />
-        )}
-
-      {/* FAQ accordion */}
+      {/* 12. FAQ */}
       <FaqAccordion items={listing.faq_items ?? []} themeColor={theme} />
 
-      {/* Contact form panel */}
+      {/* 13. Contact form (only when enabled) */}
       {listing.contact_form_enabled && (
         <ContactFormPanel
           listingId={listing.id}
@@ -586,15 +597,10 @@ function PremiumLayout({
         />
       )}
 
-      {/* Tools I use */}
+      {/* 14. Tools I use cross-sell */}
       <ToolsIUseBlock toolProducts={toolProducts} tierLabel={tierLabel} />
 
-      {/* 13. Social icons */}
-      <section className="mx-auto max-w-6xl px-4 pb-2 pt-8">
-        <TradeSocialIcons listing={listing} />
-      </section>
-
-      {/* 14. Primary CTA — themed WhatsApp button */}
+      {/* Primary CTA — themed WhatsApp button kept for users who scroll past */}
       <section className="mx-auto max-w-3xl px-4 pb-2 pt-8">
         <XratedCtaButton
           href={waUrl}
@@ -610,25 +616,25 @@ function PremiumLayout({
         />
       </section>
 
-      {/* 15. Running marquee */}
-      {listing.running_marquee && (
-        <div className="mt-8">
-          <RunningMarquee text={listing.running_marquee} themeColor={theme} />
-        </div>
-      )}
-
-      {/* 16. Social share strip */}
-      <section className="mx-auto max-w-3xl px-4 pt-6">
+      {/* Share strip anchor — referenced by the action triple's Share button */}
+      <section id="share" className="mx-auto max-w-3xl px-4 pt-6 scroll-mt-20">
         <XratedSocialShareStrip
           url={profileFullUrl}
           displayName={listing.display_name}
         />
       </section>
 
-      {/* 17. Report */}
-      <section className="mx-auto max-w-3xl px-4 pb-12 pt-6">
+      {/* Report */}
+      <section className="mx-auto max-w-3xl px-4 pb-8 pt-6">
         <TradeReportButton listingId={listing.id} />
       </section>
+
+      {/* 15. Sticky QR + Contact footer dock (above the global XratedFooter) */}
+      <QrFooterDock
+        qrPngUrl={qrPngUrl}
+        whatsappHref={waUrl}
+        themeColor={theme}
+      />
     </>
   );
 }

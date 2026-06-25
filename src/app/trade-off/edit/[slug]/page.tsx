@@ -174,9 +174,18 @@ export default async function TradeOffEditPage({
               avatar_frame_style: row.data.avatar_frame_style ?? "none",
               profile_placement: row.data.profile_placement ?? "center",
               running_marquee: row.data.running_marquee ?? "",
+              promo_text: row.data.promo_text ?? "",
               accepting_jobs: row.data.accepting_jobs ?? true,
               services_offered: Array.isArray(row.data.services_offered)
                 ? row.data.services_offered
+                : [],
+              priced_services: Array.isArray(row.data.priced_services)
+                ? row.data.priced_services.map((p: { name?: unknown; image_url?: unknown; price?: unknown; unit?: unknown }) => ({
+                    name: typeof p.name === "string" ? p.name : "",
+                    image_url: typeof p.image_url === "string" ? p.image_url : "",
+                    price: typeof p.price === "number" ? p.price : 0,
+                    unit: typeof p.unit === "string" ? p.unit : "per project"
+                  }))
                 : [],
               faq_items: Array.isArray(row.data.faq_items)
                 ? row.data.faq_items

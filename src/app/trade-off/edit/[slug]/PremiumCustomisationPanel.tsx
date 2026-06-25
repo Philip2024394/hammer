@@ -10,6 +10,12 @@ import { useState } from "react";
 type HoursSlot = { open: string; close: string } | null;
 type HoursMap = Record<string, HoursSlot>;
 type FaqItem = { q: string; a: string };
+type PricedService = {
+  name: string;
+  image_url: string;
+  price: number;
+  unit: string;
+};
 
 type Patch = {
   theme_color: string;
@@ -23,8 +29,10 @@ type Patch = {
   avatar_frame_style: "none" | "ring" | "pulse" | "dance";
   profile_placement: "center" | "top-left" | "bottom-left";
   running_marquee: string;
+  promo_text: string;
   accepting_jobs: boolean;
   services_offered: string[];
+  priced_services: PricedService[];
   faq_items: FaqItem[];
   operating_hours: HoursMap;
   contact_form_enabled: boolean;
@@ -84,6 +92,29 @@ export function PremiumCustomisationPanel({
     setState((s) => ({ ...s, faq_items: s.faq_items.filter((_, idx) => idx !== i) }));
   }
 
+  function updatePriced(i: number, patch: Partial<PricedService>) {
+    setState((s) => {
+      const next = [...s.priced_services];
+      next[i] = { ...next[i], ...patch };
+      return { ...s, priced_services: next };
+    });
+  }
+  function addPriced() {
+    setState((s) => ({
+      ...s,
+      priced_services: [
+        ...s.priced_services,
+        { name: "", image_url: "", price: 0, unit: "per project" }
+      ]
+    }));
+  }
+  function removePriced(i: number) {
+    setState((s) => ({
+      ...s,
+      priced_services: s.priced_services.filter((_, idx) => idx !== i)
+    }));
+  }
+
   async function save() {
     setBusy(true);
     setMsg(null);
@@ -99,7 +130,16 @@ export function PremiumCustomisationPanel({
       const faq_items = state.faq_items.filter(
         (f) => f.q.trim().length > 0 && f.a.trim().length > 0
       );
-      const payload: Patch = { ...state, services_offered, faq_items };
+      // Drop empty priced-service rows (must have a name + a positive price).
+      const priced_services = state.priced_services
+        .map((p) => ({
+          name: p.name.trim(),
+          image_url: p.image_url.trim(),
+          price: Number(p.price) || 0,
+          unit: p.unit.trim() || "per project"
+        }))
+        .filter((p) => p.name.length > 0 && p.price > 0);
+      const payload: Patch = { ...state, services_offered, faq_items, priced_services };
 
       const res = await fetch("/api/trade-off/update", {
         method: "POST",
@@ -215,6 +255,14 @@ export function PremiumCustomisationPanel({
           />
         </Field>
 
+        <Field label="Promo text (footer scroll)" full>
+          <Text
+            value={state.promo_text}
+            onChange={(v) => set("promo_text", v)}
+            placeholder="e.g. Free same-week site visits across Greater Manchester"
+          />
+        </Field>
+
         <Field label="Accepting new jobs" full>
           <label className="inline-flex items-center gap-2 text-sm">
             <input
@@ -243,6 +291,83 @@ export function PremiumCustomisationPanel({
           placeholder="Service 1, Service 2, Service 3"
           className="w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
         />
+      </div>
+
+      {/* ─── Priced services (carousel) ─── */}
+      <div className="space-y-2 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+            Priced services
+          </h3>
+          <button
+            type="button"
+            onClick={addPriced}
+            className="inline-flex h-9 items-center rounded-md border border-brand-accent bg-brand-accent/10 px-3 text-[11px] font-bold text-brand-accent transition hover:bg-brand-accent hover:text-black"
+          >
+            + Add service
+          </button>
+        </div>
+        <p className="text-[11px] text-brand-muted">
+          Shown as a swipeable carousel on your profile. Unit is free-text — e.g.{" "}
+          <em>per project</em>, <em>per m²</em>, <em>per hour</em>, <em>from</em>.
+        </p>
+        {state.priced_services.length === 0 ? (
+          <p className="text-[11px] text-brand-muted">
+            No priced services yet — add one above.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {state.priced_services.map((p, i) => (
+              <li
+                key={i}
+                className="space-y-2 rounded-md border border-brand-line bg-brand-surface/40 p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-brand-muted">
+                    Service {i + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removePriced(i)}
+                    className="text-[11px] font-semibold text-red-300 hover:text-red-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Text
+                    value={p.name}
+                    onChange={(v) => updatePriced(i, { name: v })}
+                    placeholder="Service name (e.g. Skim coat)"
+                  />
+                  <Text
+                    value={p.image_url}
+                    onChange={(v) => updatePriced(i, { image_url: v })}
+                    placeholder="Image URL (https://…)"
+                  />
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={p.price || ""}
+                    onChange={(e) =>
+                      updatePriced(i, { price: Number(e.target.value) || 0 })
+                    }
+                    placeholder="Price (£)"
+                    className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+                  />
+                  <Text
+                    value={p.unit}
+                    onChange={(v) => updatePriced(i, { unit: v })}
+                    placeholder="Unit (e.g. per m², per project, from)"
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* ─── Operating hours ─── */}
