@@ -149,10 +149,18 @@ export function TradeIconChips() {
   return (
     <section
       aria-label="Pick a trade"
-      className="mx-auto mt-4 max-w-6xl px-3 sm:mt-5 sm:px-4"
+      className="mx-auto mt-4 max-w-6xl sm:mt-5"
     >
       <ul
-        className="flex gap-2 overflow-x-auto pb-1 sm:gap-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-2 overflow-x-auto px-3 pb-1 pr-8 sm:gap-3 sm:px-4 sm:pr-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{
+          // Soft fade on the right edge so the last visible chip never
+          // looks 'sliced' against the viewport — signals scrollable.
+          maskImage:
+            "linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%)"
+        }}
       >
         <li key="all" className="shrink-0">
           <Chip
@@ -194,11 +202,19 @@ function Chip({
       href={href}
       aria-label={label}
       title={label}
-      className="flex h-12 w-12 items-center justify-center rounded-full transition active:scale-[0.95]"
+      className="flex h-12 w-12 items-center justify-center rounded-full border transition active:scale-[0.95]"
       style={
         active
-          ? { background: XRATED_BRAND.accent, color: "#1a1a1a" }
-          : { background: "#0a0a0a", color: "#FFFFFF" }
+          ? {
+              background: XRATED_BRAND.accent,
+              color: "#1a1a1a",
+              borderColor: XRATED_BRAND.accent
+            }
+          : {
+              background: "#FFFFFF",
+              color: "#1a1a1a",
+              borderColor: "#E5E7EB"
+            }
       }
     >
       <Icon />
