@@ -196,7 +196,32 @@ export default async function TradeOffEditPage({
                   ? row.data.operating_hours
                   : {},
               contact_form_enabled: row.data.contact_form_enabled ?? false,
-              visit_us_enabled: row.data.visit_us_enabled ?? false
+              visit_us_enabled: row.data.visit_us_enabled ?? false,
+              availability:
+                row.data.availability === "now" ||
+                row.data.availability === "tomorrow" ||
+                row.data.availability === "this_week" ||
+                row.data.availability === "next_week" ||
+                row.data.availability === "two_weeks" ||
+                row.data.availability === "later"
+                  ? row.data.availability
+                  : "",
+              headline_rate:
+                row.data.headline_rate &&
+                typeof row.data.headline_rate === "object" &&
+                typeof (row.data.headline_rate as { amount?: unknown }).amount === "number"
+                  ? {
+                      amount: (row.data.headline_rate as { amount: number }).amount,
+                      unit:
+                        typeof (row.data.headline_rate as { unit?: unknown }).unit === "string"
+                          ? ((row.data.headline_rate as { unit: string }).unit)
+                          : "per day",
+                      currency:
+                        typeof (row.data.headline_rate as { currency?: unknown }).currency === "string"
+                          ? ((row.data.headline_rate as { currency: string }).currency)
+                          : "GBP"
+                    }
+                  : { amount: 0, unit: "per day", currency: "GBP" }
             }}
           />
         ) : (

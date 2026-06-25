@@ -8,7 +8,6 @@
 // Mobile-first throughout.
 
 import type { Metadata } from "next";
-import { headers, cookies } from "next/headers";
 import { XratedHeader } from "@/components/xrated/XratedHeader";
 import { XratedFooter } from "@/components/xrated/XratedFooter";
 import {
@@ -18,11 +17,11 @@ import {
 } from "@/lib/supabase";
 import { BRAND, absolute } from "@/lib/seo";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
-import { getCountryFromRequest } from "@/lib/geo";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { LandingSearchBar } from "@/components/xrated/landing/LandingSearchBar";
 import { TradeIconChips } from "@/components/xrated/landing/TradeIconChips";
-import { AutoFlipJobsSpotlight } from "@/components/xrated/landing/AutoFlipJobsSpotlight";
+import { TradesOnStandby } from "@/components/xrated/landing/TradesOnStandby";
+import { availabilityRank } from "@/lib/xratedAvailability";
 import { TradeShowcaseGrid } from "@/components/xrated/landing/TradeShowcaseGrid";
 import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
 import { HowItWorks } from "@/components/xrated/landing/HowItWorks";
@@ -52,15 +51,9 @@ export const metadata: Metadata = {
 };
 
 export default async function TradeOffLandingPage() {
-  // Detect the visitor's country server-side so the spotlight can weight
-  // its display list ~70% local / ~30% international.
-  const [h, c] = await Promise.all([headers(), cookies()]);
-  const userCountry = getCountryFromRequest(h, c);
-
-  // Parallel fetches — listings (ranked) + spotlight jobs (top 20 so the
-  // country-weighted shuffle has enough to pick from) + headcount-only query
-  // for the live jobs stat so the hero number reflects the full live feed,
-  // not just what the spotlight cycles through.
+  // Parallel fetches — listings (ranked) + recent jobs (used only for the
+  // city/jobcount stats now that the spotlight is gone) + headcount-only
+  // query so the hero number reflects the full live feed.
   const [listingsRes, spotlightJobsRes, jobsCountRes] = await Promise.all([
     supabase
       .from("hammerex_trade_off_listings")
@@ -204,6 +197,17 @@ export default async function TradeOffLandingPage() {
       {/* Circular trade-icon chip row under the search bar */}
       <TradeIconChips />
 
+      {/* Trades On Standby — tradies who've opted-in with an availability
+          + headline rate. Soonest-available first, capped at 10. */}
+      <TradesOnStandby
+        listings={listings
+          .filter((l) => l.accepting_jobs === true && l.availability !== null)
+          .sort(
+            (a, b) => availabilityRank(a.availability) - availabilityRank(b.availability)
+          )
+          .slice(0, 10)}
+      />
+
       {/* Stats strip — single line, brand orange highlights. */}
       <section className="border-b border-neutral-200 bg-neutral-50">
         <div className="mx-auto max-w-6xl px-4 py-4">
@@ -218,8 +222,6 @@ export default async function TradeOffLandingPage() {
           </p>
         </div>
       </section>
-
-      <AutoFlipJobsSpotlight jobs={jobs} userCountry={userCountry} />
 
       <TradeShowcaseGrid countsBySlug={countsBySlug} />
 

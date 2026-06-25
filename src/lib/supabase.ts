@@ -267,6 +267,12 @@ export type HammerexTradeOffListing = {
     unit: string;
     description?: string | null;
   }[];
+  // "Trades On Standby" advertised availability — the editor enforces
+  // the allowed values; null = not opted into the standby feed.
+  availability: "now" | "tomorrow" | "this_week" | "next_week" | "two_weeks" | "later" | null;
+  // Headline starting rate shown on the standby card. Separate from
+  // priced_services so the tradie can advertise a single from-price.
+  headline_rate: { amount: number; unit: string; currency: string } | null;
   promo_text: string | null;
   joined_at: string;
   created_at: string;

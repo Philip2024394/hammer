@@ -77,7 +77,11 @@ const UPDATABLE_STRING_FIELDS = [
   "avatar_frame_style",
   "profile_placement",
   "running_marquee",
-  "promo_text"
+  "promo_text",
+  // "Trades On Standby" advertised availability. Editor enforces the
+  // allowed values; we accept any non-empty string and let the editor
+  // own validation (so adding a new option doesn't need an API change).
+  "availability"
 ] as const;
 
 const UPDATABLE_ARRAY_FIELDS = [
@@ -101,7 +105,12 @@ const UPDATABLE_BOOL_FIELDS = [
 //  - faq_items: { q, a }[]
 //  - priced_services: { name, image_url, price, unit }[]
 // We sanitise each before persisting.
-const UPDATABLE_JSON_FIELDS = ["operating_hours", "faq_items", "priced_services"] as const;
+const UPDATABLE_JSON_FIELDS = [
+  "operating_hours",
+  "faq_items",
+  "priced_services",
+  "headline_rate"
+] as const;
 
 const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 const TIME_RE = /^[0-2]\d:[0-5]\d$/;
@@ -146,6 +155,24 @@ function sanitisePricedServices(
     if (name && price > 0) out.push({ name, image_url, price, unit, description });
   }
   return out;
+}
+
+// headline_rate is the single starting price shown on the "Trades On
+// Standby" card. Returns null when the payload is malformed or empty
+// so the card simply omits the price column.
+function sanitiseHeadlineRate(
+  v: unknown
+): { amount: number; unit: string; currency: string } | null {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const rec = v as Record<string, unknown>;
+  const amountN = Number(rec.amount);
+  if (!Number.isFinite(amountN) || amountN <= 0) return null;
+  const amount = Math.round(amountN);
+  const unitRaw = typeof rec.unit === "string" ? rec.unit.trim() : "";
+  if (unitRaw.length === 0 || unitRaw.length > 30) return null;
+  const currencyRaw = typeof rec.currency === "string" ? rec.currency.trim().toUpperCase() : "";
+  if (currencyRaw.length !== 3) return null;
+  return { amount, unit: unitRaw.slice(0, 30), currency: currencyRaw };
 }
 
 function sanitiseFaqItems(v: unknown): { q: string; a: string }[] {
@@ -226,6 +253,8 @@ export async function POST(req: NextRequest) {
         patch[f] = sanitiseFaqItems(fieldsIn[f]);
       } else if (f === "priced_services") {
         patch[f] = sanitisePricedServices(fieldsIn[f]);
+      } else if (f === "headline_rate") {
+        patch[f] = sanitiseHeadlineRate(fieldsIn[f]);
       }
     }
   }

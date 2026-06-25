@@ -6,6 +6,7 @@
 // itself just collects + posts.
 
 import { useState } from "react";
+import { AVAILABILITY_OPTIONS } from "@/lib/xratedAvailability";
 
 type HoursSlot = { open: string; close: string } | null;
 type HoursMap = Record<string, HoursSlot>;
@@ -16,6 +17,12 @@ type PricedService = {
   price: number;
   unit: string;
   description: string;
+};
+
+type HeadlineRate = {
+  amount: number;
+  unit: string;
+  currency: string;
 };
 
 type Patch = {
@@ -38,7 +45,18 @@ type Patch = {
   operating_hours: HoursMap;
   contact_form_enabled: boolean;
   visit_us_enabled: boolean;
+  // "Trades On Standby" feed — empty string = not opted in.
+  availability: "" | "now" | "tomorrow" | "this_week" | "next_week" | "two_weeks" | "later";
+  headline_rate: HeadlineRate;
 };
+
+const HEADLINE_UNIT_OPTIONS = [
+  "per day",
+  "per m²",
+  "per hour",
+  "per project",
+  "from"
+] as const;
 
 const DAY_ROW: { key: keyof HoursMap; label: string }[] = [
   { key: "mon", label: "Mon" },
@@ -141,7 +159,29 @@ export function PremiumCustomisationPanel({
           description: (p.description ?? "").trim().slice(0, 500)
         }))
         .filter((p) => p.name.length > 0 && p.price > 0);
-      const payload: Patch = { ...state, services_offered, faq_items, priced_services };
+      // Headline rate: only persist when amount > 0 AND unit is set.
+      // Null tells the server "clear it", so the standby card omits the
+      // price column rather than rendering "£0 per day".
+      const headlineAmount = Number(state.headline_rate.amount) || 0;
+      const headlineUnit = (state.headline_rate.unit || "").trim();
+      const headline_rate =
+        headlineAmount > 0 && headlineUnit.length > 0
+          ? {
+              amount: headlineAmount,
+              unit: headlineUnit,
+              currency: state.headline_rate.currency || "GBP"
+            }
+          : null;
+      const payload = {
+        ...state,
+        services_offered,
+        faq_items,
+        priced_services,
+        // The API treats empty-string strings as "set to null", which is
+        // exactly the semantics we want for availability (opt-out).
+        availability: state.availability,
+        headline_rate
+      };
 
       const res = await fetch("/api/trade-off/update", {
         method: "POST",
@@ -276,6 +316,84 @@ export function PremiumCustomisationPanel({
             <span>{state.accepting_jobs ? "Yes — show as accepting" : "No — show as paused"}</span>
           </label>
         </Field>
+      </div>
+
+      {/* ─── Trades On Standby ─── */}
+      <div className="space-y-3 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+            Trades On Standby
+          </h3>
+          <p className="mt-1 text-[11px] text-brand-muted">
+            Show on the landing-page standby feed. Pick when you're free to
+            start and your headline starting rate. Leave availability blank
+            to stay out of the feed.
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Availability">
+            <select
+              value={state.availability}
+              onChange={(e) =>
+                set("availability", e.target.value as Patch["availability"])
+              }
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+            >
+              <option value="">— Not on standby —</option>
+              {AVAILABILITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Headline rate amount (£)">
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={state.headline_rate.amount || ""}
+              onChange={(e) =>
+                set("headline_rate", {
+                  ...state.headline_rate,
+                  amount: Number(e.target.value) || 0
+                })
+              }
+              placeholder="e.g. 280"
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+            />
+          </Field>
+          <Field label="Headline rate unit">
+            <select
+              value={state.headline_rate.unit}
+              onChange={(e) =>
+                set("headline_rate", {
+                  ...state.headline_rate,
+                  unit: e.target.value
+                })
+              }
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text focus:border-brand-accent focus:outline-none"
+            >
+              {HEADLINE_UNIT_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Currency">
+            {/* v1: GBP only — the column accepts any 3-letter code so the
+                field is wired for future expansion, but the picker stays
+                locked to keep the standby card consistent. */}
+            <select
+              value={state.headline_rate.currency}
+              disabled
+              className="h-11 w-full rounded-md border border-brand-line bg-brand-bg/60 px-3 text-sm text-brand-text opacity-70 focus:outline-none"
+            >
+              <option value="GBP">GBP (£)</option>
+            </select>
+          </Field>
+        </div>
       </div>
 
       {/* ─── Services offered ─── */}
