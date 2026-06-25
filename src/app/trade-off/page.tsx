@@ -20,7 +20,7 @@ import { BRAND, absolute } from "@/lib/seo";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
 import { getCountryFromRequest } from "@/lib/geo";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
-import { SearchHero } from "@/components/xrated/landing/SearchHero";
+import { LandingSearchBar } from "@/components/xrated/landing/LandingSearchBar";
 import { AutoFlipJobsSpotlight } from "@/components/xrated/landing/AutoFlipJobsSpotlight";
 import { TradeShowcaseGrid } from "@/components/xrated/landing/TradeShowcaseGrid";
 import { FeaturedTradiesRail } from "@/components/xrated/landing/FeaturedTradiesRail";
@@ -191,8 +191,14 @@ export default async function TradeOffLandingPage() {
         </div>
       </section>
 
-      {/* Search funnel sits below the banner. */}
-      <SearchHero />
+      {/* Long search bar sits flush UNDER the hero — overlapping by ~28px
+          so it looks anchored to the banner. Cities list is built from the
+          live tradies + jobs union so the dropdown reflects real supply. */}
+      <LandingSearchBar
+        cities={Array.from(citySet)
+          .map((c) => c.replace(/(^|\s|-)\w/g, (m) => m.toUpperCase()))
+          .sort()}
+      />
 
       {/* Stats strip — single line, brand orange highlights. */}
       <section className="border-b border-neutral-200 bg-neutral-50">

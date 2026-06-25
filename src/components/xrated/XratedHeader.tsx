@@ -1,20 +1,13 @@
 "use client";
 
 // Xrated Trades — standalone header for the public Trade Off surface.
-// Logo on the left. "List your trade" CTA on the right — but hidden on
-// individual tradesperson profile pages (`/trade/<slug>`) since those are
-// the "premium app" surface and the sign-up nudge is off-brand there.
-// Search lives BELOW the header on the landing page (see SearchHero).
+// Logo on the left. Right side: hamburger menu, profile, alerts bell.
+// 'List your trade' CTA removed per user direction — it lives in the
+// landing hero CTAs and the footer 'List your trade (free)' button.
 
-import { usePathname } from "next/navigation";
 import { XRATED_BRAND } from "@/lib/xratedTrades";
 
 export function XratedHeader() {
-  const pathname = usePathname() ?? "";
-  // /trade/<slug> = tradesperson profile (premium app surface) → hide CTA.
-  // /trade-off/* paths keep the CTA so customers can still sign up.
-  const isProfilePage = pathname.startsWith("/trade/");
-
   return (
     <header className="sticky top-0 z-30 bg-black/95 backdrop-blur">
       <div className="mx-auto flex h-[64px] max-w-6xl items-center justify-between gap-3 px-4 sm:h-[72px] sm:gap-4">
@@ -32,18 +25,51 @@ export function XratedHeader() {
           />
         </a>
 
-        {!isProfilePage && (
-          <a
-            href="/trade-off/signup"
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded-lg px-3 text-xs font-bold sm:h-12 sm:px-4 sm:text-sm"
-            style={{ color: XRATED_BRAND.accent, minHeight: 44 }}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Hamburger menu — opens main nav drawer */}
+          <button
+            type="button"
+            aria-label="Open menu"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
           >
-            <span className="sm:hidden">List your trade</span>
-            <span className="hidden sm:inline">
-              List your trade — free <span aria-hidden="true">→</span>
-            </span>
-          </a>
-        )}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+
+          {/* Profile avatar — placeholder silhouette until auth lands */}
+          <button
+            type="button"
+            aria-label="Account"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/20 bg-white/5 text-white/80 transition hover:border-white/40 hover:text-white"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </button>
+
+          {/* Alerts bell */}
+          <button
+            type="button"
+            aria-label="Alerts"
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+            {/* Unread dot — visible when alerts pending; placeholder shown
+                so the chrome has its full visual today */}
+            <span
+              className="absolute right-2 top-2 inline-block h-2 w-2 rounded-full"
+              style={{ background: XRATED_BRAND.accent }}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
       </div>
     </header>
   );
