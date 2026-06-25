@@ -17,6 +17,7 @@ import { effectiveTier, trialDaysRemaining } from "@/lib/xratedTrades";
 import { maybeExpireListingTier } from "@/lib/xratedTier";
 import { TradeOffForm, type TradeOffFormInitial } from "../../signup/TradeOffForm";
 import { PremiumCustomisationPanel } from "./PremiumCustomisationPanel";
+import type { HammerexXratedVoucher } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,21 @@ export default async function TradeOffEditPage({
     tier: row.data.tier ?? "standard",
     trial_expires_at: row.data.trial_expires_at ?? null
   });
+
+  // Welcome Knife voucher — best-effort fetch. Tradies who signed up
+  // before the voucher feature shipped (or whose listing went 'live' via
+  // an edit rather than first submit) may not have one yet; the card
+  // simply hides in that case.
+  const voucherRes = await supabaseAdmin
+    .from("hammerex_xrated_vouchers")
+    .select(
+      "id, listing_id, code, product_slug, status, issued_at, expires_at, redeemed_at, redeemed_order_ref, admin_note"
+    )
+    .eq("listing_id", row.data.id)
+    .order("issued_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const voucher = (voucherRes.data ?? null) as HammerexXratedVoucher | null;
   const trialDays =
     tier === "app_trial" ? trialDaysRemaining(row.data.trial_expires_at) : null;
   const upgradeHref = `/trade-off/upgrade?slug=${encodeURIComponent(slug)}&token=${encodeURIComponent(token)}`;
@@ -140,6 +156,12 @@ export default async function TradeOffEditPage({
           Manage your verified work →
         </a>
       </section>
+
+      {voucher && (
+        <section className="mx-auto max-w-3xl px-4 pb-6">
+          <WelcomeKnifeCard voucher={voucher} />
+        </section>
+      )}
 
       <section className="mx-auto max-w-3xl px-4 pb-6">
         <TierStatusCard
@@ -366,6 +388,77 @@ function TierStatusCard({
       >
         Start your 30-day free trial →
       </Link>
+    </div>
+  );
+}
+
+function WelcomeKnifeCard({ voucher }: { voucher: HammerexXratedVoucher }) {
+  const expiresAt = (() => {
+    const d = new Date(voucher.expires_at);
+    if (!Number.isFinite(d.getTime())) return voucher.expires_at;
+    return d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  })();
+  const STATUS_LABEL: Record<HammerexXratedVoucher["status"], string> = {
+    unused: "Unused",
+    redeemed: "Redeemed",
+    expired: "Expired",
+    revoked: "Revoked"
+  };
+  const STATUS_CLS: Record<HammerexXratedVoucher["status"], string> = {
+    unused: "border-[#FFB300] bg-[#FFB300]/15 text-[#FFB300]",
+    redeemed: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
+    expired: "border-brand-line bg-brand-surface text-brand-muted",
+    revoked: "border-red-500/50 bg-red-500/10 text-red-300"
+  };
+  const isUnused = voucher.status === "unused";
+  return (
+    <div
+      className={`rounded-xl border-2 p-4 ${
+        isUnused ? "border-[#FFB300] bg-[#FFB300]/10" : "border-brand-line bg-brand-surface"
+      }`}
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">
+          <span aria-hidden="true" className="mr-1">🎁</span>
+          Welcome gift voucher
+        </p>
+        <span
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-widest ${STATUS_CLS[voucher.status]}`}
+        >
+          {STATUS_LABEL[voucher.status]}
+        </span>
+      </div>
+      <p className="mt-2 text-sm font-bold text-brand-text">
+        FREE Hammerex Folding Safety Cutting Knife
+      </p>
+      <div className="mt-3 break-all rounded-lg border border-[#FFB300]/50 bg-black/80 px-3 py-2 text-center font-mono text-base font-extrabold tracking-widest text-[#FFB300] sm:text-lg">
+        {voucher.code}
+      </div>
+      {isUnused ? (
+        <p className="mt-3 text-xs text-brand-muted">
+          Use this code on your next Hammerex order. Add it in the
+          &ldquo;Voucher / promo code&rdquo; field at checkout — we&rsquo;ll
+          throw a free knife in your box. No minimum spend. Expires {expiresAt}.
+        </p>
+      ) : voucher.status === "redeemed" ? (
+        <p className="mt-3 text-xs text-brand-muted">
+          Redeemed
+          {voucher.redeemed_order_ref ? ` on order ${voucher.redeemed_order_ref}` : ""}
+          {voucher.redeemed_at
+            ? ` on ${new Date(voucher.redeemed_at).toLocaleDateString("en-GB")}`
+            : ""}
+          . Thanks for shopping Hammerex.
+        </p>
+      ) : (
+        <p className="mt-3 text-xs text-brand-muted">
+          This voucher is no longer redeemable. Message Hammerex on WhatsApp
+          if you think this is a mistake.
+        </p>
+      )}
     </div>
   );
 }

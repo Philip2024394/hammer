@@ -23,6 +23,7 @@ export default function CheckoutPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [voucherCode, setVoucherCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -48,6 +49,7 @@ export default function CheckoutPage() {
         whatsapp: whatsapp.trim(),
         country: country.trim(),
         address: address.trim(),
+        voucher_code: voucherCode.trim() || null,
         lines: lines.map((l) => ({
           productId: l.productId,
           slug: l.slug,
@@ -139,6 +141,23 @@ export default function CheckoutPage() {
               <Field label={t("checkout.phone")}     icon={<Phone size={14} />}  value={whatsapp} onChange={setWhatsapp} placeholder="+44 7700 900000" inputMode="tel" type="tel" autoComplete="tel" name="phone" />
               <Field label={t("checkout.country")}           icon={<Globe size={14} />}  value={country}  onChange={setCountry}  placeholder="United Kingdom" autoComplete="country-name" name="country" />
               <Field label={t("checkout.deliveryAddress")} icon={<MapPin size={14} />} value={address} onChange={setAddress} placeholder="123 High Street, London, EC1A 1BB" multiline autoComplete="street-address" name="address" />
+              <label className="flex flex-col gap-1">
+                <span className="flex items-center gap-1.5 text-xs font-medium text-brand-muted">
+                  <span aria-hidden="true">🎁</span>
+                  Got a voucher? Enter code (optional)
+                </span>
+                <input
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  placeholder="XRATED-XXXX-XXXX"
+                  autoComplete="off"
+                  name="voucher_code"
+                  className="h-12 rounded-full border border-brand-line bg-brand-surface px-4 font-mono text-sm uppercase tracking-widest text-brand-text placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+                />
+                <span className="text-xs text-brand-muted">
+                  Xrated Trades members got one on signup. We&rsquo;ll honour it on this order.
+                </span>
+              </label>
             </fieldset>
 
             {err && (

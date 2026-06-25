@@ -246,14 +246,18 @@ export function TradeOffForm({
           slug?: string;
           edit_token?: string;
           status?: string;
+          voucher_code?: string | null;
           error?: string;
         };
         if (!body.ok || !body.slug || !body.edit_token) {
           setErr(body.error || "Could not save. Please try again.");
           return;
         }
+        const voucherSuffix = body.voucher_code
+          ? `&voucher=${encodeURIComponent(body.voucher_code)}`
+          : "";
         router.push(
-          `/trade-off/signup/done?slug=${encodeURIComponent(body.slug)}&token=${encodeURIComponent(body.edit_token)}&status=${encodeURIComponent(body.status ?? "draft")}`
+          `/trade-off/signup/done?slug=${encodeURIComponent(body.slug)}&token=${encodeURIComponent(body.edit_token)}&status=${encodeURIComponent(body.status ?? "draft")}${voucherSuffix}`
         );
       } else {
         const res = await fetch("/api/trade-off/update", {

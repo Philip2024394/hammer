@@ -14,6 +14,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { normaliseVoucherCode, WELCOME_KNIFE_NAME } from "@/lib/xratedVoucher";
 
 export const runtime = "nodejs";
 
@@ -102,6 +103,43 @@ export async function POST(req: NextRequest) {
   }));
   const subtotal_idr = lines.reduce((sum, l) => sum + l.unitPriceIdr * l.qty, 0);
 
+  // Optional Welcome Knife voucher. We DO NOT mark the voucher redeemed
+  // here — admin marks it manually from /admin/xrated/vouchers when they
+  // actually fulfil the order. This avoids vouchers getting burnt on
+  // quote requests that never get paid. We do, however, append a short
+  // structured note to admin_notes so the order-desk sees it immediately.
+  const rawVoucher = normaliseVoucherCode(body.voucher_code);
+  let voucherNote: string | null = null;
+  if (rawVoucher) {
+    const v = await supabaseAdmin
+      .from("hammerex_xrated_vouchers")
+      .select("id, code, status, expires_at, listing_id")
+      .eq("code", rawVoucher)
+      .maybeSingle();
+    if (v.data) {
+      // Surface trader display name + slug so admin can confirm at a glance.
+      const listing = await supabaseAdmin
+        .from("hammerex_trade_off_listings")
+        .select("display_name, slug")
+        .eq("id", v.data.listing_id)
+        .maybeSingle();
+      const traderTag = listing.data
+        ? `${listing.data.display_name} @ /trade/${listing.data.slug}`
+        : `listing ${v.data.listing_id}`;
+      const expired =
+        v.data.expires_at && new Date(v.data.expires_at).getTime() < Date.now();
+      if (v.data.status === "unused" && !expired) {
+        voucherNote = `WELCOME-KNIFE VOUCHER: ${v.data.code} (${traderTag}) — add 1× ${WELCOME_KNIFE_NAME} free.`;
+      } else {
+        voucherNote = `WELCOME-KNIFE VOUCHER (NOT REDEEMABLE): ${v.data.code} status=${v.data.status}${expired ? " expired" : ""} (${traderTag}).`;
+      }
+    } else {
+      // Buyer typed something but it didn't match any voucher in our DB.
+      // Log it for admin so they can ping the buyer if it was a typo.
+      voucherNote = `WELCOME-KNIFE VOUCHER (UNKNOWN CODE): ${rawVoucher} — buyer-typed, no match in vouchers table.`;
+    }
+  }
+
   // Generate a reference and retry on the rare collision (unique constraint).
   let reference = generateReference();
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -116,7 +154,8 @@ export async function POST(req: NextRequest) {
         buyer_address: address.slice(0, 1000),
         line_items: lines,
         subtotal_idr,
-        status: "pending"
+        status: "pending",
+        admin_notes: voucherNote
       })
       .select("id, reference")
       .single();

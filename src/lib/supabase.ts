@@ -369,6 +369,19 @@ export type HammerexTradeOffProject = {
   updated_at: string;
 };
 
+export type HammerexXratedVoucher = {
+  id: string;
+  listing_id: string;
+  code: string;
+  product_slug: string;
+  status: "unused" | "redeemed" | "expired" | "revoked";
+  issued_at: string;
+  expires_at: string;
+  redeemed_at: string | null;
+  redeemed_order_ref: string | null;
+  admin_note: string | null;
+};
+
 export type HammerexShippingZone = {
   id: string;
   country_code: string;

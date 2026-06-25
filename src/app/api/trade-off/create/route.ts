@@ -22,6 +22,10 @@ import {
 import { recomputeHammerexStandard } from "@/lib/tradeOffStandard";
 import { geocodeListing } from "@/lib/tradeOffGeocode";
 import { startTrialFor } from "@/lib/xratedTier";
+import {
+  generateVoucherCode,
+  WELCOME_KNIFE_PRODUCT_SLUG
+} from "@/lib/xratedVoucher";
 
 export const runtime = "nodejs";
 
@@ -191,6 +195,43 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error("[trade-off/create] recomputeHammerexStandard failed:", err);
       }
+
+      // Issue the Welcome Knife voucher when the listing goes live on
+      // first submit. Best-effort — failure here MUST NOT block the
+      // signup response. Retry up to 3x on the rare unique-code collision.
+      let voucherCode: string | null = null;
+      if (insert.data.status === "live") {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const code = generateVoucherCode();
+          try {
+            const voucherInsert = await supabaseAdmin
+              .from("hammerex_xrated_vouchers")
+              .insert({
+                listing_id: insert.data.id,
+                code,
+                product_slug: WELCOME_KNIFE_PRODUCT_SLUG
+              })
+              .select("code")
+              .maybeSingle();
+            if (voucherInsert.data) {
+              voucherCode = voucherInsert.data.code;
+              break;
+            }
+            if (voucherInsert.error?.code !== "23505") {
+              console.error(
+                "[trade-off/create] voucher insert failed:",
+                voucherInsert.error
+              );
+              break;
+            }
+            // 23505 = unique violation — retry with a fresh code.
+          } catch (err) {
+            console.error("[trade-off/create] voucher insert threw:", err);
+            break;
+          }
+        }
+      }
+
       return NextResponse.json({
         ok: true,
         slug: insert.data.slug,
@@ -199,6 +240,7 @@ export async function POST(req: NextRequest) {
         tier: trial ? "app_trial" : "standard",
         trial_started_at: trial?.trial_started_at ?? null,
         trial_expires_at: trial?.trial_expires_at ?? null,
+        voucher_code: voucherCode,
         missing
       });
     }

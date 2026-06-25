@@ -14,6 +14,7 @@ const NAV_LINKS: Array<{ href: string; label: string; group?: string }> = [
   { href: "/admin/trade-orders",    label: "Trade Orders" },
   { href: "/admin/xrated",          label: "Xrated Trades", group: "Xrated" },
   { href: "/admin/xrated/jobs",     label: "Xrated Jobs",  group: "Xrated" },
+  { href: "/admin/xrated/vouchers", label: "Vouchers",     group: "Xrated" },
   { href: "/admin/pricing",         label: "Pricing" },
   { href: "/admin/reviews",         label: "Reviews" },
   { href: "/admin/world",           label: "Live map" },

@@ -18,6 +18,7 @@ function Inner() {
   const token = params.get("token") ?? "";
   const status = (params.get("status") ?? "draft").toLowerCase();
   const isEdit = params.get("edit") === "1";
+  const voucher = (params.get("voucher") ?? "").trim();
 
   const isLive = status === "live";
   const editPath = `/trade-off/edit/${slug}?token=${token}`;
@@ -30,6 +31,31 @@ function Inner() {
 
   const [copied, setCopied] = useState(false);
   const [profileCopied, setProfileCopied] = useState(false);
+  const [voucherCopied, setVoucherCopied] = useState(false);
+
+  // Expiry shown to the tradie is the same +12 months horizon the API
+  // applies, formatted in en-GB for readability (matches the "voucher
+  // expires" copy in the dashboard card).
+  const expiryDate = (() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 12);
+    return d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  })();
+
+  async function copyVoucher() {
+    if (!voucher) return;
+    try {
+      await navigator.clipboard.writeText(voucher);
+      setVoucherCopied(true);
+      setTimeout(() => setVoucherCopied(false), 2500);
+    } catch {
+      window.prompt("Copy this voucher code:", voucher);
+    }
+  }
 
   async function copyLink() {
     try {
@@ -56,6 +82,43 @@ function Inner() {
     <main className="min-h-screen bg-brand-bg text-brand-text">
       <XratedHeader />
       <section className="mx-auto max-w-2xl px-4 pb-16 pt-12">
+        {voucher && (
+          <div className="mb-6 rounded-2xl border-2 border-[#FFB300] bg-[#FFB300]/10 p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#FFB300]">
+              Your welcome gift
+            </p>
+            <h2 className="mt-2 text-2xl font-extrabold leading-tight text-brand-text sm:text-3xl">
+              <span aria-hidden="true" className="mr-2">🎁</span>
+              Welcome gift — a FREE Hammerex Folding Safety Cutting Knife
+            </h2>
+            <p className="mt-3 text-xs text-brand-muted">
+              Use this code on your next Hammerex order. Add it in the
+              &ldquo;Voucher / promo code&rdquo; field at checkout — we&rsquo;ll
+              throw a free knife in your box. No minimum spend.
+            </p>
+            <div className="mt-4 break-all rounded-lg border-2 border-[#FFB300] bg-black/80 px-4 py-3 text-center font-mono text-lg font-extrabold tracking-widest text-[#FFB300] sm:text-2xl">
+              {voucher}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={copyVoucher}
+                className="h-11 rounded-lg bg-[#FFB300] px-5 text-xs font-bold text-black transition hover:opacity-90"
+              >
+                {voucherCopied ? "Copied!" : "Copy voucher code"}
+              </button>
+              <a
+                href="/"
+                className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-surface px-5 text-xs font-semibold text-brand-text transition hover:border-[#FFB300]"
+              >
+                Shop Hammerex tools →
+              </a>
+              <span className="text-xs text-brand-muted">
+                Expires {expiryDate}
+              </span>
+            </div>
+          </div>
+        )}
         <div
           className={`rounded-2xl border p-6 ${
             isLive
