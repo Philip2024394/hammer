@@ -17,7 +17,7 @@ export function XratedHeader() {
 
   return (
     <header className="sticky top-0 z-30 bg-black/95 backdrop-blur">
-      <div className="mx-auto flex h-[96px] max-w-6xl items-center justify-between gap-3 px-4 sm:h-[112px] sm:gap-4">
+      <div className="mx-auto flex h-[64px] max-w-6xl items-center justify-between gap-3 px-4 sm:h-[72px] sm:gap-4">
         <a
           href="/trade-off"
           aria-label={`${XRATED_BRAND.name} home`}
@@ -27,7 +27,7 @@ export function XratedHeader() {
           <img
             src={XRATED_BRAND.logoUrl}
             alt={XRATED_BRAND.name}
-            className="block h-20 w-auto object-contain sm:h-24"
+            className="block h-10 w-auto object-contain sm:h-12"
             style={{ background: "transparent" }}
           />
         </a>
