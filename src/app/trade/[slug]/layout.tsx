@@ -17,7 +17,7 @@ export default function TradeSlugLayout({
 }) {
   return (
     <div
-      className="min-h-screen bg-white text-neutral-900"
+      className="flex min-h-screen flex-col bg-white text-neutral-900"
       style={
         {
           "--brand-bg": "255 255 255",

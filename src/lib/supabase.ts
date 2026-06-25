@@ -298,6 +298,9 @@ export type HammerexTradeOffListing = {
   // Annual paid members can upload a custom app-page hero banner that
   // overrides the per-trade default. Null for everyone else.
   custom_app_hero_url: string | null;
+  // X-Rated trust level admin override (3-5). NULL = auto-derive from
+  // current listing data (see src/lib/xratedTrustLevel.ts).
+  trust_level_override: number | null;
   joined_at: string;
   created_at: string;
   updated_at: string;

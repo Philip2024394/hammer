@@ -101,7 +101,7 @@ export function OperatingHoursPanel({
               >
                 {label}
                 {isToday && (
-                  <span className="ml-2 text-[11px] font-bold uppercase tracking-wide opacity-80">
+                  <span className="ml-2 text-xs font-bold uppercase tracking-wide opacity-80">
                     Today
                   </span>
                 )}

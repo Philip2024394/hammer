@@ -44,6 +44,25 @@ export async function POST(req: NextRequest) {
   const sender_email = s(body.sender_email);
   const sender_phone = s(body.sender_phone);
   const message = s(body.message);
+  const postcode = s(body.postcode).toUpperCase().replace(/\s+/g, " ");
+  const project_type = s(body.project_type);
+  const project_stage = s(body.project_stage);
+  const earliest_start = s(body.earliest_start);
+  const photo_urls = Array.isArray(body.photo_urls)
+    ? body.photo_urls
+        .filter((u: unknown): u is string => typeof u === "string")
+        .slice(0, 6)
+    : [];
+
+  const PROJECT_TYPES = new Set(["new_build", "renovation", "repair"]);
+  const PROJECT_STAGES = new Set([
+    "ready_to_book",
+    "comparing_quotes",
+    "just_researching"
+  ]);
+  // UK postcode — partial-format permissive, must contain at least
+  // one digit and one letter so "1234" and "ABCD" don't sneak through.
+  const UK_POSTCODE_RE = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/;
 
   if (!listing_id) {
     return NextResponse.json(
@@ -66,6 +85,24 @@ export async function POST(req: NextRequest) {
   if (message.length < 50 || message.length > 500) {
     return NextResponse.json(
       { ok: false, error: "Message must be 50–500 characters." },
+      { status: 400 }
+    );
+  }
+  if (postcode && !UK_POSTCODE_RE.test(postcode)) {
+    return NextResponse.json(
+      { ok: false, error: "Please enter a valid UK postcode." },
+      { status: 400 }
+    );
+  }
+  if (project_type && !PROJECT_TYPES.has(project_type)) {
+    return NextResponse.json(
+      { ok: false, error: "Invalid project type." },
+      { status: 400 }
+    );
+  }
+  if (project_stage && !PROJECT_STAGES.has(project_stage)) {
+    return NextResponse.json(
+      { ok: false, error: "Invalid project stage." },
       { status: 400 }
     );
   }
@@ -100,7 +137,12 @@ export async function POST(req: NextRequest) {
       sender_email,
       sender_phone: sender_phone || null,
       message,
-      ip_hash
+      ip_hash,
+      postcode: postcode || null,
+      project_type: project_type || null,
+      project_stage: project_stage || null,
+      earliest_start: earliest_start || null,
+      photo_urls
     })
     .select("id")
     .maybeSingle();
