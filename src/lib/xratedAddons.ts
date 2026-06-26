@@ -106,6 +106,40 @@ export const XRATED_ADDONS: XratedAddon[] = [
     ]
   },
   {
+    slug: "job_diary",
+    name: "Job Diary",
+    tagline: "Live updates from every job — built-in social proof",
+    summary:
+      "Turn every project you run into a public update stream. Post photos and a quick status (running to plan / weather delay / scope changed), share each post to your socials with a tap, and let new customers see you're genuinely busy. Completed projects scroll into a swipeable strip under your profile hero.",
+    glyph: "📔",
+    pricing: { kind: "paid", monthly_pence: 400 },
+    availability: "coming_soon",
+    hasEditor: false,
+    includedWithPaid: false,
+    benefits: [
+      "Post-by-post job updates with status chips and photos",
+      "One-tap share to Instagram / Facebook / TikTok / X",
+      "Completed projects auto-archive into a swipeable hero strip"
+    ]
+  },
+  {
+    slug: "wholesale_mode",
+    name: "Wholesale Mode",
+    tagline: "Tiered pricing + distance-based delivery for merchants",
+    summary:
+      "Built for builder's merchants, materials yards, and tool suppliers. Set bulk pricing tiers per product, define a free-delivery radius from your yard, and charge a per-km or banded rate beyond it. Customers tap 'Set my location' to see real delivery costs added straight into their cart — no more 'phone for quote' friction.",
+    glyph: "🚚",
+    pricing: { kind: "paid", monthly_pence: 700 },
+    availability: "coming_soon",
+    hasEditor: false,
+    includedWithPaid: false,
+    benefits: [
+      "Bulk tiers — e.g. 10 sheets £8 each, 50 sheets £6 each",
+      "Free-delivery radius from your address — postcode whitelist optional",
+      "Customer 'Set my location' → live delivery quote into cart"
+    ]
+  },
+  {
     slug: "custom_domain",
     name: "Custom domain",
     tagline: "Use your own domain — yourtrade.co.uk",
