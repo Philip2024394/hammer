@@ -5,13 +5,68 @@
 // yellow-bordered highlight so the eye always knows which column is
 // "this one" vs "the alternatives".
 //
-// Siblings are pre-picked by the tradesperson on the dashboard
-// (product.compare_with). Phase 1 supports 1-2 siblings — the modal
-// scrolls horizontally on mobile if more are passed.
+// Sibling source:
+//   – Phase 1: tradesperson hand-picked product.compare_with → passed in
+//              as the `siblings` prop.
+//   – Phase 2: if the prop list is empty we fall back to the auto-pick
+//              endpoint /api/trade-off/products/siblings which scores
+//              candidates by same-category + price proximity. Either
+//              path empty + zero auto-picks → friendly empty state.
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { HammerexXratedProduct } from "@/lib/supabase";
 import { addItem, formatGbp } from "@/lib/xratedCart";
+
+// Light subset of HammerexXratedProduct returned by the siblings API.
+// Kept narrow so the API can stay read-only (no need to fetch unused
+// columns) and the column renderer only relies on what's present.
+type AutoSibling = {
+  id: string;
+  name: string;
+  cover_url: string | null;
+  price_pence: number;
+  dispatch_days: number | null;
+  stock_count: number | null;
+  category: string | null;
+  unit: string | null;
+};
+
+type ColumnProduct = {
+  id: string;
+  name: string;
+  cover_url: string | null;
+  price_pence: number;
+  dispatch_days: number | null;
+  stock_count: number | null;
+  description: string | null;
+  unit: string | null;
+};
+
+function fromFullProduct(p: HammerexXratedProduct): ColumnProduct {
+  return {
+    id: p.id,
+    name: p.name,
+    cover_url: p.cover_url,
+    price_pence: p.price_pence,
+    dispatch_days: p.dispatch_days,
+    stock_count: p.stock_count,
+    description: p.description,
+    unit: p.unit
+  };
+}
+
+function fromAutoSibling(s: AutoSibling): ColumnProduct {
+  return {
+    id: s.id,
+    name: s.name,
+    cover_url: s.cover_url,
+    price_pence: s.price_pence,
+    dispatch_days: s.dispatch_days,
+    stock_count: s.stock_count,
+    description: null,
+    unit: s.unit
+  };
+}
 
 export function CompareProductsModal({
   anchor,
@@ -39,10 +94,54 @@ export function CompareProductsModal({
     };
   }, [onClose]);
 
-  const columns: Array<{ product: HammerexXratedProduct; isAnchor: boolean }> = [
-    { product: anchor, isAnchor: true },
-    ...siblings.map((p) => ({ product: p, isAnchor: false }))
+  const hasManualSiblings = siblings.length > 0;
+  const [autoSiblings, setAutoSiblings] = useState<AutoSibling[] | null>(null);
+  const [autoLoaded, setAutoLoaded] = useState(false);
+
+  // Only fetch the auto-pick fallback when the tradesperson hasn't
+  // hand-picked siblings — otherwise we'd waste a request on a list
+  // we're not going to render.
+  useEffect(() => {
+    if (hasManualSiblings) {
+      setAutoLoaded(true);
+      return;
+    }
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(
+          `/api/trade-off/products/siblings?product_id=${encodeURIComponent(anchor.id)}&limit=3`,
+          { method: "GET" }
+        );
+        const json = (await res.json()) as {
+          ok: boolean;
+          siblings?: AutoSibling[];
+        };
+        if (cancelled) return;
+        setAutoSiblings(json.ok ? json.siblings ?? [] : []);
+      } catch {
+        if (!cancelled) setAutoSiblings([]);
+      } finally {
+        if (!cancelled) setAutoLoaded(true);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [anchor.id, hasManualSiblings]);
+
+  const siblingColumns: ColumnProduct[] = hasManualSiblings
+    ? siblings.map(fromFullProduct)
+    : (autoSiblings ?? []).map(fromAutoSibling);
+
+  const columns: Array<{ product: ColumnProduct; isAnchor: boolean }> = [
+    { product: fromFullProduct(anchor), isAnchor: true },
+    ...siblingColumns.map((p) => ({ product: p, isAnchor: false }))
   ];
+
+  const noSiblingsToShow =
+    !hasManualSiblings && autoLoaded && siblingColumns.length === 0;
 
   return (
     <div
@@ -65,7 +164,9 @@ export function CompareProductsModal({
               Compare
             </p>
             <p className="mt-0.5 text-sm font-extrabold text-neutral-900">
-              {columns.length} products side by side
+              {noSiblingsToShow
+                ? "Just this product so far"
+                : `${columns.length} products side by side`}
             </p>
           </div>
           <button
@@ -82,7 +183,25 @@ export function CompareProductsModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 sm:p-5">
-          <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:gap-4 sm:overflow-visible" style={gridStyle(columns.length)}>
+          {!hasManualSiblings && !autoLoaded && (
+            <p className="px-3 py-6 text-center text-[13px] text-neutral-500">
+              Finding similar products…
+            </p>
+          )}
+          {noSiblingsToShow && (
+            <div className="mx-auto max-w-md px-3 py-6 text-center">
+              <p className="text-[13px] font-bold text-neutral-700">
+                No similar products to compare yet.
+              </p>
+              <p className="mt-1 text-[13px] text-neutral-500">
+                Once this shop adds more, they&rsquo;ll appear here automatically.
+              </p>
+            </div>
+          )}
+          <div
+            className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:gap-4 sm:overflow-visible"
+            style={gridStyle(columns.length)}
+          >
             {columns.map(({ product, isAnchor }) => (
               <CompareColumn
                 key={product.id}
@@ -115,7 +234,7 @@ function CompareColumn({
   themeColor,
   onAdded
 }: {
-  product: HammerexXratedProduct;
+  product: ColumnProduct;
   isAnchor: boolean;
   slug: string;
   themeColor: string;
@@ -129,7 +248,8 @@ function CompareColumn({
       product_id: product.id,
       name: product.name,
       price_pence: product.price_pence,
-      cover_url: product.cover_url
+      cover_url: product.cover_url,
+      unit: product.unit ?? null
     });
     onAdded();
   }
@@ -161,7 +281,7 @@ function CompareColumn({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
+          <div className="flex h-full w-full items-center justify-center text-[13px] text-neutral-400">
             No image
           </div>
         )}
@@ -171,6 +291,11 @@ function CompareColumn({
       </p>
       <p className="text-lg font-extrabold text-neutral-900">
         {formatGbp(product.price_pence)}
+        {product.unit && (
+          <span className="ml-1 text-[13px] font-bold text-neutral-500">
+            {product.unit}
+          </span>
+        )}
       </p>
       <dl className="flex flex-col gap-1.5 text-[13px]">
         <Row label="Stock" value={stockLabel(product.stock_count)} />

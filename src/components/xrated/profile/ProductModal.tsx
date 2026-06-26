@@ -22,6 +22,16 @@
 // the chart face renders its own "Back to product" button at the top
 // of the scrollable area, plus the action row's outline button doubles
 // as the back path so customers always have two ways back.
+//
+// Phase 2 additions:
+//   – Variant picker (size / colour chips) shown ABOVE the description
+//     when product.variants.length > 0. Picking a chip live-updates the
+//     displayed price (price_pence + price_delta_pence). The action row
+//     is disabled until a chip is picked. Cart-add sends variant_label
+//     so two sizes of the same product cohabit as separate cart lines.
+//   – Size chart sub-overlay layered on top of the modal body with
+//     `absolute inset-0 z-10` (no second portal) when size_chart_url is
+//     set. "View size chart" button lives next to the variant eyebrow.
 
 import { useEffect, useMemo, useState } from "react";
 import type { HammerexXratedProduct } from "@/lib/supabase";
@@ -36,6 +46,35 @@ import {
 // star row above the price when the product has at least 3 live reviews
 // so a single 5-star outlier doesn't game the surface.
 const RATING_BADGE_MIN = 3;
+
+type Variant = HammerexXratedProduct["variants"][number];
+
+function variantStockLabel(stock: number | null | undefined): string {
+  if (stock === null || stock === undefined) return "Available";
+  if (stock <= 0) return "Out of stock";
+  if (stock <= 5) return `${stock} left`;
+  return "In stock";
+}
+
+function variantStockTone(stock: number | null | undefined): string {
+  if (stock === null || stock === undefined) return "text-neutral-500";
+  if (stock <= 0) return "text-red-600";
+  if (stock <= 5) return "text-orange-600";
+  return "text-emerald-700";
+}
+
+function formatDelta(delta: number | null | undefined): string {
+  if (!delta || delta === 0) return "";
+  const sign = delta > 0 ? "+" : "−";
+  const abs = Math.abs(delta);
+  const pounds = abs / 100;
+  // Drop trailing zero pence on whole-pound deltas for chip compactness:
+  // "+£2" instead of "+£2.00" reads cleaner at 13px.
+  const display = pounds % 1 === 0
+    ? `£${pounds}`
+    : `£${pounds.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return ` · ${sign}${display}`;
+}
 
 export function ProductModal({
   product,
@@ -62,18 +101,33 @@ export function ProductModal({
   const [flipped, setFlipped] = useState(false);
   const [stats, setStats] = useState<ProductStats | null>(null);
   const [statsLoaded, setStatsLoaded] = useState(false);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
+  const [sizeChartOpen, setSizeChartOpen] = useState(false);
+
+  const variants = product.variants ?? [];
+  const hasVariants = variants.length > 0;
+  const variantAxis: "size" | "colour" =
+    hasVariants ? variants[0].axis : "size";
+  const selectedVariant: Variant | null =
+    selectedVariantIdx !== null ? variants[selectedVariantIdx] ?? null : null;
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (sizeChartOpen) {
+          setSizeChartOpen(false);
+          return;
+        }
+        onClose();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
+  }, [onClose, sizeChartOpen]);
 
   // Fetch product review stats on mount. Cached in component state so
   // flipping back and forth never re-fires the request, and the API
@@ -108,19 +162,43 @@ export function ProductModal({
     };
   }, [product.id]);
 
-  const outOfStock = product.stock_count !== null && product.stock_count <= 0;
-  const canCompare = siblings.length > 0;
+  // Parent-level stock + variant-level stock combine — if the parent is
+  // OOS we treat the whole product as OOS; if a specific variant is OOS
+  // we disable that chip; if the customer hasn't picked yet we require
+  // the pick before enabling Add-to-enquiry.
+  const parentOutOfStock =
+    product.stock_count !== null && product.stock_count <= 0;
+  const variantOutOfStock =
+    selectedVariant !== null &&
+    selectedVariant.stock_count !== undefined &&
+    selectedVariant.stock_count !== null &&
+    selectedVariant.stock_count <= 0;
+  const outOfStock = parentOutOfStock || variantOutOfStock;
+  const needsVariantPick = hasVariants && selectedVariantIdx === null;
+  const addDisabled = outOfStock || needsVariantPick;
+
+  const computedPricePence = useMemo(() => {
+    const delta = selectedVariant?.price_delta_pence ?? 0;
+    return product.price_pence + (delta ?? 0);
+  }, [product.price_pence, selectedVariant]);
+
+  // Phase 2: Compare is always available. Manual siblings render
+  // immediately; if there are none the modal auto-fetches from the
+  // /siblings endpoint and renders an empty state if zero matches.
+  const canCompare = true;
+
   const reviewCount = stats?.total ?? 0;
   const hasReviews = reviewCount > 0;
   const showStarRow = reviewCount >= RATING_BADGE_MIN && stats?.overall_avg != null;
 
   function handleAdd() {
-    if (outOfStock) return;
+    if (addDisabled) return;
     const next = addItem(slug, {
       product_id: product.id,
       name: product.name,
-      price_pence: product.price_pence,
-      cover_url: product.cover_url
+      price_pence: computedPricePence,
+      cover_url: product.cover_url,
+      variant_label: selectedVariant?.label ?? null
     });
     setToast(`Added — ${cartItemCount(next)} in cart`);
     window.setTimeout(() => {
@@ -129,10 +207,14 @@ export function ProductModal({
   }
 
   // Pre-read the cart for the modal-open lifetime so the "already in
-  // cart" badge can show the customer they already added this once.
+  // cart" badge can show the customer they already added this once. We
+  // sum across variants since the customer cares about total qty of
+  // "this product" regardless of which size/colour they picked.
   const currentQty = useMemo(() => {
     const state = readCart(slug);
-    return state.items.find((it) => it.product_id === product.id)?.qty ?? 0;
+    return state.items
+      .filter((it) => it.product_id === product.id)
+      .reduce((acc, it) => acc + it.qty, 0);
   }, [slug, product.id]);
 
   const activeImage = images[active];
@@ -188,6 +270,14 @@ export function ProductModal({
               overallAvg={stats?.overall_avg ?? null}
               reviewCount={reviewCount}
               onTapStars={() => setFlipped(true)}
+              variants={variants}
+              variantAxis={variantAxis}
+              selectedVariantIdx={selectedVariantIdx}
+              onPickVariant={setSelectedVariantIdx}
+              computedPricePence={computedPricePence}
+              selectedVariant={selectedVariant}
+              onOpenSizeChart={() => setSizeChartOpen(true)}
+              hasSizeChart={Boolean(product.size_chart_url)}
             />
           </div>
 
@@ -220,30 +310,37 @@ export function ProductModal({
               </button>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={handleAdd}
-                  disabled={outOfStock}
-                  aria-disabled={outOfStock}
-                  className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl text-sm font-extrabold uppercase tracking-wider text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-                  style={{
-                    background: outOfStock ? "#737373" : "#0F7A3F",
-                    boxShadow: outOfStock ? undefined : "0 8px 22px rgba(15,122,63,0.45)"
-                  }}
-                >
-                  {outOfStock ? (
-                    <>Out of stock — message on WhatsApp</>
-                  ) : (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="9" cy="21" r="1" />
-                        <circle cx="20" cy="21" r="1" />
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                      </svg>
-                      Add to enquiry
-                    </>
+                <div className="flex flex-1 flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    disabled={addDisabled}
+                    aria-disabled={addDisabled}
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-extrabold uppercase tracking-wider text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                    style={{
+                      background: outOfStock ? "#737373" : "#0F7A3F",
+                      boxShadow: outOfStock ? undefined : "0 8px 22px rgba(15,122,63,0.45)"
+                    }}
+                  >
+                    {outOfStock ? (
+                      <>Out of stock — message on WhatsApp</>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="9" cy="21" r="1" />
+                          <circle cx="20" cy="21" r="1" />
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                        Add to enquiry
+                      </>
+                    )}
+                  </button>
+                  {needsVariantPick && !outOfStock && (
+                    <p className="text-center text-[13px] font-bold text-neutral-500">
+                      Choose a {variantAxis} above
+                    </p>
                   )}
-                </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => hasReviews && setFlipped(true)}
@@ -285,6 +382,14 @@ export function ProductModal({
               </span>
             </div>
           )}
+
+          {sizeChartOpen && product.size_chart_url && (
+            <SizeChartOverlay
+              imageUrl={product.size_chart_url}
+              unit={product.size_chart_unit}
+              onClose={() => setSizeChartOpen(false)}
+            />
+          )}
         </div>
       </div>
 
@@ -312,7 +417,15 @@ function ProductDetailView({
   showStarRow,
   overallAvg,
   reviewCount,
-  onTapStars
+  onTapStars,
+  variants,
+  variantAxis,
+  selectedVariantIdx,
+  onPickVariant,
+  computedPricePence,
+  selectedVariant,
+  onOpenSizeChart,
+  hasSizeChart
 }: {
   product: HammerexXratedProduct;
   images: string[];
@@ -325,7 +438,18 @@ function ProductDetailView({
   overallAvg: number | null;
   reviewCount: number;
   onTapStars: () => void;
+  variants: Variant[];
+  variantAxis: "size" | "colour";
+  selectedVariantIdx: number | null;
+  onPickVariant: (i: number) => void;
+  computedPricePence: number;
+  selectedVariant: Variant | null;
+  onOpenSizeChart: () => void;
+  hasSizeChart: boolean;
 }) {
+  const hasVariants = variants.length > 0;
+  const eyebrowLabel = variantAxis === "colour" ? "CHOOSE COLOUR" : "CHOOSE SIZE";
+
   return (
     <div>
       <div className="relative w-full bg-neutral-100" style={{ aspectRatio: "1 / 1" }}>
@@ -370,8 +494,13 @@ function ProductDetailView({
           </h2>
           <p className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-extrabold text-neutral-900 sm:text-3xl">
-              {formatGbp(product.price_pence)}
+              {formatGbp(computedPricePence)}
             </span>
+            {selectedVariant && (
+              <span className="text-[13px] font-bold text-neutral-500">
+                {variantAxis === "colour" ? "Colour" : "Size"}: {selectedVariant.label}
+              </span>
+            )}
           </p>
           {showStarRow && overallAvg !== null && (
             <button
@@ -429,11 +558,219 @@ function ProductDetailView({
           )}
         </div>
 
+        {hasVariants && (
+          <VariantPicker
+            variants={variants}
+            axis={variantAxis}
+            eyebrowLabel={eyebrowLabel}
+            selectedIdx={selectedVariantIdx}
+            onPick={onPickVariant}
+            selectedVariant={selectedVariant}
+            hasSizeChart={hasSizeChart}
+            onOpenSizeChart={onOpenSizeChart}
+            basePricePence={product.price_pence}
+          />
+        )}
+        {/* If the product has no variants but DOES have a size chart
+            (rare — usually paired with sizes, but render-defensively),
+            still surface the chart link below the metadata row. */}
+        {!hasVariants && hasSizeChart && (
+          <button
+            type="button"
+            onClick={onOpenSizeChart}
+            className="inline-flex h-11 w-fit items-center gap-1.5 rounded-lg border-2 border-neutral-300 bg-white px-3 text-[13px] font-extrabold uppercase tracking-wider text-neutral-700 transition active:scale-[0.98]"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <line x1="15" y1="3" x2="15" y2="21" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+            </svg>
+            View size chart
+          </button>
+        )}
+
         {product.description && (
           <p className="text-[13px] leading-relaxed text-neutral-700 sm:text-sm">
             {product.description}
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+function VariantPicker({
+  variants,
+  axis,
+  eyebrowLabel,
+  selectedIdx,
+  onPick,
+  selectedVariant,
+  hasSizeChart,
+  onOpenSizeChart,
+  basePricePence
+}: {
+  variants: Variant[];
+  axis: "size" | "colour";
+  eyebrowLabel: string;
+  selectedIdx: number | null;
+  onPick: (i: number) => void;
+  selectedVariant: Variant | null;
+  hasSizeChart: boolean;
+  onOpenSizeChart: () => void;
+  basePricePence: number;
+}) {
+  const computedPence = selectedVariant
+    ? basePricePence + (selectedVariant.price_delta_pence ?? 0)
+    : null;
+  const variantStock = selectedVariant?.stock_count;
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p
+          className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
+          style={{ color: "#FFB300" }}
+        >
+          {eyebrowLabel}
+        </p>
+        {hasSizeChart && axis === "size" && (
+          <button
+            type="button"
+            onClick={onOpenSizeChart}
+            className="inline-flex h-9 items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2.5 text-[13px] font-extrabold uppercase tracking-wider text-neutral-700 transition active:scale-[0.98]"
+            aria-label="View size chart"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <line x1="15" y1="3" x2="15" y2="21" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+            </svg>
+            View size chart
+          </button>
+        )}
+      </div>
+      <div
+        role="radiogroup"
+        aria-label={eyebrowLabel}
+        className="flex flex-wrap gap-2"
+      >
+        {variants.map((v, i) => {
+          const isActive = selectedIdx === i;
+          const disabled =
+            v.stock_count !== undefined &&
+            v.stock_count !== null &&
+            v.stock_count <= 0;
+          return (
+            <button
+              key={`${v.label}-${i}`}
+              type="button"
+              role="radio"
+              aria-checked={isActive}
+              aria-disabled={disabled}
+              disabled={disabled}
+              onClick={() => !disabled && onPick(i)}
+              className={`inline-flex h-11 min-w-[44px] items-center justify-center rounded-full border-2 px-3 text-[13px] font-extrabold transition active:scale-[0.98] ${
+                disabled
+                  ? "cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400 line-through decoration-2"
+                  : isActive
+                    ? "border-[#FFB300] bg-[#FFB300] text-neutral-900 shadow-sm"
+                    : "border-neutral-300 bg-white text-neutral-800 hover:border-[#FFB300]"
+              }`}
+            >
+              {v.label}
+              {!disabled && formatDelta(v.price_delta_pence) && (
+                <span className="ml-1 text-[13px] font-bold">
+                  {formatDelta(v.price_delta_pence)}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {selectedVariant && computedPence !== null && (
+        <p className="flex flex-wrap items-baseline gap-2 text-[13px]">
+          <span className="font-extrabold text-neutral-900">
+            {formatGbp(computedPence)}
+          </span>
+          <span className="text-neutral-400">·</span>
+          <span className={`font-bold ${variantStockTone(variantStock)}`}>
+            {variantStockLabel(variantStock)}
+          </span>
+        </p>
+      )}
+      {!selectedVariant && (
+        <p className="text-[13px] font-bold text-neutral-500">
+          Pick a {axis} to see the final price.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SizeChartOverlay({
+  imageUrl,
+  unit,
+  onClose
+}: {
+  imageUrl: string;
+  unit: HammerexXratedProduct["size_chart_unit"];
+  onClose: () => void;
+}) {
+  const unitLabel = unit && unit !== "other" ? unit : "the supplied units";
+  return (
+    <div
+      className="absolute inset-0 z-30 flex flex-col bg-white"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Size chart"
+    >
+      <div className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 sm:px-5">
+        <div>
+          <p
+            className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
+            style={{ color: "#FFB300" }}
+          >
+            Size chart
+          </p>
+          <p className="mt-0.5 text-[13px] font-extrabold text-neutral-900 sm:text-sm">
+            Pick the right fit
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close size chart"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-neutral-900 text-white shadow-lg transition hover:bg-black"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+        <div className="flex w-full justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt="Size chart"
+            className="h-auto max-h-[60vh] w-full max-w-2xl object-contain"
+          />
+        </div>
+        <p className="mt-3 text-center text-[13px] text-neutral-600">
+          Measurements in {unitLabel}.
+        </p>
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-11 items-center justify-center rounded-xl border-2 border-neutral-300 bg-white px-5 text-[13px] font-extrabold uppercase tracking-wider text-neutral-700 transition active:scale-[0.98]"
+          >
+            Back to product
+          </button>
+        </div>
       </div>
     </div>
   );

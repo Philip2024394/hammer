@@ -4,11 +4,51 @@
 // products with edit/archive; modal-style inline editor for create/edit.
 // Cover + gallery uploads reuse /api/trade-off/upload-photo (same as the
 // rest of the dashboard so we don't fork the storage path).
+//
+// Phase 2 additions:
+//   – Variants section (single-axis size OR colour; axis locked once a
+//     row exists; per-row stock + price delta).
+//   – Size chart upload (image + unit picker locked to the schema's
+//     five enum values).
+//   – Drag-reorder for the product list and the per-product gallery
+//     strip, both using dnd-kit with a 250 ms touch activation delay so
+//     accidental taps don't trigger a drag on mobile.
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { HammerexXratedProduct } from "@/lib/supabase";
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Mode = "list" | "create" | { kind: "edit"; product: HammerexXratedProduct };
+
+type VariantAxis = "size" | "colour";
+
+type VariantRow = {
+  // Local-only key so dnd-kit can identify rows that have no DB id yet.
+  key: string;
+  axis: VariantAxis;
+  label: string;
+  // Strings so the inputs stay controlled; sanitised at save time.
+  stock_count: string;
+  price_delta_pounds: string;
+};
 
 type FormState = {
   id: string;
@@ -27,6 +67,11 @@ type FormState = {
   // category=null on save.
   unit: string;
   category: string;
+  // Phase 2.
+  has_variants: boolean;
+  variants: VariantRow[];
+  size_chart_url: string;
+  size_chart_unit: "" | "size" | "kg" | "litre" | "cm" | "other";
 };
 
 const EMPTY_FORM: FormState = {
@@ -42,7 +87,11 @@ const EMPTY_FORM: FormState = {
   sort_order: "0",
   status: "live",
   unit: "",
-  category: ""
+  category: "",
+  has_variants: false,
+  variants: [],
+  size_chart_url: "",
+  size_chart_unit: ""
 };
 
 const UNIT_CHIPS = [
@@ -63,6 +112,14 @@ const CATEGORY_CHIPS = [
   "Callout"
 ] as const;
 
+const SIZE_CHART_UNITS: { value: "size" | "kg" | "litre" | "cm" | "other"; label: string }[] = [
+  { value: "size", label: "Size" },
+  { value: "kg", label: "Kilograms" },
+  { value: "litre", label: "Litres" },
+  { value: "cm", label: "Centimetres" },
+  { value: "other", label: "Other" }
+];
+
 function poundsToPence(input: string): number {
   const n = Number(input);
   if (!Number.isFinite(n) || n < 0) return 0;
@@ -74,7 +131,39 @@ function penceToPounds(p: number): string {
   return (p / 100).toFixed(2);
 }
 
+// Signed delta input: accepts "+2.50", "-1", "2.50" — all return pence.
+function signedPoundsToPenceOrNull(input: string): number | null {
+  const t = input.trim();
+  if (t.length === 0) return null;
+  // Strip a single leading + so Number() parses cleanly.
+  const cleaned = t.startsWith("+") ? t.slice(1) : t;
+  const n = Number(cleaned);
+  if (!Number.isFinite(n)) return null;
+  return Math.round(n * 100);
+}
+
+function penceToSignedPounds(p: number | null | undefined): string {
+  if (p === null || p === undefined || !Number.isFinite(p)) return "";
+  if (p === 0) return "0.00";
+  return p > 0 ? `+${(p / 100).toFixed(2)}` : (p / 100).toFixed(2);
+}
+
+let _keyCounter = 0;
+function nextRowKey(): string {
+  _keyCounter += 1;
+  return `v-${Date.now().toString(36)}-${_keyCounter}`;
+}
+
 function productToForm(p: HammerexXratedProduct): FormState {
+  const rawVariants = Array.isArray(p.variants) ? p.variants : [];
+  const variants: VariantRow[] = rawVariants.map((v) => ({
+    key: nextRowKey(),
+    axis: v.axis === "colour" ? "colour" : "size",
+    label: typeof v.label === "string" ? v.label : "",
+    stock_count:
+      v.stock_count === null || v.stock_count === undefined ? "" : String(v.stock_count),
+    price_delta_pounds: penceToSignedPounds(v.price_delta_pence)
+  }));
   return {
     id: p.id,
     name: p.name ?? "",
@@ -95,8 +184,24 @@ function productToForm(p: HammerexXratedProduct): FormState {
       typeof p.sort_order === "number" ? String(p.sort_order) : "0",
     status: p.status === "archived" ? "archived" : "live",
     unit: typeof p.unit === "string" ? p.unit : "",
-    category: typeof p.category === "string" ? p.category : ""
+    category: typeof p.category === "string" ? p.category : "",
+    has_variants: variants.length > 0,
+    variants,
+    size_chart_url: p.size_chart_url ?? "",
+    size_chart_unit: p.size_chart_unit ?? ""
   };
+}
+
+// Mobile-friendly dnd-kit sensor config. The 250 ms touch delay matches
+// the spec — long-press triggers a drag, a normal tap on the row passes
+// through to the Edit button. Pointer sensor uses a small move-distance
+// threshold so click-and-release on desktop never starts a drag.
+function useDragSensors() {
+  return useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 }
 
 export function ShopModeEditor({
@@ -184,6 +289,40 @@ export function ShopModeEditor({
       setErr('Unit is required for services — e.g. "per hour", "per tree".');
       return;
     }
+    // Variants validation. The API double-checks, but bouncing here
+    // gives an instant error before we burn a network round-trip.
+    let variantsOut: { axis: VariantAxis; label: string; stock_count: number | null; price_delta_pence: number | null }[] = [];
+    if (form.has_variants) {
+      if (form.variants.length === 0) {
+        setErr("Add at least one variant, or turn variants off.");
+        return;
+      }
+      for (const v of form.variants) {
+        const label = v.label.trim();
+        if (label.length === 0 || label.length > 32) {
+          setErr("Each variant needs a label of 1-32 characters.");
+          return;
+        }
+      }
+      variantsOut = form.variants.map((v) => {
+        const sc = v.stock_count.trim();
+        const stock_count = sc.length === 0 ? null : Math.max(0, Math.round(Number(sc)));
+        const pd = signedPoundsToPenceOrNull(v.price_delta_pounds);
+        return {
+          axis: v.axis,
+          label: v.label.trim().slice(0, 32),
+          stock_count: Number.isFinite(stock_count as number) ? stock_count : null,
+          price_delta_pence: pd
+        };
+      });
+    }
+    // Size chart — require a unit when an image is uploaded.
+    const sizeChartUrl = form.size_chart_url.trim();
+    if (sizeChartUrl.length > 0 && form.size_chart_unit === "") {
+      setErr("Pick a size-chart unit (or remove the chart).");
+      return;
+    }
+
     setSubmitting(true);
     try {
       // In service-mode stock is hidden (services don't run out) — force
@@ -212,7 +351,10 @@ export function ShopModeEditor({
         category:
           form.category.trim().length > 0
             ? form.category.trim().slice(0, 40)
-            : null
+            : null,
+        variants: variantsOut,
+        size_chart_url: sizeChartUrl,
+        size_chart_unit: sizeChartUrl.length > 0 ? form.size_chart_unit : null
       };
       const res = await fetch("/api/trade-off/products/upsert", {
         method: "POST",
@@ -264,6 +406,50 @@ export function ShopModeEditor({
     }
   }
 
+  // Product-list drag reorder. Local state updates immediately for
+  // snappy feedback; a 500 ms debounce coalesces rapid drags before
+  // posting to /products/reorder. On error we revert to the snapshot
+  // we captured before the drag started.
+  const reorderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (reorderTimeoutRef.current) clearTimeout(reorderTimeoutRef.current);
+    };
+  }, []);
+  function persistReorder(nextProducts: HammerexXratedProduct[], snapshot: HammerexXratedProduct[]) {
+    if (reorderTimeoutRef.current) clearTimeout(reorderTimeoutRef.current);
+    reorderTimeoutRef.current = setTimeout(async () => {
+      // Space sort_order in tens so future single-row inserts can land
+      // between two existing rows without renumbering everything.
+      const ordering = nextProducts.map((p, idx) => ({
+        id: p.id,
+        sort_order: (idx + 1) * 10
+      }));
+      try {
+        const res = await fetch("/api/trade-off/products/reorder", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ slug, edit_token: editToken, ordering })
+        });
+        const json = await res.json();
+        if (!json.ok) {
+          setProducts(snapshot);
+          setErr(json.error ?? "Reorder failed — restored previous order.");
+          return;
+        }
+        setProducts((prev) =>
+          prev.map((p) => {
+            const o = ordering.find((x) => x.id === p.id);
+            return o ? { ...p, sort_order: o.sort_order } : p;
+          })
+        );
+      } catch {
+        setProducts(snapshot);
+        setErr("Network error — restored previous order.");
+      }
+    }, 500);
+  }
+
   return (
     <div className="space-y-4 rounded-xl border border-brand-line bg-brand-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -303,6 +489,10 @@ export function ShopModeEditor({
           onEdit={startEdit}
           onArchive={archive}
           isService={isService}
+          onReorder={(next, snapshot) => {
+            setProducts(next);
+            persistReorder(next, snapshot);
+          }}
         />
       ) : (
         <ProductForm
@@ -327,13 +517,20 @@ function ProductList({
   products,
   onEdit,
   onArchive,
-  isService
+  isService,
+  onReorder
 }: {
   products: HammerexXratedProduct[];
   onEdit: (p: HammerexXratedProduct) => void;
   onArchive: (p: HammerexXratedProduct) => void;
   isService: boolean;
+  onReorder: (
+    next: HammerexXratedProduct[],
+    snapshot: HammerexXratedProduct[]
+  ) => void;
 }) {
+  const sensors = useDragSensors();
+
   if (products.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-brand-line bg-brand-bg px-4 py-6 text-center text-xs text-brand-muted">
@@ -343,63 +540,138 @@ function ProductList({
       </p>
     );
   }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = products.findIndex((p) => p.id === active.id);
+    const newIndex = products.findIndex((p) => p.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(products, oldIndex, newIndex);
+    onReorder(next, products);
+  }
+
   return (
-    <ul className="space-y-2">
-      {products.map((p) => (
-        <li
-          key={p.id}
-          className="flex flex-wrap items-center gap-3 rounded-lg border border-brand-line bg-brand-bg p-3"
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={products.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+        <ul className="space-y-2">
+          {products.map((p) => (
+            <SortableProductRow
+              key={p.id}
+              product={p}
+              isService={isService}
+              onEdit={onEdit}
+              onArchive={onArchive}
+            />
+          ))}
+        </ul>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableProductRow({
+  product,
+  isService,
+  onEdit,
+  onArchive
+}: {
+  product: HammerexXratedProduct;
+  isService: boolean;
+  onEdit: (p: HammerexXratedProduct) => void;
+  onArchive: (p: HammerexXratedProduct) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: product.id
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1
+  };
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="flex flex-wrap items-center gap-3 rounded-lg border border-brand-line bg-brand-bg p-3"
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="Drag to reorder"
+        className="inline-flex h-11 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md border border-brand-line bg-brand-surface text-brand-muted transition hover:border-brand-accent hover:text-brand-accent active:cursor-grabbing"
+      >
+        <DragHandleIcon />
+      </button>
+      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-brand-line bg-brand-surface">
+        {product.cover_url ? (
+          <img src={product.cover_url} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-widest text-brand-muted">
+            No img
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-bold text-brand-text">{product.name}</p>
+        <p className="text-xs text-brand-muted">
+          £{penceToPounds(product.price_pence ?? 0)}
+          {isService
+            ? product.unit
+              ? ` ${product.unit}`
+              : ""
+            : ` · ${stockLabel(product.stock_count)}`}
+        </p>
+      </div>
+      <span
+        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+          product.status === "live"
+            ? "border-brand-accent/60 bg-brand-accent/10 text-brand-accent"
+            : "border-brand-line bg-brand-surface text-brand-muted"
+        }`}
+      >
+        {product.status}
+      </span>
+      <div className="flex w-full gap-2 sm:w-auto">
+        <button
+          type="button"
+          onClick={() => onEdit(product)}
+          className="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-brand-line bg-brand-surface px-3 text-xs font-bold text-brand-text transition hover:border-brand-accent hover:text-brand-accent sm:flex-none"
         >
-          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-brand-line bg-brand-surface">
-            {p.cover_url ? (
-              <img src={p.cover_url} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-widest text-brand-muted">
-                No img
-              </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-brand-text">{p.name}</p>
-            <p className="text-xs text-brand-muted">
-              £{penceToPounds(p.price_pence ?? 0)}
-              {isService
-                ? p.unit
-                  ? ` ${p.unit}`
-                  : ""
-                : ` · ${stockLabel(p.stock_count)}`}
-            </p>
-          </div>
-          <span
-            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
-              p.status === "live"
-                ? "border-brand-accent/60 bg-brand-accent/10 text-brand-accent"
-                : "border-brand-line bg-brand-surface text-brand-muted"
-            }`}
+          Edit
+        </button>
+        {product.status === "live" && (
+          <button
+            type="button"
+            onClick={() => onArchive(product)}
+            className="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/5 px-3 text-xs font-bold text-red-300 transition hover:bg-red-500/15 sm:flex-none"
           >
-            {p.status}
-          </span>
-          <div className="flex w-full gap-2 sm:w-auto">
-            <button
-              type="button"
-              onClick={() => onEdit(p)}
-              className="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-brand-line bg-brand-surface px-3 text-xs font-bold text-brand-text transition hover:border-brand-accent hover:text-brand-accent sm:flex-none"
-            >
-              Edit
-            </button>
-            {p.status === "live" && (
-              <button
-                type="button"
-                onClick={() => onArchive(p)}
-                className="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/5 px-3 text-xs font-bold text-red-300 transition hover:bg-red-500/15 sm:flex-none"
-              >
-                Archive
-              </button>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
+            Archive
+          </button>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function DragHandleIcon() {
+  return (
+    <svg
+      width="14"
+      height="20"
+      viewBox="0 0 8 14"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <circle cx="1.5" cy="2" r="1.2" />
+      <circle cx="6.5" cy="2" r="1.2" />
+      <circle cx="1.5" cy="7" r="1.2" />
+      <circle cx="6.5" cy="7" r="1.2" />
+      <circle cx="1.5" cy="12" r="1.2" />
+      <circle cx="6.5" cy="12" r="1.2" />
+    </svg>
   );
 }
 
@@ -616,7 +888,7 @@ function ProductForm({
         />
       </Field>
 
-      <Field label="Gallery (up to 3 extra images)">
+      <Field label="Gallery (up to 3 extra images — drag to reorder)">
         <GalleryUploader
           urls={form.gallery_urls}
           onChange={(urls) => update("gallery_urls", urls)}
@@ -624,6 +896,24 @@ function ProductForm({
           editToken={editToken}
         />
       </Field>
+
+      {!isService && (
+        <CollapsibleSection
+          title="Variants (optional)"
+          subtitle={form.has_variants ? `${form.variants.length} variant${form.variants.length === 1 ? "" : "s"}` : "Off"}
+        >
+          <VariantsEditor form={form} update={update} />
+        </CollapsibleSection>
+      )}
+
+      {!isService && (
+        <CollapsibleSection
+          title="Size chart (optional)"
+          subtitle={form.size_chart_url ? `Uploaded · ${form.size_chart_unit || "no unit"}` : "Off"}
+        >
+          <SizeChartEditor form={form} update={update} slug={slug} editToken={editToken} />
+        </CollapsibleSection>
+      )}
 
       {compareOptions.length > 0 && (
         <Field label="Compare with your other products">
@@ -669,6 +959,317 @@ function ProductForm({
           Cancel
         </button>
       </div>
+    </div>
+  );
+}
+
+function CollapsibleSection({
+  title,
+  subtitle,
+  children
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-md border border-brand-line bg-brand-surface">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex h-11 w-full items-center justify-between gap-3 rounded-md px-3 text-left text-sm font-bold text-brand-text transition hover:text-brand-accent"
+        aria-expanded={open}
+      >
+        <span className="flex items-baseline gap-2">
+          <span>{title}</span>
+          {subtitle && (
+            <span className="text-[13px] font-semibold text-brand-muted">{subtitle}</span>
+          )}
+        </span>
+        <span className="text-brand-muted">{open ? "−" : "+"}</span>
+      </button>
+      {open && <div className="space-y-3 border-t border-brand-line p-3">{children}</div>}
+    </div>
+  );
+}
+
+function VariantsEditor({
+  form,
+  update
+}: {
+  form: FormState;
+  update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+}) {
+  const sensors = useDragSensors();
+  const lockedAxis: VariantAxis | null =
+    form.variants.length > 0 ? form.variants[0].axis : null;
+
+  function toggleHasVariants(next: boolean) {
+    if (!next) {
+      update("has_variants", false);
+      update("variants", []);
+    } else {
+      update("has_variants", true);
+    }
+  }
+
+  function setAxis(axis: VariantAxis) {
+    if (lockedAxis && lockedAxis !== axis) return;
+    // Stamp every row with the picked axis so the lock works on first add.
+    update(
+      "variants",
+      form.variants.map((v) => ({ ...v, axis }))
+    );
+  }
+  function addRow() {
+    const axis: VariantAxis = lockedAxis ?? "size";
+    update("variants", [
+      ...form.variants,
+      {
+        key: nextRowKey(),
+        axis,
+        label: "",
+        stock_count: "",
+        price_delta_pounds: ""
+      }
+    ]);
+  }
+  function removeRow(key: string) {
+    update("variants", form.variants.filter((v) => v.key !== key));
+  }
+  function patchRow(key: string, patch: Partial<VariantRow>) {
+    update(
+      "variants",
+      form.variants.map((v) => (v.key === key ? { ...v, ...patch } : v))
+    );
+  }
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = form.variants.findIndex((v) => v.key === active.id);
+    const newIndex = form.variants.findIndex((v) => v.key === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    update("variants", arrayMove(form.variants, oldIndex, newIndex));
+  }
+
+  const activeAxis: VariantAxis = lockedAxis ?? "size";
+  const labelPlaceholder = activeAxis === "size" ? "e.g. M, L, 1m, 2.5m" : "e.g. Red, Black, Yellow";
+
+  return (
+    <div className="space-y-3">
+      <label className="flex h-11 items-center gap-3 rounded-md border border-brand-line bg-brand-bg px-3">
+        <input
+          type="checkbox"
+          checked={form.has_variants}
+          onChange={(e) => toggleHasVariants(e.target.checked)}
+          className="h-5 w-5 accent-brand-accent"
+        />
+        <span className="text-[13px] font-bold text-brand-text">
+          This product has variants
+        </span>
+      </label>
+
+      {form.has_variants && (
+        <>
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">
+              Axis
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {(["size", "colour"] as VariantAxis[]).map((axis) => {
+                const active = activeAxis === axis;
+                const locked = lockedAxis !== null && lockedAxis !== axis;
+                return (
+                  <button
+                    key={axis}
+                    type="button"
+                    onClick={() => setAxis(axis)}
+                    disabled={locked}
+                    className={`inline-flex h-11 items-center rounded-full border px-4 text-[13px] font-bold transition ${
+                      active
+                        ? "border-brand-accent bg-brand-accent/15 text-brand-accent"
+                        : locked
+                          ? "border-brand-line bg-brand-surface text-brand-muted opacity-60"
+                          : "border-brand-line bg-brand-bg text-brand-text hover:border-brand-accent"
+                    }`}
+                  >
+                    {axis === "size" ? "Size" : "Colour"}
+                  </button>
+                );
+              })}
+            </div>
+            {lockedAxis && (
+              <p className="text-[13px] text-brand-muted">
+                Clear all variants to change the axis.
+              </p>
+            )}
+          </div>
+
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={form.variants.map((v) => v.key)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ul className="space-y-2">
+                {form.variants.map((v) => (
+                  <SortableVariantRow
+                    key={v.key}
+                    row={v}
+                    labelPlaceholder={labelPlaceholder}
+                    onPatch={(patch) => patchRow(v.key, patch)}
+                    onRemove={() => removeRow(v.key)}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+
+          <button
+            type="button"
+            onClick={addRow}
+            className="inline-flex h-11 items-center rounded-lg border border-brand-line bg-brand-bg px-3 text-[13px] font-bold text-brand-text transition hover:border-brand-accent hover:text-brand-accent"
+          >
+            + Add variant
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function SortableVariantRow({
+  row,
+  labelPlaceholder,
+  onPatch,
+  onRemove
+}: {
+  row: VariantRow;
+  labelPlaceholder: string;
+  onPatch: (patch: Partial<VariantRow>) => void;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.key
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1
+  };
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="space-y-2 rounded-md border border-brand-line bg-brand-bg p-2"
+    >
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          aria-label="Drag to reorder variant"
+          className="inline-flex h-11 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md border border-brand-line bg-brand-surface text-brand-muted transition hover:border-brand-accent hover:text-brand-accent active:cursor-grabbing"
+        >
+          <DragHandleIcon />
+        </button>
+        <input
+          type="text"
+          value={row.label}
+          maxLength={32}
+          onChange={(e) => onPatch({ label: e.target.value })}
+          placeholder={labelPlaceholder}
+          className="block h-11 w-full min-w-0 flex-1 rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Remove variant"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-red-500/40 bg-red-500/5 text-base font-bold text-red-300 transition hover:bg-red-500/15"
+        >
+          ×
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          type="number"
+          inputMode="numeric"
+          min="0"
+          value={row.stock_count}
+          onChange={(e) => onPatch({ stock_count: e.target.value })}
+          placeholder="Stock (inherit)"
+          className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-[13px] text-brand-text outline-none focus:border-brand-accent"
+        />
+        <input
+          type="text"
+          inputMode="decimal"
+          value={row.price_delta_pounds}
+          onChange={(e) => onPatch({ price_delta_pounds: e.target.value })}
+          placeholder="Price ± (e.g. +2.00)"
+          className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-[13px] text-brand-text outline-none focus:border-brand-accent"
+        />
+      </div>
+    </li>
+  );
+}
+
+function SizeChartEditor({
+  form,
+  update,
+  slug,
+  editToken
+}: {
+  form: FormState;
+  update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+  slug: string;
+  editToken: string;
+}) {
+  return (
+    <div className="space-y-3">
+      <SingleImageUploader
+        value={form.size_chart_url}
+        onChange={(url) => update("size_chart_url", url)}
+        slug={slug}
+        editToken={editToken}
+      />
+      {form.size_chart_url && (
+        <button
+          type="button"
+          onClick={() => {
+            update("size_chart_url", "");
+            update("size_chart_unit", "");
+          }}
+          className="inline-flex h-11 items-center rounded-lg border border-red-500/40 bg-red-500/5 px-3 text-[13px] font-bold text-red-300 transition hover:bg-red-500/15"
+        >
+          Remove chart
+        </button>
+      )}
+      {form.size_chart_url && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">
+            Unit *
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {SIZE_CHART_UNITS.map((u) => {
+              const active = form.size_chart_unit === u.value;
+              return (
+                <button
+                  key={u.value}
+                  type="button"
+                  onClick={() => update("size_chart_unit", u.value)}
+                  className={`inline-flex h-11 items-center rounded-full border px-4 text-[13px] font-bold transition ${
+                    active
+                      ? "border-brand-accent bg-brand-accent/15 text-brand-accent"
+                      : "border-brand-line bg-brand-bg text-brand-text hover:border-brand-accent"
+                  }`}
+                >
+                  {u.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -792,6 +1393,7 @@ function GalleryUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const sensors = useDragSensors();
 
   async function handleFile(file: File) {
     if (urls.length >= 3) {
@@ -823,36 +1425,43 @@ function GalleryUploader({
     }
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = urls.findIndex((u, i) => `${i}-${u}` === active.id);
+    const newIndex = urls.findIndex((u, i) => `${i}-${u}` === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    onChange(arrayMove(urls, oldIndex, newIndex));
+  }
+
+  const ids = urls.map((u, i) => `${i}-${u}`);
+
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {urls.map((u, i) => (
-          <div
-            key={`${u}-${i}`}
-            className="relative h-20 w-20 overflow-hidden rounded-md border border-brand-line bg-brand-surface"
-          >
-            <img src={u} alt="" className="h-full w-full object-cover" />
-            <button
-              type="button"
-              onClick={() => onChange(urls.filter((_, idx) => idx !== i))}
-              className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-xs font-bold text-white"
-              aria-label="Remove image"
-            >
-              ×
-            </button>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={ids} strategy={horizontalListSortingStrategy}>
+          <div className="flex flex-wrap gap-2">
+            {urls.map((u, i) => (
+              <SortableGalleryThumb
+                key={ids[i]}
+                id={ids[i]}
+                url={u}
+                onRemove={() => onChange(urls.filter((_, idx) => idx !== i))}
+              />
+            ))}
+            {urls.length < 3 && (
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                disabled={busy}
+                className="inline-flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-brand-line bg-brand-bg text-xs font-bold text-brand-muted transition hover:border-brand-accent hover:text-brand-accent disabled:opacity-60"
+              >
+                {busy ? "…" : "+ Add"}
+              </button>
+            )}
           </div>
-        ))}
-        {urls.length < 3 && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={busy}
-            className="inline-flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-brand-line bg-brand-bg text-xs font-bold text-brand-muted transition hover:border-brand-accent hover:text-brand-accent disabled:opacity-60"
-          >
-            {busy ? "…" : "+ Add"}
-          </button>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
       <input
         ref={inputRef}
         type="file"
@@ -864,6 +1473,50 @@ function GalleryUploader({
         }}
       />
       {err && <p className="text-xs font-semibold text-red-300">{err}</p>}
+    </div>
+  );
+}
+
+function SortableGalleryThumb({
+  id,
+  url,
+  onRemove
+}: {
+  id: string;
+  url: string;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative h-20 w-20 overflow-hidden rounded-md border border-brand-line bg-brand-surface"
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="Drag thumbnail to reorder"
+        className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+      >
+        <img src={url} alt="" className="h-full w-full object-cover pointer-events-none" />
+      </button>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-xs font-bold text-white"
+        aria-label="Remove image"
+      >
+        ×
+      </button>
     </div>
   );
 }

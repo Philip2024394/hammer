@@ -376,10 +376,20 @@ export type HammerexXratedProduct = {
   // product modal lightbox.
   gallery_urls: string[];
   dispatch_days: number | null;
-  // Phase 2 — variant axes (size, colour). Shape kept open here to
-  // avoid schema churn when we ship variant pickers next sprint.
-  variants: Record<string, unknown>[];
-  // Phase 3 — uploaded sizing chart with unit picker.
+  // Single-axis variants — every entry MUST share the same `axis` value
+  // ("size" OR "colour"). The editor enforces this. price_delta_pence
+  // is added to the parent product's price_pence at cart time; can be
+  // negative for cheaper sizes. stock_count overrides the parent stock
+  // when present (null = inherit parent).
+  variants: {
+    axis: "size" | "colour";
+    label: string;
+    stock_count?: number | null;
+    price_delta_pence?: number | null;
+  }[];
+  // Uploaded sizing chart image + unit picker. When set, the customer
+  // modal renders a "View size chart" sub-overlay so the customer can
+  // pick the right variant before adding to cart.
   size_chart_url: string | null;
   size_chart_unit: "size" | "kg" | "litre" | "cm" | "other" | null;
   // Sibling product ids the tradesperson wants surfaced in the Compare

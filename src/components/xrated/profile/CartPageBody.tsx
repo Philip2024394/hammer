@@ -113,12 +113,16 @@ export function CartPageBody({
     );
   }
 
-  function handleQty(productId: string, qty: number) {
-    setState(setQty(slug, productId, qty));
+  function handleQty(
+    productId: string,
+    qty: number,
+    variantLabel: string | null
+  ) {
+    setState(setQty(slug, productId, qty, variantLabel));
   }
 
-  function handleRemove(productId: string) {
-    setState(removeItem(slug, productId));
+  function handleRemove(productId: string, variantLabel: string | null) {
+    setState(removeItem(slug, productId, variantLabel));
   }
 
   function handleClear() {
@@ -165,62 +169,83 @@ export function CartPageBody({
               <EmptyCart slug={slug} firstName={firstName} />
             ) : (
               <ul className="flex flex-col gap-3">
-                {state.items.map((item) => (
-                  <li
-                    key={item.product_id}
-                    className="flex items-stretch gap-3 rounded-2xl border border-neutral-200 bg-white p-3 sm:p-4"
-                  >
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:h-24 sm:w-24">
-                      {item.cover_url ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={item.cover_url}
-                          alt={item.name}
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[13px] text-neutral-400">
-                          —
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <p className="line-clamp-2 text-[13px] font-extrabold leading-tight text-neutral-900 sm:text-sm">
-                        {item.name}
-                      </p>
-                      {/* Service rows surface their unit ("per tree",
-                          "per hour") alongside the per-unit price so the
-                          line reads "£23.00 per tree × qty 2 = £46.00".
-                          Physical-product rows leave unit null and
-                          continue to read "£X.XX each". */}
-                      <p className="mt-1 text-[13px] text-neutral-500">
-                        {formatGbp(item.price_pence)}{" "}
-                        {item.unit ? item.unit : "each"}
-                      </p>
-                      <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-                        <QtyStepper
-                          value={item.qty}
-                          onChange={(n) => handleQty(item.product_id, n)}
-                        />
-                        <p className="text-sm font-extrabold text-neutral-900">
-                          {formatGbp(item.price_pence * item.qty)}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemove(item.product_id)}
-                      aria-label={`Remove ${item.name} from cart`}
-                      className="inline-flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+                {state.items.map((item) => {
+                  // Composite key — product_id alone collides when the
+                  // customer added two variants of the same product (two
+                  // sizes of one item are distinct cart lines).
+                  const lineKey = `${item.product_id}::${item.variant_label ?? ""}`;
+                  return (
+                    <li
+                      key={lineKey}
+                      className="flex items-stretch gap-3 rounded-2xl border border-neutral-200 bg-white p-3 sm:p-4"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      </svg>
-                    </button>
-                  </li>
-                ))}
+                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:h-24 sm:w-24">
+                        {item.cover_url ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={item.cover_url}
+                            alt={item.name}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[13px] text-neutral-400">
+                            —
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <p className="line-clamp-2 text-[13px] font-extrabold leading-tight text-neutral-900 sm:text-sm">
+                          {item.name}
+                        </p>
+                        {/* Variant subline — when the customer picked a
+                            size/colour in the modal we mirror the chip
+                            label here so it's obvious which variant the
+                            line refers to (mirrors how `unit` is shown
+                            below). Axis prefix uses the same "Size/
+                            Colour" convention as the modal heading. */}
+                        {item.variant_label && (
+                          <p className="mt-0.5 text-[13px] font-bold text-neutral-600">
+                            {item.variant_label}
+                          </p>
+                        )}
+                        {/* Service rows surface their unit ("per tree",
+                            "per hour") alongside the per-unit price so the
+                            line reads "£23.00 per tree × qty 2 = £46.00".
+                            Physical-product rows leave unit null and
+                            continue to read "£X.XX each". */}
+                        <p className="mt-1 text-[13px] text-neutral-500">
+                          {formatGbp(item.price_pence)}{" "}
+                          {item.unit ? item.unit : "each"}
+                        </p>
+                        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                          <QtyStepper
+                            value={item.qty}
+                            onChange={(n) =>
+                              handleQty(item.product_id, n, item.variant_label ?? null)
+                            }
+                          />
+                          <p className="text-sm font-extrabold text-neutral-900">
+                            {formatGbp(item.price_pence * item.qty)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRemove(item.product_id, item.variant_label ?? null)
+                        }
+                        aria-label={`Remove ${item.name}${item.variant_label ? ` (${item.variant_label})` : ""} from cart`}
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
 
@@ -529,8 +554,12 @@ function buildWhatsappHref({
     // "per hour"…) so the tradesperson immediately sees the customer is
     // asking about 2 trees at £23/tree rather than two unitless items.
     const unitSuffix = item.unit ? ` ${item.unit}` : "";
+    // Variant suffix — "Drywall corner bead — Size: 2.5m — qty 2". The
+    // axis is implicit from the variant label so we keep the line tight
+    // by leading with the label only.
+    const variantSuffix = item.variant_label ? ` — ${item.variant_label}` : "";
     lines.push(
-      `• ${item.name} — ${formatGbp(item.price_pence)}${unitSuffix} × qty ${item.qty} — ${formatGbp(item.price_pence * item.qty)}`
+      `• ${item.name}${variantSuffix} — ${formatGbp(item.price_pence)}${unitSuffix} × qty ${item.qty} — ${formatGbp(item.price_pence * item.qty)}`
     );
   }
   lines.push("");

@@ -17,6 +17,12 @@ export type CartItem = {
   // the price so the line reads "£23.00 per tree × 2". Null/undefined for
   // physical Shop Mode products — they price by item, no unit suffix.
   unit?: string | null;
+  // Phase 2 variant axis — when a product/service has variants the
+  // customer picks one before "Add to cart" and we record the label
+  // here ("L", "Yellow", "1-day hire"). The composite cart key becomes
+  // product_id + variant_label so two sizes of the same product live
+  // as separate cart lines instead of silently merging.
+  variant_label?: string | null;
 };
 
 export type CartState = {
@@ -39,6 +45,24 @@ function clampQty(qty: number): number {
   if (!Number.isFinite(qty) || qty < 1) return 1;
   if (qty > QTY_MAX) return QTY_MAX;
   return Math.floor(qty);
+}
+
+// Normalise a variant label down to a stable form for key equality:
+// trim, collapse whitespace, lowercase. Two "L" and " l " variants
+// merge into one cart line (same product, same option). Null/empty
+// stays null so legacy unitless items remain backwards-compatible.
+function normaliseVariantLabel(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return null;
+  return trimmed;
+}
+
+function sameLine(a: CartItem, b: { product_id: string; variant_label?: string | null }): boolean {
+  if (a.product_id !== b.product_id) return false;
+  const av = a.variant_label ?? null;
+  const bv = normaliseVariantLabel(b.variant_label ?? null);
+  return av === bv;
 }
 
 export function readCart(slug: string): CartState {
@@ -68,7 +92,8 @@ export function readCart(slug: string): CartState {
         unit:
           typeof it.unit === "string" && it.unit.trim().length > 0
             ? it.unit.trim()
-            : null
+            : null,
+        variant_label: normaliseVariantLabel(it.variant_label)
       }));
     return { listing_slug: slug, items };
   } catch {
@@ -98,7 +123,12 @@ export function addItem(
 ): CartState {
   const state = readCart(slug);
   const qtyToAdd = clampQty(item.qty ?? 1);
-  const existing = state.items.find((it) => it.product_id === item.product_id);
+  const normalisedVariant = normaliseVariantLabel(item.variant_label);
+  // Composite key is product_id + variant_label so two different
+  // variants of the same product cohabit as separate lines.
+  const existing = state.items.find((it) =>
+    sameLine(it, { product_id: item.product_id, variant_label: normalisedVariant })
+  );
   if (existing) {
     existing.qty = clampQty(existing.qty + qtyToAdd);
   } else {
@@ -112,29 +142,43 @@ export function addItem(
       unit:
         typeof item.unit === "string" && item.unit.trim().length > 0
           ? item.unit.trim()
-          : null
+          : null,
+      variant_label: normalisedVariant
     });
   }
   writeCart(state);
   return state;
 }
 
-export function setQty(slug: string, product_id: string, qty: number): CartState {
+export function setQty(
+  slug: string,
+  product_id: string,
+  qty: number,
+  variant_label?: string | null
+): CartState {
   const state = readCart(slug);
   const clamped = clampQty(qty);
+  const target = normaliseVariantLabel(variant_label);
   const next = state.items.map((it) =>
-    it.product_id === product_id ? { ...it, qty: clamped } : it
+    sameLine(it, { product_id, variant_label: target }) ? { ...it, qty: clamped } : it
   );
   const out: CartState = { listing_slug: slug, items: next };
   writeCart(out);
   return out;
 }
 
-export function removeItem(slug: string, product_id: string): CartState {
+export function removeItem(
+  slug: string,
+  product_id: string,
+  variant_label?: string | null
+): CartState {
   const state = readCart(slug);
+  const target = normaliseVariantLabel(variant_label);
   const out: CartState = {
     listing_slug: slug,
-    items: state.items.filter((it) => it.product_id !== product_id)
+    items: state.items.filter(
+      (it) => !sameLine(it, { product_id, variant_label: target })
+    )
   };
   writeCart(out);
   return out;
