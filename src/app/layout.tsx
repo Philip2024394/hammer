@@ -76,6 +76,15 @@ export const metadata: Metadata = {
     icon: BRAND.logo,
     shortcut: BRAND.logo,
     apple: BRAND.logo
+  },
+  // iOS-specific PWA hints. Without these, an "Add to Home Screen"
+  // install on iPhone launches inside Safari with chrome — defeats the
+  // standalone feel. Title and status-bar style align with the dark
+  // brand surface so the system bar blends with the app background.
+  appleWebApp: {
+    capable: true,
+    title: "Xrated",
+    statusBarStyle: "black-translucent"
   }
 };
 

@@ -23,6 +23,11 @@ type FaqItem = { q: string; a: string };
 type PricedService = {
   name: string;
   image_url: string;
+  /** Optional "before" image. When set, the public service-card View
+   *  lightbox shows tabs that swap between After (image_url) and
+   *  Before (this). Tradies see significantly higher engagement on
+   *  before/after pairs than after-only cards. */
+  before_image_url?: string;
   price: number;
   unit: string;
   description: string;
@@ -72,6 +77,9 @@ type Patch = {
   quote_turnaround_hours: number | null;
   current_status_note: string;
   ready_date: string;
+  /** Trusted Trades — array of slugs the tradesperson vouches for,
+   *  with an optional handwritten note. Capped at 12 by the API. */
+  recommendations: { slug: string; note: string }[];
 };
 
 const DAY_ROW: { key: keyof HoursMap; label: string }[] = [
@@ -207,7 +215,7 @@ export function PremiumCustomisationPanel({
       ...s,
       priced_services: [
         ...s.priced_services,
-        { name: "", image_url: "", price: 0, unit: "per project", description: "" }
+        { name: "", image_url: "", before_image_url: "", price: 0, unit: "per project", description: "" }
       ]
     }));
   }
@@ -235,13 +243,19 @@ export function PremiumCustomisationPanel({
       );
       // Drop empty priced-service rows (must have a name + a positive price).
       const priced_services = state.priced_services
-        .map((p) => ({
-          name: p.name.trim(),
-          image_url: p.image_url.trim(),
-          price: Number(p.price) || 0,
-          unit: p.unit.trim() || "per project",
-          description: (p.description ?? "").trim().slice(0, 500)
-        }))
+        .map((p) => {
+          const before = (p.before_image_url ?? "").trim();
+          return {
+            name: p.name.trim(),
+            image_url: p.image_url.trim(),
+            // Only persist before_image_url when set — saves clutter on
+            // services where the tradesperson didn't add a before pair.
+            ...(before ? { before_image_url: before } : {}),
+            price: Number(p.price) || 0,
+            unit: p.unit.trim() || "per project",
+            description: (p.description ?? "").trim().slice(0, 500)
+          };
+        })
         .filter((p) => p.name.length > 0 && p.price > 0);
       // Headline rate: only persist when amount > 0 AND unit is set.
       // Null tells the server "clear it", so the standby card omits the
@@ -297,7 +311,15 @@ export function PremiumCustomisationPanel({
         quote_availability: state.quote_availability.trim().slice(0, 500),
         quote_turnaround_hours,
         current_status_note: state.current_status_note.trim().slice(0, 500),
-        ready_date: state.ready_date || null
+        ready_date: state.ready_date || null,
+        // Trusted Trades — clamp to 12, drop empty slugs, trim notes.
+        recommendations: (state.recommendations ?? [])
+          .map((r) => ({
+            slug: (r.slug ?? "").trim().toLowerCase(),
+            note: (r.note ?? "").trim().slice(0, 200)
+          }))
+          .filter((r) => r.slug.length >= 5)
+          .slice(0, 12)
       };
 
       const res = await fetch("/api/trade-off/update", {
@@ -850,8 +872,29 @@ export function PremiumCustomisationPanel({
                   <Text
                     value={p.image_url}
                     onChange={(v) => updatePriced(i, { image_url: v })}
-                    placeholder="Image URL (https://…)"
+                    placeholder="After-image URL (https://…)"
                   />
+                </div>
+                {/* Optional "before" image — shown in the View-card
+                    lightbox tabs alongside the After. Skip if the trade
+                    is install-only (no meaningful before). */}
+                <div className="rounded-md border border-dashed border-brand-line bg-brand-bg/30 p-2.5">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-brand-muted">
+                      Before image
+                    </span>
+                    <span className="text-[10px] uppercase tracking-widest text-brand-accent">
+                      Optional · +2× engagement
+                    </span>
+                  </div>
+                  <Text
+                    value={p.before_image_url ?? ""}
+                    onChange={(v) => updatePriced(i, { before_image_url: v })}
+                    placeholder="Before-image URL (https://…)"
+                  />
+                  <p className="mt-1 text-[10px] leading-relaxed text-brand-muted">
+                    Adds a Before/After tab to the View-card popup. Skip for install-only trades or services without a clear "before".
+                  </p>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <input
@@ -986,6 +1029,141 @@ export function PremiumCustomisationPanel({
                   placeholder="Answer"
                   className="w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
                 />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* ─── My Trusted Trades ─── */}
+      <div className="space-y-3 rounded-lg border border-brand-line bg-brand-bg/40 p-4">
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-brand-muted">
+            My Trusted Trades
+          </h3>
+          <p className="mt-1 text-[11px] leading-relaxed text-brand-muted">
+            Recommend other Xrated tradespeople your customers can trust. Each one becomes a card on your profile that links to their URL. Up to 12 — they should be on Xrated already.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            setState((s) => ({
+              ...s,
+              recommendations: [
+                ...(s.recommendations ?? []),
+                { slug: "", note: "" }
+              ].slice(0, 12)
+            }))
+          }
+          disabled={(state.recommendations ?? []).length >= 12}
+          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-brand-accent px-3 text-[11px] font-bold text-black transition active:scale-[0.97] disabled:opacity-50"
+        >
+          + Add a recommendation
+        </button>
+        {(state.recommendations ?? []).length === 0 ? (
+          <p className="text-[11px] text-brand-muted">No trades recommended yet.</p>
+        ) : (
+          <ul className="space-y-3">
+            {(state.recommendations ?? []).map((r, i) => (
+              <li
+                key={i}
+                className="space-y-2 rounded-md border border-brand-line bg-brand-surface/40 p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-brand-muted">
+                    Recommendation {i + 1}
+                  </span>
+                  <div className="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState((s) => {
+                          if (i === 0) return s;
+                          const next = [...(s.recommendations ?? [])];
+                          [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                          return { ...s, recommendations: next };
+                        })
+                      }
+                      disabled={i === 0}
+                      aria-label="Move up"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded text-[14px] text-brand-muted hover:text-brand-text disabled:opacity-30"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState((s) => {
+                          const arr = s.recommendations ?? [];
+                          if (i >= arr.length - 1) return s;
+                          const next = [...arr];
+                          [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                          return { ...s, recommendations: next };
+                        })
+                      }
+                      disabled={i >= (state.recommendations ?? []).length - 1}
+                      aria-label="Move down"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded text-[14px] text-brand-muted hover:text-brand-text disabled:opacity-30"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState((s) => ({
+                          ...s,
+                          recommendations: (s.recommendations ?? []).filter(
+                            (_, idx) => idx !== i
+                          )
+                        }))
+                      }
+                      className="text-[11px] font-semibold text-red-600 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-brand-muted">
+                    Their xratedtrade.com slug
+                  </label>
+                  <input
+                    type="text"
+                    value={r.slug}
+                    onChange={(e) =>
+                      setState((s) => {
+                        const next = [...(s.recommendations ?? [])];
+                        next[i] = { ...next[i], slug: e.target.value.toLowerCase() };
+                        return { ...s, recommendations: next };
+                      })
+                    }
+                    placeholder="e.g. tom-carpenter-leeds"
+                    className="mt-1 h-11 w-full rounded-md border border-brand-line bg-brand-bg px-3 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-brand-muted">
+                    Why you recommend them (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={r.note}
+                    onChange={(e) =>
+                      setState((s) => {
+                        const next = [...(s.recommendations ?? [])];
+                        next[i] = { ...next[i], note: e.target.value.slice(0, 200) };
+                        return { ...s, recommendations: next };
+                      })
+                    }
+                    placeholder="e.g. Worked with Tom on 12 extensions — never a complaint."
+                    maxLength={200}
+                    className="mt-1 w-full rounded-md border border-brand-line bg-brand-bg px-3 py-2 text-sm text-brand-text placeholder:text-brand-muted focus:border-brand-accent focus:outline-none"
+                  />
+                  <p className="mt-1 text-right text-[10px] text-brand-muted">
+                    {(r.note ?? "").length}/200
+                  </p>
+                </div>
               </li>
             ))}
           </ul>

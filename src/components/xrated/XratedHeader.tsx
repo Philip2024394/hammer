@@ -6,6 +6,7 @@
 // landing hero CTAs and the footer 'List your trade (free)' button.
 
 import { XRATED_BRAND } from "@/lib/xratedTrades";
+import { BurgerMenu } from "./BurgerMenu";
 
 export function XratedHeader() {
   return (
@@ -55,18 +56,10 @@ export function XratedHeader() {
             </svg>
           </button>
 
-          {/* Hamburger menu — anchored to the far right */}
-          <button
-            type="button"
-            aria-label="Open menu"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
+          {/* Hamburger menu — opens the BurgerMenu slide-down panel
+              with the 6 priority nav destinations + Sign in / Start
+              free trial CTAs + a secondary grid of all other pages. */}
+          <BurgerMenu />
         </div>
       </div>
     </header>

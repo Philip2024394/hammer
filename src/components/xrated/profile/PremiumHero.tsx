@@ -12,11 +12,13 @@ import type { HammerexTradeOffListing } from "@/lib/supabase";
 import { tradeLabel } from "@/lib/tradeOff";
 import { resolveAppHero } from "@/lib/tradeAppBanners";
 import { getTrustLevel, TRUST_LEVEL_META } from "@/lib/xratedTrustLevel";
+import { getTrustScore, getTrustScoreBand } from "@/lib/trustScore";
 
 export function PremiumHero({
   listing,
   waUrl,
-  currentPage = "profile"
+  currentPage = "profile",
+  tier = "paid"
 }: {
   listing: HammerexTradeOffListing;
   waUrl: string;
@@ -24,7 +26,11 @@ export function PremiumHero({
    *  "Home page" link back to the public profile so the customer can
    *  always retreat to the landing page from any subpage. */
   currentPage?: "profile" | "contact";
+  /** Free profiles strip the Contact us + Call Now CTAs from the hero
+   *  — only WhatsApp remains, full-width across the row. */
+  tier?: "free" | "paid";
 }) {
+  const isPaid = tier === "paid";
   const isContact = currentPage === "contact";
   const primaryCta = isContact
     ? {
@@ -79,6 +85,13 @@ export function PremiumHero({
 
   const trustLevel = getTrustLevel(listing);
   const trustLabel = TRUST_LEVEL_META[trustLevel].label;
+  const trustScore = getTrustScore(listing);
+  const trustBand = getTrustScoreBand(trustScore);
+  // Circumference of r=46 on a 100-unit viewBox = 2π × 46 ≈ 289.
+  // strokeDasharray paints the proportion of the circle equal to the
+  // score's % of 100. -rotate-90 rotates the start point to 12 o'clock.
+  const ringCircumference = 2 * Math.PI * 46;
+  const ringDashOffset = ringCircumference * (1 - trustScore / 100);
 
   return (
     <>
@@ -104,45 +117,95 @@ export function PremiumHero({
           <div className="w-full max-w-md">
             <div className="flex items-start gap-4 sm:gap-5">
               <div className="relative shrink-0">
-                <div
-                  className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-white sm:h-24 sm:w-24"
-                  style={{ boxShadow: "0 6px 16px rgba(0,0,0,0.45)" }}
-                >
-                  {listing.avatar_url ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={listing.avatar_url}
-                      alt={listing.display_name}
-                      className="h-full w-full object-cover"
+                {/* Avatar wrapper — circular Trust Score progress ring
+                    surrounds the photo. Yellow arc = points earned out
+                    of 100. The avatar itself sits inset inside the ring
+                    so the photo isn't obscured. */}
+                <div className="relative h-24 w-24 sm:h-28 sm:w-28">
+                  {/* Background ring (full circle, faded) + earned arc */}
+                  <svg
+                    className="absolute inset-0 h-full w-full -rotate-90"
+                    viewBox="0 0 100 100"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.18)"
+                      strokeWidth="5"
                     />
-                  ) : (
-                    <div
-                      className="flex h-full w-full items-center justify-center bg-black"
-                      aria-label={`X-Rated Level ${trustLevel} — ${trustLabel}`}
-                      title={`X-Rated Level ${trustLevel} — ${trustLabel}`}
-                    >
-                      <span
-                        className="text-2xl font-extrabold leading-none sm:text-3xl"
-                        style={{ color: "#FFB300", letterSpacing: "0.05em" }}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
+                      stroke="#FFB300"
+                      strokeWidth="5"
+                      strokeDasharray={ringCircumference.toFixed(2)}
+                      strokeDashoffset={ringDashOffset.toFixed(2)}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  {/* Avatar inset inside the ring */}
+                  <div
+                    className="absolute inset-[7px] overflow-hidden rounded-full sm:inset-[8px]"
+                    style={{ boxShadow: "0 6px 16px rgba(0,0,0,0.45)" }}
+                  >
+                    {listing.avatar_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={listing.avatar_url}
+                        alt={listing.display_name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="flex h-full w-full items-center justify-center bg-black"
+                        aria-label={`X-Rated Level ${trustLevel} — ${trustLabel}`}
+                        title={`X-Rated Level ${trustLevel} — ${trustLabel}`}
                       >
-                        X{trustLevel}
-                      </span>
-                    </div>
-                  )}
+                        <span
+                          className="text-2xl font-extrabold leading-none sm:text-3xl"
+                          style={{ color: "#FFB300", letterSpacing: "0.05em" }}
+                        >
+                          X{trustLevel}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {/* Trust-level badge — replaces the old verified-check
-                    badge. Anyone at Level 3+ is verified by definition,
-                    so combining them removes a duplicate signal. The
-                    native title attribute gives a tooltip with the
-                    descriptive label. */}
-                <span
-                  className="absolute -bottom-1 -right-1 inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded-full px-1.5 text-xs font-extrabold ring-2 ring-black sm:h-8 sm:min-w-[2rem]"
+                {/* Trust Score badge — replaces the X{level} badge.
+                    Shows the live 0-100 number. Click-through to the
+                    marketing page so customers can read what the number
+                    means. */}
+                <a
+                  href="/trade-off/trust"
+                  className="absolute -bottom-1.5 -right-1.5 inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full px-2 text-sm font-extrabold ring-2 ring-black transition hover:scale-105 sm:h-11 sm:min-w-[2.75rem] sm:text-base"
                   style={{ background: "#FFB300", color: "#0A0A0A" }}
-                  aria-label={`X-Rated Level ${trustLevel} — ${trustLabel}`}
-                  title={`X-Rated Level ${trustLevel} — ${trustLabel}`}
+                  aria-label={`Trust Score ${trustScore}/100 — ${trustBand.label}`}
+                  title={`Trust Score ${trustScore}/100 — ${trustBand.label}. Tap to learn how the score works.`}
                 >
-                  X{trustLevel}
-                </span>
+                  {trustScore}
+                </a>
+                {/* Verified-check tick — smaller circle at top-right.
+                    Separate signal from the Trust Score number: the
+                    score is the gauge, the tick is the verification
+                    flag. Only renders when the Hammerex Standard flag
+                    is true. */}
+                {listing.hammerex_standard_verified && (
+                  <span
+                    className="absolute -right-1 -top-1 inline-flex h-6 w-6 items-center justify-center rounded-full ring-2 ring-black sm:h-7 sm:w-7"
+                    style={{ background: "#FFB300" }}
+                    aria-label="Verified by Xrated"
+                    title="Verified by Xrated"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </span>
+                )}
               </div>
 
               <div className="min-w-0 flex-1">
@@ -224,43 +287,65 @@ export function PremiumHero({
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <a
-                href={primaryCta.href}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-bold text-neutral-900 shadow-lg transition active:scale-[0.97] sm:text-sm"
-                style={{ background: "#FFB300" }}
-              >
-                {primaryCta.icon}
-                {primaryCta.label}
-              </a>
-              <a
-                href={phoneHref ?? "#"}
-                aria-disabled={!phoneHref}
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 text-xs font-bold shadow-lg backdrop-blur-sm transition active:scale-[0.97] sm:text-sm"
-                style={
-                  phoneHref
-                    ? { borderColor: "#FFB300", color: "#FFB300", background: "rgba(0,0,0,0.35)" }
-                    : { borderColor: "rgba(255,179,0,0.4)", color: "rgba(255,179,0,0.4)", background: "rgba(0,0,0,0.35)", pointerEvents: "none" }
-                }
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
-                </svg>
-                Call Now
-              </a>
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 text-xs font-bold shadow-lg backdrop-blur-sm transition active:scale-[0.97] sm:text-sm"
-                style={{ borderColor: "#FFB300", color: "#FFB300", background: "rgba(0,0,0,0.35)" }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
-                </svg>
-                WhatsApp
-              </a>
-            </div>
+            {/* Hero CTAs — paid profiles get the full 3-up row
+                (Contact us / Call Now / WhatsApp). Free profiles only
+                expose WhatsApp; Contact us + Call Now are paid-only
+                because they route through the contact form / phone
+                deep-link surfaces that don't exist on free. */}
+            {isPaid ? (
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <a
+                  href={primaryCta.href}
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-bold text-neutral-900 shadow-lg transition active:scale-[0.97] sm:text-sm"
+                  style={{ background: "#FFB300" }}
+                >
+                  {primaryCta.icon}
+                  {primaryCta.label}
+                </a>
+                <a
+                  href={phoneHref ?? "#"}
+                  aria-disabled={!phoneHref}
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 text-xs font-bold shadow-lg backdrop-blur-sm transition active:scale-[0.97] sm:text-sm"
+                  style={
+                    phoneHref
+                      ? { borderColor: "#FFB300", color: "#FFB300", background: "rgba(0,0,0,0.35)" }
+                      : { borderColor: "rgba(255,179,0,0.4)", color: "rgba(255,179,0,0.4)", background: "rgba(0,0,0,0.35)", pointerEvents: "none" }
+                  }
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
+                  </svg>
+                  Call Now
+                </a>
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 text-xs font-bold shadow-lg backdrop-blur-sm transition active:scale-[0.97] sm:text-sm"
+                  style={{ borderColor: "#FFB300", color: "#FFB300", background: "rgba(0,0,0,0.35)" }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
+                  </svg>
+                  WhatsApp
+                </a>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-extrabold text-neutral-900 shadow-lg transition active:scale-[0.97] sm:text-sm"
+                  style={{ background: "#25D366" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M19.05 4.91A10 10 0 0 0 12 2a10 10 0 0 0-8.94 14.5L2 22l5.62-1.47A10 10 0 1 0 19.05 4.91Zm-7.05 15.4a8.36 8.36 0 0 1-4.27-1.17l-.3-.18-3.34.87.89-3.26-.2-.33A8.32 8.32 0 1 1 12 20.31Z" />
+                  </svg>
+                  Message on WhatsApp
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -7,6 +7,7 @@ import { VideoLightbox } from "@/components/xrated/profile/VideoLightbox";
 import { EnquireButton } from "@/components/xrated/profile/EnquireButton";
 import { ServicesTabbedGallery } from "@/components/xrated/profile/ServicesTabbedGallery";
 import { TeamGrid } from "@/components/xrated/profile/TeamGrid";
+import { RecommendedTrades } from "@/components/xrated/profile/RecommendedTrades";
 import { AboutFlipPanel } from "@/components/xrated/profile/AboutFlipPanel";
 import { TradeIcon } from "@/lib/tradeIcons";
 import { ReviewsCarousel } from "@/components/xrated/profile/ReviewsCarousel";
@@ -20,6 +21,7 @@ import { TradeProfileUrlChip } from "@/components/trade-off/TradeProfileUrlChip"
 import { InstantQuoteForm } from "@/components/trade-off/InstantQuoteForm";
 import { ProjectGalleryGrid } from "@/components/trade-off/ProjectGalleryGrid";
 import { TradeSocialIcons } from "@/components/trade-off/TradeSocialIcons";
+import { websiteUrl } from "@/lib/tradeOffSocial";
 import { XratedViewTracker } from "@/components/trade-off/XratedViewTracker";
 import { WhatsappClickTracker } from "@/components/trade-off/WhatsappClickTracker";
 import { PreviewModeBar } from "@/components/trade-off/PreviewModeBar";
@@ -34,6 +36,7 @@ import { ProfileActionTriple } from "@/components/xrated/profile/ProfileActionTr
 import { ShareIconButton } from "@/components/xrated/profile/ShareIconButton";
 import { PricedServicesCarousel } from "@/components/xrated/profile/PricedServicesCarousel";
 import { QrFooterDock } from "@/components/xrated/profile/QrFooterDock";
+import { PremiumStickyTrust } from "@/components/xrated/profile/PremiumStickyTrust";
 import { ProfileExpandPanels } from "@/components/xrated/profile/ProfileExpandPanels";
 import { AboutBio } from "@/components/xrated/profile/AboutBio";
 import {
@@ -399,36 +402,6 @@ export default async function TradiePublicProfilePage({
           every profile until the £3/mo white-label add-on ships. */}
       {renderTier === "free" && <XratedHeader />}
 
-      {/* Per-trade default hero banner — Standard tier only. PremiumLayout
-          renders its own banner WITH the profile card overlaid on the left. */}
-      {!isPremium && (() => {
-        const heroUrl = resolveAppHero({
-          custom_app_hero_url: listing.custom_app_hero_url,
-          primary_trade: listing.primary_trade,
-          tier: listing.tier,
-          last_payment_plan: listing.last_payment_plan
-        });
-        if (!heroUrl) return null;
-        return (
-          <section className="relative h-[320px] w-full overflow-hidden bg-neutral-900 sm:h-[480px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroUrl}
-              alt={`${listing.display_name} — ${tradeLabel(listing.primary_trade)} hero`}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0) 60%)"
-              }}
-            />
-          </section>
-        );
-      })()}
-
       {/* Single render path — both tiers go through PremiumLayout with
           feature gates driven by `tier`. Free profiles get the Xrated
           header (rendered above) + a pinned upgrade banner; paid
@@ -496,7 +469,7 @@ function PremiumLayout({
   const isPaid = tier === "paid";
   return (
     <>
-      <PremiumHero listing={listing} waUrl={waUrl} />
+      <PremiumHero listing={listing} waUrl={waUrl} tier={tier} />
 
       {/* Free-tier upgrade banner — pinned high under the hero so it's
           one of the first things visitors see, BUT below the hero so
@@ -521,13 +494,36 @@ function PremiumLayout({
         allowAddReview={isPaid}
       />
       <TeamGrid listing={listing} />
+      {/* My Trusted Trades — server-component card grid of other Xrated
+          tradespeople this person vouches for. Paid tier only; the
+          server fetch is one batch query, fast. Hidden when empty. */}
+      {isPaid && <RecommendedTrades listing={listing} />}
       <ShareAndContactCta
         listing={listing}
         waUrl={waUrl}
         profileFullUrl={profileFullUrl}
       />
       <BottomTrustStrip />
+      {/* Coloured social-icon strip + website chip, sits just above the
+          "Powered by Xrated" credit on paid profiles. Auto-hides if the
+          tradesperson hasn't filled any social fields. */}
+      {isPaid && <PremiumSocialFooter listing={listing} />}
       <PoweredByXratedFooter slug={listing.slug} />
+      {isPaid && (
+        <>
+          {/* Spacer reserves the height of the fixed sticky bar so the
+              footer + last content always have room to breathe when the
+              sticky is visible. The sticky auto-hides via Intersection-
+              Observer once the global XratedFooter scrolls in, but the
+              spacer ensures the footer is always reachable. */}
+          <div aria-hidden="true" className="h-[72px]" />
+          <PremiumStickyTrust
+            ratingAvg={listing.rating_avg}
+            ratingCount={listing.rating_count}
+            whatsappHref={waUrl}
+          />
+        </>
+      )}
     </>
   );
 }
@@ -574,6 +570,54 @@ function FreeTierUpgradeBanner({
   );
 }
 
+// ─── Premium social-link row ────────────────────────────────────────
+// Renders the coloured social-icon strip above the Powered-by credit.
+// Pulls every populated social field on the listing (Instagram, TikTok,
+// Facebook, X, Snapchat, Reddit, YouTube, Google Business) plus the
+// website chip. Hidden when the tradesperson hasn't filled any of them.
+function PremiumSocialFooter({ listing }: { listing: HammerexTradeOffListing }) {
+  // Quick gate — only render the section when at least one social field
+  // resolves to a URL. The component itself returns null in that case,
+  // but bailing here avoids the empty padding wrapper.
+  const anySocial = Boolean(
+    listing.instagram ||
+      listing.tiktok ||
+      listing.facebook ||
+      listing.twitter ||
+      listing.snapchat ||
+      listing.reddit ||
+      listing.youtube ||
+      listing.google ||
+      listing.website
+  );
+  if (!anySocial) return null;
+  return (
+    <section className="w-full px-4 pt-8 sm:px-6">
+      <div className="mx-auto flex max-w-md flex-col items-center gap-3 text-center">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-neutral-500">
+          Find us on
+        </p>
+        <TradeSocialIcons listing={listing} variant="coloured" />
+        {listing.website && (
+          <a
+            href={websiteUrl(listing.website) ?? "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 text-xs font-bold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] sm:text-sm"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+            </svg>
+            {listing.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+          </a>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ─── Powered by Xrated Trades footer credit ──────────────────────────
 // Renders on EVERY profile, free + paid, until the £3/mo white-label
 // add-on is shipped. Doubles as Linktree-style top-of-funnel — every
@@ -590,7 +634,7 @@ function PoweredByXratedFooter({ slug }: { slug: string }) {
           >
             Xrated Trades
           </a>{" "}
-          — the shareable trade profile for UK tradies.
+          — the shareable trade profile for tradies anywhere.
         </p>
         <a
           href="/trade-off/signup"
@@ -1006,7 +1050,7 @@ function StandardLayout({
           <a href="/trade-off" className="font-semibold text-brand-text hover:text-[#FFB300]">
             Hammerex Trade Off
           </a>{" "}
-          · Free UK trade directory
+          · Shareable trade profile
         </div>
       </div>
 
@@ -1179,7 +1223,7 @@ function StandardLayout({
           <h2 className="text-xs font-bold uppercase tracking-widest text-brand-accent">
             About
           </h2>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
+          <p className="mt-3 line-clamp-8 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
             {listing.bio}
           </p>
         </section>

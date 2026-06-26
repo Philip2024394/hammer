@@ -20,6 +20,7 @@ import { PremiumCustomisationPanel } from "./PremiumCustomisationPanel";
 import { VideoUploadInput } from "@/components/trade-off/VideoUploadInput";
 import { WhatsappLeadsNudge } from "@/components/trade-off/WhatsappLeadsNudge";
 import { LossAversionPreview } from "@/components/trade-off/LossAversionPreview";
+import { TrustScorePanel } from "@/components/trade-off/TrustScorePanel";
 import type { HammerexXratedVoucher } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -137,6 +138,10 @@ export default async function TradeOffEditPage({
     facebook: row.data.facebook ?? "",
     tiktok: row.data.tiktok ?? "",
     youtube: row.data.youtube ?? "",
+    twitter: row.data.twitter ?? "",
+    snapchat: row.data.snapchat ?? "",
+    reddit: row.data.reddit ?? "",
+    google: row.data.google ?? "",
     bio: row.data.bio === "(draft)" ? "" : row.data.bio ?? "",
     years_in_trade:
       row.data.years_in_trade === null || row.data.years_in_trade === undefined
@@ -186,6 +191,15 @@ export default async function TradeOffEditPage({
           Manage your verified work →
         </a>
       </section>
+
+      {/* Trust Score panel — shows the live 0-100 gauge + the 8-item
+          checklist + tip per unearned item. Sits at the top of the
+          dashboard so it's the first thing the tradesperson sees and
+          updates the moment any related field is saved. */}
+      <TrustScorePanel
+        listing={row.data}
+        tier={tier === "app_trial" || tier === "app_paid" ? "paid" : "free"}
+      />
 
       {showLeadsNudge && (
         <WhatsappLeadsNudge
@@ -346,7 +360,15 @@ export default async function TradeOffEditPage({
                   ? row.data.current_status_note
                   : "",
               ready_date:
-                typeof row.data.ready_date === "string" ? row.data.ready_date : ""
+                typeof row.data.ready_date === "string" ? row.data.ready_date : "",
+              recommendations: Array.isArray(row.data.recommendations)
+                ? row.data.recommendations
+                    .map((r: { slug?: unknown; note?: unknown }) => ({
+                      slug: typeof r.slug === "string" ? r.slug : "",
+                      note: typeof r.note === "string" ? r.note : ""
+                    }))
+                    .filter((r: { slug: string }) => r.slug.length > 0)
+                : []
             }}
           />
         ) : (

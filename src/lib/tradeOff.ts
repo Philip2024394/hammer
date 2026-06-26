@@ -104,8 +104,11 @@ export const TRADE_OFF_REQUIRED_FIELDS = [
 export type TradeOffStatus = "draft" | "live" | "hidden";
 
 // Reserved slugs that tradies cannot claim as their vanity URL.
-// Anything matching these — or shorter than 3 / longer than 60 chars — is
+// Anything matching these — or shorter than 5 / longer than 60 chars — is
 // rejected by /api/trade-off/slug-available and by the create/update APIs.
+// The 5-char floor matches xratedSlug.SLUG_MIN_LENGTH; bumped from 3
+// because 3-char vanity URLs tend to be route-collision-prone and rank
+// poorly on Google.
 export const TRADE_OFF_RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "signup",
   "edit",
@@ -142,9 +145,10 @@ export const TRADE_OFF_RESERVED_SLUGS: ReadonlySet<string> = new Set([
 
 export function isReservedSlug(slug: string): boolean {
   const s = slug.toLowerCase().trim();
-  if (s.length < 3 || s.length > 60) return true;
+  if (s.length < 5 || s.length > 60) return true;
   if (TRADE_OFF_RESERVED_SLUGS.has(s)) return true;
   if (!/^[a-z0-9-]+$/.test(s)) return true;
   if (s.startsWith("-") || s.endsWith("-")) return true;
+  if (s.includes("--")) return true;
   return false;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 // Vanity-slug picker for the Trade Off signup form. Live-prefixed with
-// `hammerex.com/trade/`, strips/lowercases to [a-z0-9-] as the tradie types,
+// `xratedtrade.com/`, strips/lowercases to [a-z0-9-] as the tradie types,
 // and shows a debounced availability check (green ✓ / red ✗) next to the
 // input.
 //
@@ -9,16 +9,26 @@
 // auto-generated displayName+city slug.
 
 import { useEffect, useRef, useState } from "react";
+import {
+  slugifyXrated,
+  validateXratedSlug,
+  SLUG_MIN_LENGTH,
+  SLUG_MAX_LENGTH
+} from "@/lib/xratedSlug";
 
 export type SlugStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
+// Keep the in-field sanitiser permissive — the canonical strip happens
+// on submit + on the server. This way the user sees "their" hyphen
+// while still typing without having it eaten by aggressive normalisation.
 function sanitize(input: string): string {
   return input
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/-{2,}/g, "-")
-    .slice(0, 60);
+    .slice(0, SLUG_MAX_LENGTH);
 }
+void slugifyXrated; // re-exported for callers that want it inline
 
 export function SlugAvailabilityField({
   value,
@@ -43,7 +53,7 @@ export function SlugAvailabilityField({
       setStatus("idle");
       return;
     }
-    if (trimmed.length < 3 || trimmed.length > 60 || /^-|-$/.test(trimmed)) {
+    if (validateXratedSlug(trimmed) !== null) {
       setStatus("invalid");
       return;
     }
@@ -77,14 +87,14 @@ export function SlugAvailabilityField({
     <div>
       <div className="flex items-stretch overflow-hidden rounded-lg border border-brand-line bg-brand-bg focus-within:border-[#FFB300]">
         <span className="inline-flex items-center bg-neutral-100 px-3 text-xs text-brand-muted">
-          hammerex.com/trade/
+          xratedtrade.com/
         </span>
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(sanitize(e.target.value))}
           placeholder={placeholder ?? "your-trade-name"}
-          maxLength={60}
+          maxLength={SLUG_MAX_LENGTH}
           className="h-11 min-w-0 flex-1 bg-transparent px-3 text-xs text-brand-text placeholder:text-brand-muted focus:outline-none"
           autoComplete="off"
           spellCheck={false}
@@ -109,7 +119,7 @@ export function SlugAvailabilityField({
       </div>
       <p className="mt-1 text-xs text-brand-muted">
         {status === "taken" && "That URL is already taken — try another."}
-        {status === "invalid" && "Use 3–60 lowercase letters, numbers or hyphens (no leading/trailing -)."}
+        {status === "invalid" && `Use ${SLUG_MIN_LENGTH}–${SLUG_MAX_LENGTH} lowercase letters / numbers / single hyphens. No leading or trailing hyphens.`}
         {status === "available" && (
           <span className="text-brand-success">Great — that URL is yours.</span>
         )}

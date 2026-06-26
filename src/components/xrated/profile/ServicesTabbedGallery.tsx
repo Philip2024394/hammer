@@ -15,11 +15,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EnquireButton } from "./EnquireButton";
+import { ViewCardModal } from "./ViewCardModal";
 
 export type PricedService = {
   name: string;
   image_url: string | null;
   image_urls?: string[];
+  /** Optional "before" image — shown in the View-card popup tabs
+   *  alongside the After image_url. When set, the View popup adds an
+   *  "Before" tab so customers can see the transformation. */
+  before_image_url?: string | null;
   /** Optional CSS object-position value (e.g. "center top", "50% 30%")
    *  used to frame the cover image when the tradesperson picks a
    *  non-default focal point via the dashboard image-positioner. Falls
@@ -293,8 +298,10 @@ function ServiceCarousel({
         onTouchEnd={() => scheduleResume(1500)}
         className="flex gap-4 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {/* Lead spacer so the first card can sit centered. */}
-        <span aria-hidden="true" className="shrink-0 basis-[8%] sm:basis-[18%]" />
+        {/* Lead + trail spacers removed — the tab row that needed
+            centering is gone, so the first card now sits flush to the
+            scroller's left edge (which itself has the section's
+            px-4/sm:px-6 breathing room from the phone edge). */}
         {looped.map((t, i) => {
           // Only store the ref + bind the active-large state to the
           // FIRST copy of each tab. Onscreen there are two copies (so
@@ -321,8 +328,6 @@ function ServiceCarousel({
             </div>
           );
         })}
-        {/* Trailing spacer so the last card can sit centered too. */}
-        <span aria-hidden="true" className="shrink-0 basis-[8%] sm:basis-[18%]" />
       </div>
       {/* Edge fade gradients removed — cards run clean to the screen
           edge with no white wash at either end. */}
@@ -418,12 +423,12 @@ function ServiceCard({
               </span>
               <span className="text-xs text-neutral-500">{svc.unit}</span>
             </div>
-            <EnquireButton
-              slug={slug}
-              name={svc.name}
-              price={svc.price}
-              unit={svc.unit}
-            />
+            {/* View opens the lightbox with description, price, image
+                (with Before tab when before_image_url is set on the
+                service), and the WhatsApp enquire CTA inside. Replaces
+                the inline Enquire button so customers always read the
+                detail card before they message. */}
+            <ViewCardModal svc={svc} slug={slug} />
           </div>
         )}
       </div>

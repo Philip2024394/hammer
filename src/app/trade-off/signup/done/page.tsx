@@ -24,12 +24,12 @@ function Inner() {
 
   const isLive = status === "live";
   const editPath = `/trade-off/edit/${slug}?token=${token}`;
-  const profilePath = `/trade/${slug}`;
+  const profilePath = `/${slug}`;
   const editAbsolute =
     typeof window !== "undefined" ? `${window.location.origin}${editPath}` : editPath;
   const profileAbsolute =
     typeof window !== "undefined" ? `${window.location.origin}${profilePath}` : profilePath;
-  const profileDisplay = `hammerex.com/trade/${slug}`;
+  const profileDisplay = `xratedtrade.com/${slug}`;
 
   const [copied, setCopied] = useState(false);
   const [profileCopied, setProfileCopied] = useState(false);

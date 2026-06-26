@@ -226,6 +226,10 @@ export type HammerexTradeOffListing = {
   facebook: string | null;
   tiktok: string | null;
   youtube: string | null;
+  twitter: string | null;
+  snapchat: string | null;
+  reddit: string | null;
+  google: string | null;
   bio: string;
   years_in_trade: number | null;
   start_year: number | null;
@@ -269,6 +273,12 @@ export type HammerexTradeOffListing = {
      *  Enquire. Backwards compatible — empty/missing array means
      *  single-image card. */
     image_urls?: string[];
+    /** Optional "before" image — shown in the View-card lightbox tabs
+     *  alongside the After. Tradies who upload before/after pairs see
+     *  significantly higher engagement because the transformation
+     *  carries more cognitive weight than the finished work alone.
+     *  Skip if your trade is install-only (no meaningful "before"). */
+    before_image_url?: string | null;
     price: number;
     unit: string;
     description?: string | null;
@@ -282,6 +292,10 @@ export type HammerexTradeOffListing = {
   // Trust & logistics — surfaced on the "What to know" panel of the
   // premium profile. All nullable / defaulted false so legacy rows
   // render as "Not confirmed".
+  /** Trusted Trades — array of other Xrated tradespeople this person
+   *  vouches for. Shown as a recommendation grid on the public profile
+   *  (paid tier only). Capped at 12 entries by the update API. */
+  recommendations: { slug: string; note?: string }[];
   is_insured: boolean;
   insurance_cover_gbp: number | null;
   qualifications: string[];

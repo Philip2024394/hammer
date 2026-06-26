@@ -42,7 +42,7 @@ export function DeliveryFooter() {
         {[
           { href: "/", label: "Home" },
           { href: "/guides", label: "Guides" },
-          { href: "/trade-off", label: "Xrated Trades — UK trade directory" },
+          { href: "/trade-off", label: "Xrated Trades — Shareable trade profiles" },
           { href: "/hammerex-group", label: "Hammerex Group" },
           { href: "/purchasing-tips", label: "Purchasing tips" },
           { href: "/partners", label: "Distribution partners" },

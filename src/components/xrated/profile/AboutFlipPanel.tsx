@@ -38,7 +38,7 @@ export function AboutFlipPanel({
         </a>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-3 line-clamp-8">
         {bioParas.length === 0 ? (
           <p className="text-justify text-[15px] leading-[1.55] text-neutral-700">
             {defaultBio}

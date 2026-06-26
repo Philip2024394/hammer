@@ -42,6 +42,10 @@ export type TradeOffFormInitial = {
   facebook: string;
   tiktok: string;
   youtube: string;
+  twitter: string;
+  snapchat: string;
+  reddit: string;
+  google: string;
   bio: string;
   years_in_trade: string;
   start_year: string;
@@ -67,6 +71,10 @@ const EMPTY_INITIAL: TradeOffFormInitial = {
   facebook: "",
   tiktok: "",
   youtube: "",
+  twitter: "",
+  snapchat: "",
+  reddit: "",
+  google: "",
   bio: "",
   years_in_trade: "",
   start_year: "",
@@ -222,6 +230,10 @@ export function TradeOffForm({
       facebook: state.facebook.trim(),
       tiktok: state.tiktok.trim(),
       youtube: state.youtube.trim(),
+      twitter: state.twitter.trim(),
+      snapchat: state.snapchat.trim(),
+      reddit: state.reddit.trim(),
+      google: state.google.trim(),
       bio: state.bio.trim(),
       years_in_trade: state.years_in_trade.trim() || null,
       start_year: state.start_year.trim() || null,

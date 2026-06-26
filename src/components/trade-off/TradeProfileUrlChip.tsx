@@ -1,7 +1,7 @@
 "use client";
 
 // Copyable chip showing the tradie's canonical public URL —
-// `hammerex.com/trade/<slug>` — sat at the top of the profile hero.
+// `xratedtrade.com/<slug>` — sat at the top of the profile hero.
 // One-click clipboard copy with a 2s "Copied!" flash.
 
 import { useState } from "react";
@@ -11,13 +11,13 @@ export function TradeProfileUrlChip({
   fullUrl
 }: {
   slug: string;
-  // Pre-resolved absolute URL (e.g. `https://hammerex.com/trade/<slug>`).
+  // Pre-resolved absolute URL (e.g. `https://xratedtrade.com/<slug>`).
   // Falls back to a relative form if not provided.
   fullUrl?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const display = `hammerex.com/trade/${slug}`;
-  const target = fullUrl ?? `/trade/${slug}`;
+  const display = `xratedtrade.com/${slug}`;
+  const target = fullUrl ?? `/${slug}`;
 
   async function copy() {
     try {

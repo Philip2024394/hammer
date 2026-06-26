@@ -140,11 +140,33 @@ const UPDATABLE_JSON_FIELDS = [
   "operating_hours",
   "faq_items",
   "priced_services",
-  "headline_rate"
+  "headline_rate",
+  "recommendations"
 ] as const;
 
 const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 const TIME_RE = /^[0-2]\d:[0-5]\d$/;
+
+// Trusted Trades — array of { slug, note? }. We strip empty slugs,
+// trim notes to 200 chars, dedupe by slug (so a tradie can't list the
+// same friend twice), and cap the array at 12 entries.
+function sanitiseRecommendations(v: unknown): { slug: string; note?: string }[] {
+  if (!Array.isArray(v)) return [];
+  const seen = new Set<string>();
+  const out: { slug: string; note?: string }[] = [];
+  for (const raw of v) {
+    if (!raw || typeof raw !== "object") continue;
+    const slug = String((raw as { slug?: unknown }).slug ?? "").trim().toLowerCase();
+    if (slug.length < 5 || slug.length > 60) continue;
+    if (!/^[a-z0-9-]+$/.test(slug)) continue;
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+    const note = String((raw as { note?: unknown }).note ?? "").trim().slice(0, 200);
+    out.push(note ? { slug, note } : { slug });
+    if (out.length >= 12) break;
+  }
+  return out;
+}
 
 function sanitiseOperatingHours(v: unknown): Record<string, { open: string; close: string } | null> {
   const out: Record<string, { open: string; close: string } | null> = {};
@@ -308,6 +330,8 @@ export async function POST(req: NextRequest) {
         patch[f] = sanitisePricedServices(fieldsIn[f]);
       } else if (f === "headline_rate") {
         patch[f] = sanitiseHeadlineRate(fieldsIn[f]);
+      } else if (f === "recommendations") {
+        patch[f] = sanitiseRecommendations(fieldsIn[f]);
       }
     }
   }
