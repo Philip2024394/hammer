@@ -17,6 +17,7 @@ import { effectiveTier, trialDaysRemaining } from "@/lib/xratedTrades";
 import { maybeExpireListingTier } from "@/lib/xratedTier";
 import { TradeOffForm, type TradeOffFormInitial } from "../../signup/TradeOffForm";
 import { PremiumCustomisationPanel } from "./PremiumCustomisationPanel";
+import { VideoUploadInput } from "@/components/trade-off/VideoUploadInput";
 import { WhatsappLeadsNudge } from "@/components/trade-off/WhatsappLeadsNudge";
 import { LossAversionPreview } from "@/components/trade-off/LossAversionPreview";
 import type { HammerexXratedVoucher } from "@/lib/supabase";
@@ -228,6 +229,20 @@ export default async function TradeOffEditPage({
           initial={initial}
         />
       </section>
+
+      {/* Self-hosted intro video uploader. Bypasses YouTube — file
+          uploads direct to Supabase Storage, no Vercel-body limits.
+          Available on every tier; ≤60s, ≤30 MB, MP4/MOV/WebM. */}
+      {(tier === "app_trial" || tier === "app_paid") && (
+        <section className="mx-auto max-w-3xl px-4 pb-10">
+          <VideoUploadInput
+            listingId={row.data.id}
+            editToken={token}
+            initialVideoUrl={row.data.video_url}
+            initialCaption={row.data.video_caption}
+          />
+        </section>
+      )}
 
       <section className="mx-auto max-w-3xl px-4 pb-16">
         {tier === "app_trial" || tier === "app_paid" ? (

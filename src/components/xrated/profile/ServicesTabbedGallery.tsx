@@ -46,11 +46,17 @@ type Tab = {
 export function ServicesTabbedGallery({
   slug,
   pricedServices,
-  servicesOffered
+  servicesOffered,
+  stripped = false
 }: {
   slug: string;
   pricedServices: PricedService[];
   servicesOffered: string[];
+  /** Free-tier strip-down — when true, every card shows just the image
+   *  + service name; price, description and the Enquire button are
+   *  hidden. The lightbox stays unavailable so customers can't tap
+   *  through to a paid-only contact flow. */
+  stripped?: boolean;
 }) {
   // Build the tab list — priced rows first (richer), then any text-only
   // services_offered that aren't already represented by a priced row.
@@ -136,6 +142,7 @@ export function ServicesTabbedGallery({
               tab={t}
               slug={slug}
               onOpenLightbox={openLightbox}
+              stripped={stripped}
             />
           ))}
         </div>
@@ -146,6 +153,7 @@ export function ServicesTabbedGallery({
           onActiveChange={setActive}
           slug={slug}
           onOpenLightbox={openLightbox}
+          stripped={stripped}
         />
       )}
 
@@ -170,13 +178,15 @@ function ServiceCarousel({
   activeIndex,
   onActiveChange,
   slug,
-  onOpenLightbox
+  onOpenLightbox,
+  stripped = false
 }: {
   tabs: Tab[];
   activeIndex: number;
   onActiveChange: (i: number) => void;
   slug: string;
   onOpenLightbox: (svc: PricedService, startIndex: number) => void;
+  stripped?: boolean;
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -306,6 +316,7 @@ function ServiceCarousel({
                 slug={slug}
                 onOpenLightbox={onOpenLightbox}
                 large={tabIndex === activeIndex}
+                stripped={stripped}
               />
             </div>
           );
@@ -323,12 +334,17 @@ function ServiceCard({
   tab,
   slug,
   onOpenLightbox,
-  large
+  large,
+  stripped = false
 }: {
   tab: Tab;
   slug: string;
   onOpenLightbox: (svc: PricedService, startIndex: number) => void;
   large?: boolean;
+  /** Free-tier card — image + service name only. No description, no
+   *  price, no Enquire button. Photo still opens the lightbox so the
+   *  customer can see the work full-size. */
+  stripped?: boolean;
 }) {
   const { name, service: svc } = tab;
 
@@ -337,11 +353,15 @@ function ServiceCard({
     return (
       <div className="flex flex-col gap-3 rounded-2xl border border-neutral-200 bg-white p-5">
         <p className="text-sm font-extrabold text-neutral-900">{name}</p>
-        <p className="text-xs text-neutral-500">
-          No fixed price published — every job is quoted on site after a quick
-          chat about scope, materials, and access.
-        </p>
-        <EnquireButton slug={slug} name={name} price={0} unit="" />
+        {!stripped && (
+          <>
+            <p className="text-xs text-neutral-500">
+              No fixed price published — every job is quoted on site after a
+              quick chat about scope, materials, and access.
+            </p>
+            <EnquireButton slug={slug} name={name} price={0} unit="" />
+          </>
+        )}
       </div>
     );
   }
@@ -384,26 +404,28 @@ function ServiceCard({
         <p className={`font-extrabold text-neutral-900 ${large ? "text-base sm:text-lg" : "text-sm"}`}>
           {svc.name}
         </p>
-        {svc.description && (
+        {!stripped && svc.description && (
           <p className="text-xs leading-relaxed text-neutral-500">
             {svc.description}
           </p>
         )}
 
-        <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-          <div className="flex items-baseline gap-1">
-            <span className={`font-extrabold text-neutral-900 ${large ? "text-2xl" : "text-lg"}`}>
-              £{svc.price.toLocaleString("en-GB")}
-            </span>
-            <span className="text-xs text-neutral-500">{svc.unit}</span>
+        {!stripped && (
+          <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+            <div className="flex items-baseline gap-1">
+              <span className={`font-extrabold text-neutral-900 ${large ? "text-2xl" : "text-lg"}`}>
+                £{svc.price.toLocaleString("en-GB")}
+              </span>
+              <span className="text-xs text-neutral-500">{svc.unit}</span>
+            </div>
+            <EnquireButton
+              slug={slug}
+              name={svc.name}
+              price={svc.price}
+              unit={svc.unit}
+            />
           </div>
-          <EnquireButton
-            slug={slug}
-            name={svc.name}
-            price={svc.price}
-            unit={svc.unit}
-          />
-        </div>
+        )}
       </div>
     </div>
   );

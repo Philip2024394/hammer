@@ -37,12 +37,16 @@ export function ReviewsCarousel({
   reviews,
   displayName,
   city,
-  slug
+  slug,
+  allowAddReview = true
 }: {
   reviews: ReviewCard[];
   displayName: string;
   city: string;
   slug: string;
+  /** Free-tier — hides the Add review CTA at the bottom of the card.
+   *  Reviews stay readable; only the call-to-action is gated. */
+  allowAddReview?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   if (reviews.length === 0) return null;
@@ -212,21 +216,24 @@ export function ReviewsCarousel({
           </div>
         )}
 
-        {/* Add review CTA — sits inside the card body, under the dot
-            indicator. Replaces the old top-right text link. */}
-        <div className="mt-4 flex justify-center border-t border-neutral-100 pt-4">
-          <a
-            href={`/trade/${slug}/review`}
-            className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg px-5 text-xs font-extrabold text-neutral-900 shadow-sm transition active:scale-[0.97]"
-            style={{ background: "#FFB300" }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Add review
-          </a>
-        </div>
+        {/* Add review CTA — only renders on paid profiles. Free
+            profiles see no button (reviews stay read-only) so customers
+            can't reach the review form, which is paid-only. */}
+        {allowAddReview && (
+          <div className="mt-4 flex justify-center border-t border-neutral-100 pt-4">
+            <a
+              href={`/trade/${slug}/review`}
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg px-5 text-xs font-extrabold text-neutral-900 shadow-sm transition active:scale-[0.97]"
+              style={{ background: "#FFB300" }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add review
+            </a>
+          </div>
+        )}
       </div>
 
       <button

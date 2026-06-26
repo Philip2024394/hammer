@@ -12,6 +12,12 @@
 
 import { useEffect, useState } from "react";
 
+// True when the URL points at our self-hosted Supabase Storage rather
+// than YouTube — drives whether we render <video> or <iframe>.
+function isSelfHosted(url: string): boolean {
+  return /^https:\/\/[^/]*supabase\.co\/storage\//.test(url);
+}
+
 function youtubeId(url: string): string | null {
   try {
     const u = new URL(url);
@@ -39,7 +45,8 @@ export function VideoLightbox({
   altText: string;
 }) {
   const [open, setOpen] = useState(false);
-  const id = youtubeId(videoUrl);
+  const selfHosted = isSelfHosted(videoUrl);
+  const id = selfHosted ? null : youtubeId(videoUrl);
 
   // Lock body scroll while the lightbox is open + close on ESC.
   useEffect(() => {
@@ -56,7 +63,7 @@ export function VideoLightbox({
     };
   }, [open]);
 
-  if (!id) return null;
+  if (!selfHosted && !id) return null;
 
   return (
     <>
@@ -73,13 +80,15 @@ export function VideoLightbox({
             alt={altText}
             className="h-full w-full object-cover transition group-hover:scale-[1.03]"
           />
-        ) : (
+        ) : id ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
             alt={altText}
             className="h-full w-full object-cover transition group-hover:scale-[1.03]"
           />
+        ) : (
+          <div className="h-full w-full bg-neutral-900" />
         )}
         <span
           aria-hidden="true"
@@ -123,13 +132,25 @@ export function VideoLightbox({
               </svg>
             </button>
             <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
-              <iframe
-                src={`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`}
-                title={altText}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="h-full w-full"
-              />
+              {selfHosted ? (
+                /* eslint-disable-next-line jsx-a11y/media-has-caption */
+                <video
+                  src={videoUrl}
+                  poster={coverUrl ?? undefined}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="h-full w-full"
+                />
+              ) : (
+                <iframe
+                  src={`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`}
+                  title={altText}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="h-full w-full"
+                />
+              )}
             </div>
           </div>
         </div>

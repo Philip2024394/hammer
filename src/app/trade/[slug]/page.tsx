@@ -345,9 +345,14 @@ export default async function TradiePublicProfilePage({
   const profileFullUrl = absolute(`/trade/${listing.slug}`);
   const toolProducts = await loadStandardProducts(listing.hammerex_standard_products);
 
+  // tier === "paid"   ➜ no Xrated header, no upgrade banner, full features
+  // tier === "free"   ➜ Xrated header visible, upgrade banner pinned,
+  //                     video / contact form / service price + description
+  //                     all gated off
   const isPremium =
     !previewStandard &&
     (effectiveTier(listing) === "app_trial" || effectiveTier(listing) === "app_paid");
+  const renderTier: "free" | "paid" = isPremium ? "paid" : "free";
 
   return (
     <main className="flex flex-1 flex-col pb-20 md:pb-0">
@@ -361,7 +366,38 @@ export default async function TradiePublicProfilePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }}
       />
-      <XratedHeader />
+      {/* VideoObject schema — emitted when the tradesperson has set a
+          video. Self-hosted MP4 / MOV / WebM AND YouTube URLs both
+          qualify; Google indexes both and the video can appear in the
+          video carousel SERP feature. */}
+      {listing.video_url && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "VideoObject",
+              name: listing.video_caption || `${listing.display_name} — ${primary} intro video`,
+              description:
+                listing.video_caption ||
+                `${listing.display_name}, ${primary.toLowerCase()} in ${listing.city} — a short intro video showing their work and approach.`,
+              thumbnailUrl: listing.video_cover_url || listing.photos[0] || listing.avatar_url || undefined,
+              contentUrl: listing.video_url,
+              uploadDate: listing.joined_at,
+              publisher: {
+                "@type": "Organization",
+                name: listing.display_name
+              },
+              inLanguage: "en-GB"
+            })
+          }}
+        />
+      )}
+      {/* Free profiles get the Xrated header; paid profiles render a
+          clean white-label page with no platform chrome above the
+          hero. A small "Powered by Xrated" footer credit goes on
+          every profile until the £3/mo white-label add-on ships. */}
+      {renderTier === "free" && <XratedHeader />}
 
       {/* Per-trade default hero banner — Standard tier only. PremiumLayout
           renders its own banner WITH the profile card overlaid on the left. */}
@@ -393,28 +429,22 @@ export default async function TradiePublicProfilePage({
         );
       })()}
 
-      {isPremium ? (
-        <PremiumLayout
-          listing={listing}
-          projects={projects}
-          reviews={reviews}
-          toolProducts={toolProducts}
-          tierLabel={tierLabel}
-          blurb={blurb}
-          waUrl={waUrl}
-          profileFullUrl={profileFullUrl}
-        />
-      ) : (
-        <StandardLayout
-          listing={listing}
-          projects={projects}
-          toolProducts={toolProducts}
-          tierLabel={tierLabel}
-          blurb={blurb}
-          waUrl={waUrl}
-          profileFullUrl={profileFullUrl}
-        />
-      )}
+      {/* Single render path — both tiers go through PremiumLayout with
+          feature gates driven by `tier`. Free profiles get the Xrated
+          header (rendered above) + a pinned upgrade banner; paid
+          profiles get the full white-label treatment with a small
+          "Powered by Xrated" credit in the footer. */}
+      <PremiumLayout
+        listing={listing}
+        projects={projects}
+        reviews={reviews}
+        toolProducts={toolProducts}
+        tierLabel={tierLabel}
+        blurb={blurb}
+        waUrl={waUrl}
+        profileFullUrl={profileFullUrl}
+        tier={renderTier}
+      />
 
       <div className="mt-auto">
         <XratedFooter />
@@ -450,7 +480,8 @@ function PremiumLayout({
   toolProducts,
   tierLabel,
   waUrl,
-  profileFullUrl
+  profileFullUrl,
+  tier
 }: {
   listing: HammerexTradeOffListing;
   projects: HammerexTradeOffProject[];
@@ -460,35 +491,35 @@ function PremiumLayout({
   blurb: string;
   waUrl: string;
   profileFullUrl: string;
+  tier: "free" | "paid";
 }) {
+  const isPaid = tier === "paid";
   return (
     <>
       <PremiumHero listing={listing} waUrl={waUrl} />
 
-      {/* Trust-level header sits under the hero as the page-2 entry.
-          FAQ + contact form live on /trade/<slug>/contact — the hero
-          Message button routes there. */}
-      <AboutAndVideo listing={listing} />
-      {/* Our Services + Pricing consolidated into a single tabbed
-          gallery — pick a service, the card below swaps to that
-          service's image library, description and price. */}
+      {/* Free-tier upgrade banner — pinned high under the hero so it's
+          one of the first things visitors see, BUT below the hero so
+          the profile still looks legit at a glance. */}
+      {!isPaid && (
+        <FreeTierUpgradeBanner
+          slug={listing.slug}
+          displayName={listing.display_name}
+        />
+      )}
+
+      <AboutAndVideo listing={listing} showVideo={isPaid} />
       <ServicesTabbedGallery
         slug={listing.slug}
         pricedServices={listing.priced_services ?? []}
         servicesOffered={listing.services_offered ?? []}
+        stripped={!isPaid}
       />
-      {/* Detailed "What to know before you message" panel now lives on
-          /trade/<slug>/contact — the chip row under About Us covers the
-          headline trust signals here. */}
-      {/* Recent Work gallery removed — each pricing card now carries up
-          to 3 photos with a shared lightbox + Enquire button, so the
-          carousel doubled up with this section. */}
-      {/* Opening hours removed from the home page — surfaced as a
-          running marquee on the contact page instead. */}
-      <ClientsCarousel listing={listing} reviews={reviews} />
-      {/* Tools-I-Use block removed from premium. Replaced by the
-          Meet the Team grid below — last trust signal before the
-          contact CTA. Solo tradies (< 2 members) auto-hide. */}
+      <ClientsCarousel
+        listing={listing}
+        reviews={reviews}
+        allowAddReview={isPaid}
+      />
       <TeamGrid listing={listing} />
       <ShareAndContactCta
         listing={listing}
@@ -496,11 +527,89 @@ function PremiumLayout({
         profileFullUrl={profileFullUrl}
       />
       <BottomTrustStrip />
+      <PoweredByXratedFooter slug={listing.slug} />
     </>
   );
 }
+
+// ─── Free-tier upgrade banner ────────────────────────────────────────
+// Pinned yellow strip sitting under the hero on every free profile.
+// One-tap upgrade CTA, drops away the moment they go paid. The dismiss
+// is deliberately NOT persisted — we want every visit to a free
+// profile to reinforce that an upgrade is available.
+function FreeTierUpgradeBanner({
+  slug,
+  displayName
+}: {
+  slug: string;
+  displayName: string;
+}) {
+  const firstName = displayName.split(/\s+/)[0] || displayName;
+  return (
+    <section className="w-full px-4 pt-6 sm:px-6">
+      <div
+        className="flex flex-col items-start gap-3 rounded-2xl px-4 py-4 text-neutral-900 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+        style={{ background: "#FFB300" }}
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-extrabold uppercase tracking-widest text-neutral-900/80">
+            Free profile
+          </p>
+          <p className="mt-1 text-sm font-extrabold leading-tight sm:text-base">
+            Upgrade to unlock {firstName}&apos;s full profile — video, contact form,
+            prices and reviews.
+          </p>
+        </div>
+        <a
+          href={`/trade-off/pricing?slug=${encodeURIComponent(slug)}`}
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-neutral-900 px-4 text-xs font-extrabold text-white shadow-sm transition active:scale-[0.97]"
+        >
+          Upgrade — 30 days free
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </a>
+      </div>
+    </section>
+  );
+}
+
+// ─── Powered by Xrated Trades footer credit ──────────────────────────
+// Renders on EVERY profile, free + paid, until the £3/mo white-label
+// add-on is shipped. Doubles as Linktree-style top-of-funnel — every
+// visitor sees a soft "get yours" link.
+function PoweredByXratedFooter({ slug }: { slug: string }) {
+  return (
+    <section className="w-full px-4 pb-6 pt-10 sm:px-6">
+      <div className="flex flex-col items-center justify-center gap-1 text-center text-xs text-neutral-500">
+        <p>
+          Built on{" "}
+          <a
+            href={`/trade-off?ref=${encodeURIComponent(slug)}`}
+            className="font-extrabold text-neutral-900 hover:text-[#FFB300]"
+          >
+            Xrated Trades
+          </a>{" "}
+          — the shareable trade profile for UK tradies.
+        </p>
+        <a
+          href="/trade-off/signup"
+          className="text-xs font-bold text-[#FFB300] hover:underline"
+        >
+          Get yours →
+        </a>
+      </div>
+    </section>
+  );
+}
 // ─── Section: About Us (left) + Video (right) ─────────────────────────
-function AboutAndVideo({ listing }: { listing: HammerexTradeOffListing }) {
+function AboutAndVideo({
+  listing,
+  showVideo = true
+}: {
+  listing: HammerexTradeOffListing;
+  showVideo?: boolean;
+}) {
   // Only break on a BLANK line (two or more newlines, possibly with
   // whitespace between). Single newlines flatten to a space, so a
   // tradesperson's continuous prose stays one paragraph unless they
@@ -519,7 +628,7 @@ function AboutAndVideo({ listing }: { listing: HammerexTradeOffListing }) {
     listing.photos[0] ??
     listing.avatar_url ??
     null;
-  const hasVideo = !!listing.video_url;
+  const hasVideo = showVideo && !!listing.video_url;
 
   return (
     <section className="w-full px-4 pt-6 sm:px-6 sm:pt-8">
@@ -606,10 +715,15 @@ function ServicesIconRow({ services }: { services: string[] }) {
 // ─── Section: real customer-review carousel ─────────────────────────
 function ClientsCarousel({
   listing,
-  reviews
+  reviews,
+  allowAddReview = true
 }: {
   listing: HammerexTradeOffListing;
   reviews: XratedReviewPublic[];
+  /** Free-tier read-only mode — reviews still render, but the "Add
+   *  review" CTA is replaced by a small upgrade nudge that explains
+   *  paid profiles let customers leave reviews tied to specific jobs. */
+  allowAddReview?: boolean;
 }) {
   // Empty state — invite a review rather than hiding the section. New
   // tradies need this CTA visible, even with zero reviews.
@@ -624,10 +738,16 @@ function ClientsCarousel({
             No customer reviews yet.
           </p>
           <p className="mt-1 text-xs text-neutral-500">
-            Be the first — leave an honest review after your job&apos;s done.
+            {allowAddReview
+              ? "Be the first — leave an honest review after your job's done."
+              : "Reviews unlock on the paid profile. Upgrade to let customers leave verified reviews tied to specific jobs."}
           </p>
           <a
-            href={`/trade/${listing.slug}/review`}
+            href={
+              allowAddReview
+                ? `/trade/${listing.slug}/review`
+                : `/trade-off/pricing?slug=${encodeURIComponent(listing.slug)}`
+            }
             className="mt-3 inline-flex h-10 items-center justify-center gap-1.5 rounded-lg px-5 text-xs font-extrabold text-neutral-900 shadow-sm transition active:scale-[0.97]"
             style={{ background: "#FFB300" }}
           >
@@ -635,7 +755,7 @@ function ClientsCarousel({
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Add review
+            {allowAddReview ? "Add review" : "Upgrade to enable reviews"}
           </a>
         </div>
       </section>
@@ -652,6 +772,7 @@ function ClientsCarousel({
         displayName={listing.display_name}
         city={listing.city}
         slug={listing.slug}
+        allowAddReview={allowAddReview}
       />
     </section>
   );
