@@ -189,8 +189,14 @@ export function CartPageBody({
                       <p className="line-clamp-2 text-[13px] font-extrabold leading-tight text-neutral-900 sm:text-sm">
                         {item.name}
                       </p>
+                      {/* Service rows surface their unit ("per tree",
+                          "per hour") alongside the per-unit price so the
+                          line reads "£23.00 per tree × qty 2 = £46.00".
+                          Physical-product rows leave unit null and
+                          continue to read "£X.XX each". */}
                       <p className="mt-1 text-[13px] text-neutral-500">
-                        {formatGbp(item.price_pence)} each
+                        {formatGbp(item.price_pence)}{" "}
+                        {item.unit ? item.unit : "each"}
                       </p>
                       <div className="mt-auto flex items-center justify-between gap-2 pt-3">
                         <QtyStepper
@@ -519,8 +525,12 @@ function buildWhatsappHref({
   lines.push("");
   lines.push("Cart:");
   for (const item of state.items) {
+    // Append the unit when the item is a service-mode line ("per tree",
+    // "per hour"…) so the tradesperson immediately sees the customer is
+    // asking about 2 trees at £23/tree rather than two unitless items.
+    const unitSuffix = item.unit ? ` ${item.unit}` : "";
     lines.push(
-      `• ${item.name} — qty ${item.qty} — ${formatGbp(item.price_pence * item.qty)}`
+      `• ${item.name} — ${formatGbp(item.price_pence)}${unitSuffix} × qty ${item.qty} — ${formatGbp(item.price_pence * item.qty)}`
     );
   }
   lines.push("");

@@ -26,20 +26,58 @@ type PricedService = {
   description?: string | null;
 };
 
+// Live products owned by the tradesperson — passed in from the server
+// shell when Shop Mode is on. The Product tab in the picker draws from
+// this list. Only `kind === 'product'` rows show; service-kind rows are
+// owned by the Services Prices add-on and stay out of this surface.
+type ReviewablePickerProduct = {
+  id: string;
+  name: string;
+  kind: "product" | "service";
+  cover_url: string | null;
+};
+
+// Discriminated union for what the customer is reviewing. null = nothing
+// picked yet; "general" = customer chose Other / General (service-side
+// fallback that never gets gated). Product picks carry the uuid; service
+// picks carry the priced_service.name string.
+type ReviewTarget =
+  | { type: "service"; name: string } // priced_service.name OR "__general__"
+  | { type: "product"; id: string }
+  | null;
+
 export function ReviewFormPanel({
   listingId,
   displayName,
-  pricedServices
+  pricedServices,
+  products = [],
+  shopModeOn = false
 }: {
   listingId: string;
   displayName: string;
   pricedServices: PricedService[];
+  /** Tradesperson's live Shop Mode products. Empty when the add-on is
+   *  off or the tradesperson hasn't added any yet. */
+  products?: ReviewablePickerProduct[];
+  /** When true AND `products.length > 0`, the Service/Product tab
+   *  toggle appears. Otherwise the form falls back to service-only. */
+  shopModeOn?: boolean;
 }) {
   const themeColor = "#FFB300";
+
+  // Product-kind rows only — services are owned by the Services Prices
+  // surface and don't belong in the product tab here.
+  const liveProducts = products.filter((p) => p.kind === "product");
+  const showProductTab = shopModeOn && liveProducts.length > 0;
+
+  // Tab state — defaults to "service" so existing behaviour is the
+  // default when the Product tab is hidden too.
+  const [activeTab, setActiveTab] = useState<"service" | "product">("service");
 
   // "" = nothing picked yet, "__general__" = customer chose Other / General,
   // anything else is the priced_service.name the review is about.
   const [serviceName, setServiceName] = useState<string>("");
+  const [productId, setProductId] = useState<string>("");
   const [overall, setOverall] = useState(0);
   const [workmanship, setWorkmanship] = useState(0);
   const [communication, setCommunication] = useState(0);
@@ -111,6 +149,23 @@ export function ReviewFormPanel({
     return null;
   }
 
+  // Derived review target — discriminated based on the active tab and
+  // the per-tab state. Used for both submission and label switching.
+  const reviewTarget: ReviewTarget =
+    activeTab === "product" && productId
+      ? { type: "product", id: productId }
+      : activeTab === "service" && serviceName
+        ? { type: "service", name: serviceName }
+        : null;
+  const isProductReview = reviewTarget?.type === "product";
+
+  // Product-context relabels for the 5-axis rating UI. Same DB columns
+  // — only the visible string changes. Communication + Value stay
+  // identical in both branches.
+  const labels = isProductReview
+    ? { workmanship: "Quality", timeliness: "Delivery time" }
+    : { workmanship: "Workmanship", timeliness: "Timeliness" };
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
@@ -121,13 +176,22 @@ export function ReviewFormPanel({
     }
     setBusy(true);
     try {
+      // Mutual-exclusion at the wire: only ONE of service_name / product_id
+      // is ever populated. The API also enforces this server-side.
+      const isProduct = reviewTarget?.type === "product";
+      const submittedServiceName =
+        !isProduct && serviceName && serviceName !== "__general__"
+          ? serviceName
+          : null;
+      const submittedProductId = isProduct ? reviewTarget.id : null;
+
       const res = await fetch("/api/trade-off/reviews", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           listing_id: listingId,
-          service_name:
-            serviceName && serviceName !== "__general__" ? serviceName : null,
+          service_name: submittedServiceName,
+          product_id: submittedProductId,
           customer_name: name.trim(),
           customer_email: email.trim(),
           customer_postcode: postcode.trim() || null,
@@ -194,13 +258,37 @@ export function ReviewFormPanel({
         onSubmit={submit}
         className="mt-4 space-y-5 rounded-2xl border border-brand-line bg-brand-surface p-4 sm:p-5"
       >
-        {/* Service-picker step — at the top so the reviewer anchors
-            their rating to a specific job before they pick stars. */}
-        <ServicePicker
-          services={pricedServices}
-          value={serviceName}
-          onChange={setServiceName}
-        />
+        {/* Picker step — at the top so the reviewer anchors their rating
+            to a specific job/product before they pick stars. When Shop
+            Mode is on AND the tradesperson has live products, a two-tab
+            toggle (Service / Product) appears; otherwise the original
+            service-only picker renders unchanged. */}
+        {showProductTab ? (
+          <PickerTabs
+            activeTab={activeTab}
+            onChange={(next) => {
+              // Reset the OTHER tab's selection on switch so the form
+              // can only ever submit one of service_name / product_id.
+              if (next === "service") setProductId("");
+              else setServiceName("");
+              setActiveTab(next);
+            }}
+          />
+        ) : null}
+
+        {!showProductTab || activeTab === "service" ? (
+          <ServicePicker
+            services={pricedServices}
+            value={serviceName}
+            onChange={setServiceName}
+          />
+        ) : (
+          <ProductPicker
+            products={liveProducts}
+            value={productId}
+            onChange={setProductId}
+          />
+        )}
 
         {/* Overall rating — big and unmissable. */}
         <div>
@@ -210,10 +298,13 @@ export function ReviewFormPanel({
           <StarRow value={overall} onChange={setOverall} size="lg" />
         </div>
 
-        {/* Category ratings */}
+        {/* Category ratings — same DB columns in both branches; only the
+            visible labels differ when the customer is reviewing a
+            product (Workmanship → Quality, Timeliness → Delivery time).
+            Communication + Value stay constant. */}
         <div className="grid gap-3 sm:grid-cols-2">
           <CategoryRating
-            label="Workmanship"
+            label={labels.workmanship}
             value={workmanship}
             onChange={setWorkmanship}
           />
@@ -224,7 +315,7 @@ export function ReviewFormPanel({
           />
           <CategoryRating label="Value" value={valueRating} onChange={setValueRating} />
           <CategoryRating
-            label="Timeliness"
+            label={labels.timeliness}
             value={timeliness}
             onChange={setTimeliness}
           />
@@ -349,7 +440,11 @@ export function ReviewFormPanel({
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="What went well, what didn't, would you hire them again. 100 characters minimum so reviewers can read enough to decide."
+            placeholder={
+              isProductReview
+                ? "Tell other tradespeople and customers what the product was like — quality, condition, how fast it arrived..."
+                : "What went well, what didn't, would you hire them again. 100 characters minimum so reviewers can read enough to decide."
+            }
             required
             minLength={100}
             maxLength={2000}
@@ -586,6 +681,130 @@ function ServicePicker({
             </span>
           </button>
         </li>
+      </ul>
+    </div>
+  );
+}
+
+// Two-tab toggle shown only when Shop Mode is on AND the tradesperson
+// has live products. Yellow pill style mirrors the rest of the public
+// profile. 44px tap targets, 13px text floor.
+function PickerTabs({
+  activeTab,
+  onChange
+}: {
+  activeTab: "service" | "product";
+  onChange: (next: "service" | "product") => void;
+}) {
+  const tabs: Array<{ key: "service" | "product"; label: string }> = [
+    { key: "service", label: "Service" },
+    { key: "product", label: "Product" }
+  ];
+  return (
+    <div>
+      <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-muted">
+        What are you reviewing?
+      </span>
+      <div
+        role="tablist"
+        aria-label="Review target"
+        className="mt-2 inline-flex w-full max-w-sm rounded-full border border-brand-line bg-brand-bg p-1"
+      >
+        {tabs.map((t) => {
+          const isActive = activeTab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onChange(t.key)}
+              className="inline-flex h-11 flex-1 items-center justify-center rounded-full text-[13px] font-extrabold transition active:scale-[0.98]"
+              style={
+                isActive
+                  ? { background: "#FFB300", color: "#0A0A0A" }
+                  : { background: "transparent", color: "rgb(115,115,115)" }
+              }
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Product-picker grid — mirror of ServicePicker but draws from the
+// tradesperson's live products list. Selected card writes the product
+// uuid into state which becomes `product_id` in the POST payload.
+function ProductPicker({
+  products,
+  value,
+  onChange
+}: {
+  products: { id: string; name: string; cover_url: string | null }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-muted">
+        Which product is this review about?
+      </span>
+      <p className="mt-1 text-[11px] text-brand-muted">
+        Tap the product you bought — it gets attached to your review so
+        future buyers can see what you actually rated.
+      </p>
+      <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        {products.map((p) => {
+          const isPicked = value === p.id;
+          return (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => onChange(isPicked ? "" : p.id)}
+                aria-pressed={isPicked}
+                className={`group relative block w-full overflow-hidden rounded-xl border-2 text-left transition active:scale-[0.98] ${
+                  isPicked
+                    ? "border-[#FFB300]"
+                    : "border-transparent ring-1 ring-brand-line hover:ring-[#FFB300]"
+                }`}
+              >
+                <span className="block aspect-video w-full overflow-hidden bg-neutral-100">
+                  {p.cover_url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={p.cover_url}
+                      alt={p.name}
+                      className="h-full w-full object-cover transition group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
+                      No image
+                    </span>
+                  )}
+                </span>
+                <span className="block px-2.5 py-2">
+                  <span className="block truncate text-xs font-extrabold text-brand-text">
+                    {p.name}
+                  </span>
+                </span>
+                {isPicked && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full"
+                    style={{ background: "#FFB300" }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -6,6 +6,7 @@ import { XratedFooter } from "@/components/xrated/XratedFooter";
 import { PremiumHero } from "@/components/xrated/profile/PremiumHero";
 import { ReviewFormPanel } from "@/components/xrated/profile/ReviewFormPanel";
 import { tradeLabel, whatsappQuoteUrl } from "@/lib/tradeOff";
+import { isShopModeOn } from "@/lib/xratedAddons";
 
 export const revalidate = 60;
 
@@ -46,6 +47,24 @@ export default async function TradeReviewPage({
   const primary = tradeLabel(listing.primary_trade);
   const waUrl = whatsappQuoteUrl(listing.whatsapp, listing.display_name, primary);
 
+  // Shop Mode add-on — when on, customers can tag the review to a
+  // specific product. We always fetch the product list (kept tiny —
+  // just id/name/kind/cover_url) so the form's Service/Product tab
+  // toggle can decide whether to render. Empty array = no products and
+  // ReviewFormPanel falls back to the single-picker layout.
+  const shopModeOn = isShopModeOn(listing);
+  let products: { id: string; name: string; kind: "product" | "service"; cover_url: string | null }[] = [];
+  if (shopModeOn) {
+    const productsRes = await supabase
+      .from("hammerex_xrated_products")
+      .select("id, name, kind, cover_url")
+      .eq("listing_id", listing.id)
+      .eq("status", "live")
+      .eq("kind", "product")
+      .order("sort_order", { ascending: true });
+    products = (productsRes.data ?? []) as typeof products;
+  }
+
   return (
     <main className="flex flex-1 flex-col pb-20 md:pb-0">
       <XratedHeader />
@@ -56,6 +75,8 @@ export default async function TradeReviewPage({
         listingId={listing.id}
         displayName={listing.display_name}
         pricedServices={listing.priced_services ?? []}
+        products={products}
+        shopModeOn={shopModeOn}
       />
 
       <div className="mt-auto">

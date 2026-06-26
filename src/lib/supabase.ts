@@ -355,6 +355,18 @@ export type HammerexTradeOffListing = {
 export type HammerexXratedProduct = {
   id: string;
   listing_id: string;
+  // 'product' = physical item shipped to the customer (Shop Mode add-on).
+  // 'service' = labour / hire / rental priced by hour, sqm, tree, day,
+  //              etc. (Services Prices add-on). Same table, two surfaces.
+  kind: "product" | "service";
+  // Pricing unit for services — "per hour", "per sqm", "per tree",
+  // "per day", "per kg", etc. Null = flat item price (the default for
+  // physical products).
+  unit: string | null;
+  // Optional grouping for the Services Prices grid: "gardening",
+  // "machinery", "hire", etc. Null = ungrouped. Render layer can
+  // sub-section the grid by category when set.
+  category: string | null;
   name: string;
   description: string | null;
   price_pence: number;

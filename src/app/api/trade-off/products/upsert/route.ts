@@ -101,6 +101,18 @@ export async function POST(req: NextRequest) {
   const status: "live" | "archived" = statusRaw === "archived" ? "archived" : "live";
   const sort_order = nonNegInt(productIn.sort_order);
 
+  // Services Prices add-on extension. `kind` swaps the same row between
+  // physical product (Shop Mode) and labour-by-unit service (Services
+  // Prices). `unit` is the per-X label rendered alongside the price, and
+  // `category` optionally buckets services on the dedicated grid page.
+  const kindRaw = s(productIn.kind);
+  const kind: "product" | "service" =
+    kindRaw === "service" ? "service" : "product";
+  const unitRaw = s(productIn.unit);
+  const unit = unitRaw.length > 0 ? unitRaw.slice(0, 32) : null;
+  const categoryRaw = s(productIn.category);
+  const category = categoryRaw.length > 0 ? categoryRaw.slice(0, 40) : null;
+
   const patch = {
     name,
     description,
@@ -111,7 +123,10 @@ export async function POST(req: NextRequest) {
     gallery_urls,
     compare_with,
     status,
-    sort_order
+    sort_order,
+    kind,
+    unit,
+    category
   };
 
   const idRaw = s(productIn.id);

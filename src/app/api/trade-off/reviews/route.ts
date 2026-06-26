@@ -18,6 +18,9 @@ export const runtime = "nodejs";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UK_POSTCODE_RE = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}$/;
 const PROJECT_TYPES = new Set(["new_build", "renovation", "repair"]);
+// Mirrors the product-stats route's UUID regex — case-insensitive 8-4-4-4-12.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function clientIp(req: NextRequest): string | null {
   const xff = req.headers.get("x-forwarded-for");
@@ -56,6 +59,10 @@ export async function POST(req: NextRequest) {
   const project_type = s(body.project_type);
   const project_finish = s(body.project_finish);
   const service_name = s(body.service_name);
+  // A review is about ONE thing — either a service (string name) or a
+  // product (uuid). The form enforces this client-side; we re-validate
+  // mutual exclusion below.
+  const product_id = s(body.product_id);
   const review_body = s(body.body);
   const attempted_resolution =
     typeof body.attempted_resolution === "boolean" ? body.attempted_resolution : null;
@@ -110,6 +117,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Mutual exclusion: a review is about ONE thing. Reject up-front so
+  // the client can't accidentally double-tag.
+  if (service_name && product_id) {
+    return NextResponse.json(
+      { ok: false, error: "Pick one — service or product." },
+      { status: 400 }
+    );
+  }
+
+  // Product id must be a syntactically valid uuid (the ownership check
+  // below confirms it belongs to this listing).
+  if (product_id && !UUID_RE.test(product_id)) {
+    return NextResponse.json(
+      { ok: false, error: "Invalid product id." },
+      { status: 400 }
+    );
+  }
+
   // Listing exists + accepts reviews (gated by status='live').
   const listing = await supabaseAdmin
     .from("hammerex_trade_off_listings")
@@ -124,6 +149,23 @@ export async function POST(req: NextRequest) {
       { ok: false, error: "This listing is not accepting reviews." },
       { status: 403 }
     );
+  }
+
+  // Product ownership check — the product must (a) exist and (b) belong
+  // to the same listing the review targets. Defends against tagging a
+  // review with someone else's product uuid.
+  if (product_id) {
+    const product = await supabaseAdmin
+      .from("hammerex_xrated_products")
+      .select("id, listing_id")
+      .eq("id", product_id)
+      .maybeSingle();
+    if (!product.data || product.data.listing_id !== listing.data.id) {
+      return NextResponse.json(
+        { ok: false, error: "Unknown product." },
+        { status: 400 }
+      );
+    }
   }
 
   const ip = clientIp(req);
@@ -141,6 +183,7 @@ export async function POST(req: NextRequest) {
       project_type: project_type || null,
       project_finish: project_finish || null,
       service_name: service_name || null,
+      product_id: product_id || null,
       timeframe_quoted_days: quoted_days,
       timeframe_actual_days: actual_days,
       attempted_resolution,

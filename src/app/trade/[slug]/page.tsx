@@ -41,7 +41,8 @@ import { ProfileExpandPanels } from "@/components/xrated/profile/ProfileExpandPa
 import { AboutBio } from "@/components/xrated/profile/AboutBio";
 import { ProductCardGrid } from "@/components/xrated/profile/ProductCardGrid";
 import { ShopCartIsland } from "@/components/xrated/profile/ShopCartIsland";
-import { isShopModeOn } from "@/lib/xratedAddons";
+import { ServicesPricedSection } from "@/components/xrated/profile/ServicesPricedSection";
+import { isServicesGridOn, isShopModeOn } from "@/lib/xratedAddons";
 import {
   supabase,
   type HammerexTradeOffListing,
@@ -475,6 +476,12 @@ function PremiumLayout({
   // dashboard but we double-check here so a leaked toggle on a free
   // profile can't bypass the gate).
   const shopMode = isPaid && isShopModeOn(listing);
+  // Services Prices add-on swap — only honour when the add-on is on AND
+  // the tradesperson is on a paid tier. Independent of Shop Mode — a
+  // tradesperson can run both at the same time (kit they sell + labour
+  // priced by the hour). Double-checks the gate here so a leaked toggle
+  // on a free profile can't bypass it.
+  const servicesGrid = isPaid && isServicesGridOn(listing);
   return (
     <>
       <PremiumHero listing={listing} waUrl={waUrl} tier={tier} />
@@ -506,6 +513,12 @@ function PremiumLayout({
         reviews={reviews}
         allowAddReview={isPaid}
       />
+      {/* Services & Prices inline teaser — paid tier + add-on on. Server
+          component, self-renders nothing when the trade has no live
+          services so a profile without entries never shows a dead
+          section. View-all link to /<slug>/services-prices for the
+          dedicated grid. */}
+      {servicesGrid && <ServicesPricedSection listing={listing} />}
       <TeamGrid listing={listing} />
       {/* My Trusted Trades — link to the dedicated sub-page. Recommendation
           cards now live exclusively on /<slug>/trusted-trades to give

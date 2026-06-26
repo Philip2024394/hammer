@@ -88,6 +88,24 @@ export const XRATED_ADDONS: XratedAddon[] = [
     ]
   },
   {
+    slug: "services_grid",
+    name: "Services Prices",
+    tagline: "Grid pricing for jobs you sell by the hour, sqm, tree or day",
+    summary:
+      "Built for trades that price by something other than 'a job' — landscapers, machinery hire, tool rental, mobile car valets. Add each service with an image, a price, and a unit (per hour / per sqm / per tree / per day). Customers tap a tile, see the detail, and either send a quick WhatsApp enquiry or batch several services into one structured message.",
+    glyph: "£",
+    pricing: { kind: "paid", monthly_pence: 400 },
+    availability: "ready",
+    hasEditor: true,
+    editorPath: "services-prices",
+    includedWithPaid: false,
+    benefits: [
+      "Tile grid + dedicated /services-prices page customers can share",
+      "Per-service unit picker — hour / sqm / tree / day / kg / item",
+      "Cart bundles services + products in one WhatsApp enquiry"
+    ]
+  },
+  {
     slug: "custom_domain",
     name: "Custom domain",
     tagline: "Use your own domain — yourtrade.co.uk",
@@ -149,6 +167,16 @@ export function isShopModeOn(
   listing: Pick<HammerexTradeOffListing, "addons_enabled">
 ): boolean {
   return (listing.addons_enabled ?? {}).shop_mode === true;
+}
+
+/** Services Prices add-on — when on, the public profile renders the
+ *  services-priced grid section (and the dedicated /services-prices
+ *  sub-page becomes reachable). Independent of Shop Mode — a trade can
+ *  run both, neither, or one. */
+export function isServicesGridOn(
+  listing: Pick<HammerexTradeOffListing, "addons_enabled">
+): boolean {
+  return (listing.addons_enabled ?? {}).services_grid === true;
 }
 
 /** Format a paid add-on's monthly price for UI rendering. */

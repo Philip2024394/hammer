@@ -12,6 +12,11 @@ export type CartItem = {
   cover_url: string | null;
   qty: number;
   added_at: string;
+  // Optional pricing unit for service-mode items ("per hour", "per tree",
+  // "per sqm" …). When set the cart + WhatsApp composer append it after
+  // the price so the line reads "£23.00 per tree × 2". Null/undefined for
+  // physical Shop Mode products — they price by item, no unit suffix.
+  unit?: string | null;
 };
 
 export type CartState = {
@@ -59,7 +64,11 @@ export function readCart(slug: string): CartState {
         price_pence: it.price_pence,
         cover_url: it.cover_url ?? null,
         qty: clampQty(typeof it.qty === "number" ? it.qty : 1),
-        added_at: typeof it.added_at === "string" ? it.added_at : new Date().toISOString()
+        added_at: typeof it.added_at === "string" ? it.added_at : new Date().toISOString(),
+        unit:
+          typeof it.unit === "string" && it.unit.trim().length > 0
+            ? it.unit.trim()
+            : null
       }));
     return { listing_slug: slug, items };
   } catch {
@@ -99,7 +108,11 @@ export function addItem(
       price_pence: item.price_pence,
       cover_url: item.cover_url ?? null,
       qty: qtyToAdd,
-      added_at: new Date().toISOString()
+      added_at: new Date().toISOString(),
+      unit:
+        typeof item.unit === "string" && item.unit.trim().length > 0
+          ? item.unit.trim()
+          : null
     });
   }
   writeCart(state);

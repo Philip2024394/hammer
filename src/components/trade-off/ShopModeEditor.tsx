@@ -22,6 +22,11 @@ type FormState = {
   compare_with: string[];
   sort_order: string;
   status: "live" | "archived";
+  // Services Prices add-on fields. Editable when kind='service' — both
+  // hidden in product-mode, where the API silently defaults unit=null and
+  // category=null on save.
+  unit: string;
+  category: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -35,8 +40,28 @@ const EMPTY_FORM: FormState = {
   gallery_urls: [],
   compare_with: [],
   sort_order: "0",
-  status: "live"
+  status: "live",
+  unit: "",
+  category: ""
 };
+
+const UNIT_CHIPS = [
+  "per hour",
+  "per item",
+  "per sqm",
+  "per day",
+  "per tree",
+  "per kg"
+] as const;
+
+const CATEGORY_CHIPS = [
+  "Gardening",
+  "Machinery",
+  "Hire",
+  "Cleaning",
+  "Labour",
+  "Callout"
+] as const;
 
 function poundsToPence(input: string): number {
   const n = Number(input);
@@ -68,20 +93,40 @@ function productToForm(p: HammerexXratedProduct): FormState {
     compare_with: Array.isArray(p.compare_with) ? p.compare_with : [],
     sort_order:
       typeof p.sort_order === "number" ? String(p.sort_order) : "0",
-    status: p.status === "archived" ? "archived" : "live"
+    status: p.status === "archived" ? "archived" : "live",
+    unit: typeof p.unit === "string" ? p.unit : "",
+    category: typeof p.category === "string" ? p.category : ""
   };
 }
 
 export function ShopModeEditor({
   slug,
   editToken,
-  initialProducts
+  initialProducts,
+  kind = "product"
 }: {
   slug: string;
   editToken: string;
   initialProducts: HammerexXratedProduct[];
+  /** Switches the editor between Shop Mode (kind='product') and the
+   *  Services Prices add-on (kind='service'). When 'service':
+   *   – Header + row labels read "Service" instead of "Product".
+   *   – Stock count + dispatch-day labels reshape ("Days from booking
+   *     to first appointment", stock hidden — services never run out).
+   *   – Unit becomes required & visible; category becomes visible.
+   *   – Defaults persisted as service-rows so the public Services Grid
+   *     picks them up. */
+  kind?: "product" | "service";
 }) {
-  const [products, setProducts] = useState<HammerexXratedProduct[]>(initialProducts);
+  const isService = kind === "service";
+  const noun = isService ? "service" : "product";
+  const NounCap = isService ? "Service" : "Product";
+  // Filter the in-editor list to the active kind so a tradesperson who
+  // runs both add-ons never sees their products mixed in with their
+  // services (or vice versa) on the editor surface.
+  const [products, setProducts] = useState<HammerexXratedProduct[]>(
+    initialProducts.filter((p) => (p.kind ?? "product") === kind)
+  );
   const [mode, setMode] = useState<Mode>("list");
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -134,13 +179,25 @@ export function ShopModeEditor({
       setErr("Set a price greater than £0.");
       return;
     }
+    const trimmedUnit = form.unit.trim();
+    if (isService && trimmedUnit.length === 0) {
+      setErr('Unit is required for services — e.g. "per hour", "per tree".');
+      return;
+    }
     setSubmitting(true);
     try {
-      const stockN = form.stock_count.trim().length === 0 ? null : Number(form.stock_count);
+      // In service-mode stock is hidden (services don't run out) — force
+      // null so an old edited row with a leftover stock value gets cleared.
+      const stockN = isService
+        ? null
+        : form.stock_count.trim().length === 0
+          ? null
+          : Number(form.stock_count);
       const dispN = form.dispatch_days.trim().length === 0 ? null : Number(form.dispatch_days);
       const sortN = Number(form.sort_order);
       const product = {
         ...(form.id ? { id: form.id } : {}),
+        kind,
         name: trimmedName.slice(0, 80),
         description: form.description.trim().slice(0, 1000),
         price_pence,
@@ -150,7 +207,12 @@ export function ShopModeEditor({
         gallery_urls: form.gallery_urls.slice(0, 3),
         compare_with: form.compare_with.slice(0, 10),
         status: form.status,
-        sort_order: Number.isFinite(sortN) && sortN >= 0 ? Math.round(sortN) : 0
+        sort_order: Number.isFinite(sortN) && sortN >= 0 ? Math.round(sortN) : 0,
+        unit: trimmedUnit.length > 0 ? trimmedUnit.slice(0, 32) : null,
+        category:
+          form.category.trim().length > 0
+            ? form.category.trim().slice(0, 40)
+            : null
       };
       const res = await fetch("/api/trade-off/products/upsert", {
         method: "POST",
@@ -206,7 +268,9 @@ export function ShopModeEditor({
     <div className="space-y-4 rounded-xl border border-brand-line bg-brand-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-lg font-extrabold">Your products</h2>
+          <h2 className="text-lg font-extrabold">
+            Your {isService ? "services" : "products"}
+          </h2>
           <p className="mt-1 text-xs text-brand-muted">
             {liveProducts.length} live · {products.length - liveProducts.length} archived
           </p>
@@ -217,7 +281,7 @@ export function ShopModeEditor({
             onClick={startCreate}
             className="inline-flex h-11 items-center rounded-lg bg-brand-accent px-4 text-xs font-bold text-black transition hover:opacity-90"
           >
-            + Add product
+            + Add {noun}
           </button>
         )}
       </div>
@@ -238,6 +302,7 @@ export function ShopModeEditor({
           products={products}
           onEdit={startEdit}
           onArchive={archive}
+          isService={isService}
         />
       ) : (
         <ProductForm
@@ -250,6 +315,8 @@ export function ShopModeEditor({
           onCancel={cancel}
           onSubmit={submit}
           mode={mode === "create" ? "create" : "edit"}
+          isService={isService}
+          NounCap={NounCap}
         />
       )}
     </div>
@@ -259,16 +326,20 @@ export function ShopModeEditor({
 function ProductList({
   products,
   onEdit,
-  onArchive
+  onArchive,
+  isService
 }: {
   products: HammerexXratedProduct[];
   onEdit: (p: HammerexXratedProduct) => void;
   onArchive: (p: HammerexXratedProduct) => void;
+  isService: boolean;
 }) {
   if (products.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-brand-line bg-brand-bg px-4 py-6 text-center text-xs text-brand-muted">
-        No products yet. Tap &ldquo;Add product&rdquo; to list your first item.
+        No {isService ? "services" : "products"} yet. Tap &ldquo;Add{" "}
+        {isService ? "service" : "product"}&rdquo; to list your first{" "}
+        {isService ? "service" : "item"}.
       </p>
     );
   }
@@ -291,7 +362,12 @@ function ProductList({
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-brand-text">{p.name}</p>
             <p className="text-xs text-brand-muted">
-              £{penceToPounds(p.price_pence ?? 0)} · {stockLabel(p.stock_count)}
+              £{penceToPounds(p.price_pence ?? 0)}
+              {isService
+                ? p.unit
+                  ? ` ${p.unit}`
+                  : ""
+                : ` · ${stockLabel(p.stock_count)}`}
             </p>
           </div>
           <span
@@ -343,7 +419,9 @@ function ProductForm({
   submitting,
   onCancel,
   onSubmit,
-  mode
+  mode,
+  isService,
+  NounCap
 }: {
   form: FormState;
   update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
@@ -354,12 +432,14 @@ function ProductForm({
   onCancel: () => void;
   onSubmit: () => void;
   mode: "create" | "edit";
+  isService: boolean;
+  NounCap: string;
 }) {
   return (
     <div className="space-y-4 rounded-lg border border-brand-line bg-brand-bg p-4">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-sm font-extrabold uppercase tracking-widest text-brand-accent">
-          {mode === "create" ? "New product" : "Edit product"}
+          {mode === "create" ? `New ${NounCap.toLowerCase()}` : `Edit ${NounCap.toLowerCase()}`}
         </h3>
         <button
           type="button"
@@ -370,13 +450,17 @@ function ProductForm({
         </button>
       </div>
 
-      <Field label="Name *">
+      <Field label={`${NounCap} name *`}>
         <input
           type="text"
           value={form.name}
           maxLength={80}
           onChange={(e) => update("name", e.target.value)}
-          placeholder="e.g. Hand-carved oak chopping board"
+          placeholder={
+            isService
+              ? "e.g. Chop tree (up to 2m)"
+              : "e.g. Hand-carved oak chopping board"
+          }
           className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
         />
       </Field>
@@ -411,28 +495,103 @@ function ProductForm({
             />
           </div>
         </Field>
-        <Field label="Stock count (blank = unlimited)">
-          <input
-            type="number"
-            inputMode="numeric"
-            min="0"
-            value={form.stock_count}
-            onChange={(e) => update("stock_count", e.target.value)}
-            placeholder="Unlimited"
-            className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
-          />
-        </Field>
+        {!isService && (
+          <Field label="Stock count (blank = unlimited)">
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={form.stock_count}
+              onChange={(e) => update("stock_count", e.target.value)}
+              placeholder="Unlimited"
+              className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
+            />
+          </Field>
+        )}
+        {isService && (
+          <Field label="Unit *">
+            <div className="space-y-2">
+              <div className="-mx-1 flex flex-wrap gap-1.5">
+                {UNIT_CHIPS.map((chip) => {
+                  const active = form.unit.trim().toLowerCase() === chip;
+                  return (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => update("unit", chip)}
+                      className={`inline-flex h-9 items-center rounded-full border px-3 text-[13px] font-bold transition ${
+                        active
+                          ? "border-brand-accent bg-brand-accent/15 text-brand-accent"
+                          : "border-brand-line bg-brand-surface text-brand-text hover:border-brand-accent"
+                      }`}
+                    >
+                      {chip}
+                    </button>
+                  );
+                })}
+              </div>
+              <input
+                type="text"
+                value={form.unit}
+                maxLength={32}
+                onChange={(e) => update("unit", e.target.value)}
+                placeholder="per tree"
+                className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
+              />
+            </div>
+          </Field>
+        )}
       </div>
 
+      {isService && (
+        <Field label="Category (optional)">
+          <div className="space-y-2">
+            <div className="-mx-1 flex flex-wrap gap-1.5">
+              {CATEGORY_CHIPS.map((chip) => {
+                const active = form.category.trim().toLowerCase() === chip.toLowerCase();
+                return (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => update("category", chip)}
+                    className={`inline-flex h-9 items-center rounded-full border px-3 text-[13px] font-bold transition ${
+                      active
+                        ? "border-brand-accent bg-brand-accent/15 text-brand-accent"
+                        : "border-brand-line bg-brand-surface text-brand-text hover:border-brand-accent"
+                    }`}
+                  >
+                    {chip}
+                  </button>
+                );
+              })}
+            </div>
+            <input
+              type="text"
+              value={form.category}
+              maxLength={40}
+              onChange={(e) => update("category", e.target.value)}
+              placeholder="e.g. Gardening, Machinery"
+              className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
+            />
+          </div>
+        </Field>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Dispatch in N days (optional)">
+        <Field
+          label={
+            isService
+              ? "Days from booking to first appointment (optional)"
+              : "Dispatch in N days (optional)"
+          }
+        >
           <input
             type="number"
             inputMode="numeric"
             min="0"
             value={form.dispatch_days}
             onChange={(e) => update("dispatch_days", e.target.value)}
-            placeholder="e.g. 3"
+            placeholder={isService ? "e.g. 5" : "e.g. 3"}
             className="block h-11 w-full rounded-md border border-brand-line bg-brand-surface px-3 text-sm text-brand-text outline-none focus:border-brand-accent"
           />
         </Field>
@@ -496,7 +655,11 @@ function ProductForm({
           disabled={submitting}
           className="inline-flex h-11 items-center rounded-lg bg-brand-accent px-5 text-xs font-bold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitting ? "Saving…" : mode === "create" ? "Add product" : "Save changes"}
+          {submitting
+            ? "Saving…"
+            : mode === "create"
+              ? `Add ${NounCap.toLowerCase()}`
+              : "Save changes"}
         </button>
         <button
           type="button"

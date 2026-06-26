@@ -22,6 +22,13 @@ export type ReviewCard = {
   customer_avatar_url: string | null;
   project_type: string | null;
   service_name: string | null;
+  /** Set when the review is tagged to a specific Shop Mode product.
+   *  Mutually exclusive with `service_name` at submission time. */
+  product_id?: string | null;
+  /** Joined product name + cover (from the listing query). Null when
+   *  the joined product is archived/deleted — chip gracefully omits. */
+  product_name?: string | null;
+  product_cover_url?: string | null;
   overall_rating: number;
   workmanship_rating: number | null;
   communication_rating: number | null;
@@ -62,11 +69,22 @@ export function ReviewsCarousel({
     month: "short",
     year: "numeric"
   });
+  // A review is "product-context" when it was tagged to a product. We
+  // only flip labels when we have a joined product name to display —
+  // archived/deleted products fall back to service-context labels so
+  // the row reads consistently.
+  const isProductReview = Boolean(r.product_id && r.product_name);
   const subRatings = [
-    { label: "Workmanship", value: r.workmanship_rating },
+    {
+      label: isProductReview ? "Quality" : "Workmanship",
+      value: r.workmanship_rating
+    },
     { label: "Communication", value: r.communication_rating },
     { label: "Value", value: r.value_rating },
-    { label: "Timeliness", value: r.timeliness_rating }
+    {
+      label: isProductReview ? "Delivery time" : "Timeliness",
+      value: r.timeliness_rating
+    }
   ].filter((s): s is { label: string; value: number } => typeof s.value === "number");
 
   return (
@@ -135,6 +153,32 @@ export function ReviewsCarousel({
             </span>
           )}
         </div>
+
+        {isProductReview && r.product_name && (
+          <div className="mt-3 flex items-center gap-2">
+            {r.product_cover_url ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={r.product_cover_url}
+                alt=""
+                className="h-7 w-7 shrink-0 rounded-md object-cover ring-1 ring-neutral-200"
+              />
+            ) : null}
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold text-neutral-900"
+              style={{ background: "#FFB300" }}
+              title={`Review of product: ${r.product_name}`}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M16.5 9.4 7.55 4.24" />
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <path d="M3.27 6.96 12 12.01l8.73-5.05" />
+                <path d="M12 22.08V12" />
+              </svg>
+              Product: {r.product_name}
+            </span>
+          </div>
+        )}
 
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr,auto] sm:items-end sm:gap-6">
           <p className="text-sm leading-relaxed text-neutral-700">{r.body}</p>
