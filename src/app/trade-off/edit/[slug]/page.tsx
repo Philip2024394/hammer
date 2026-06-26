@@ -17,6 +17,7 @@ import { effectiveTier, trialDaysRemaining } from "@/lib/xratedTrades";
 import { maybeExpireListingTier } from "@/lib/xratedTier";
 import { TradeOffForm, type TradeOffFormInitial } from "../../signup/TradeOffForm";
 import { PremiumCustomisationPanel } from "./PremiumCustomisationPanel";
+import { AddOnsHub } from "@/components/trade-off/AddOnsHub";
 import { VideoUploadInput } from "@/components/trade-off/VideoUploadInput";
 import { WhatsappLeadsNudge } from "@/components/trade-off/WhatsappLeadsNudge";
 import { LossAversionPreview } from "@/components/trade-off/LossAversionPreview";
@@ -242,6 +243,10 @@ export default async function TradeOffEditPage({
           mode={{ kind: "edit", slug, editToken: token }}
           initial={initial}
         />
+      </section>
+
+      <section className="mx-auto max-w-3xl px-4 pb-10">
+        <AddOnsHub listing={row.data} editToken={token} tier={tier} />
       </section>
 
       {/* Self-hosted intro video uploader. Bypasses YouTube — file

@@ -340,7 +340,58 @@ export type HammerexTradeOffListing = {
     avatar_url: string | null;
     skills: string[];
   }[];
+  // Add-ons toggle map — keyed by add-on slug from src/lib/xratedAddons.ts.
+  // Presence + true = on. Absence or false = off. Default {} = none active.
+  // Trusted Trades is NOT tracked here — it's always-on for paid tier.
+  addons_enabled: Record<string, boolean>;
   joined_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+// Shop Mode add-on — a tradesperson's product catalog. When the add-on
+// is enabled, public profile swaps its services carousel for a product
+// card grid. All monetary values are integer pence (GBP only in v1).
+export type HammerexXratedProduct = {
+  id: string;
+  listing_id: string;
+  name: string;
+  description: string | null;
+  price_pence: number;
+  stock_count: number | null;
+  cover_url: string | null;
+  // Up to 3 additional photos. Cover + gallery = 4 images total in the
+  // product modal lightbox.
+  gallery_urls: string[];
+  dispatch_days: number | null;
+  // Phase 2 — variant axes (size, colour). Shape kept open here to
+  // avoid schema churn when we ship variant pickers next sprint.
+  variants: Record<string, unknown>[];
+  // Phase 3 — uploaded sizing chart with unit picker.
+  size_chart_url: string | null;
+  size_chart_unit: "size" | "kg" | "litre" | "cm" | "other" | null;
+  // Sibling product ids the tradesperson wants surfaced in the Compare
+  // modal. Empty array = auto-pick by same category in Phase 2.
+  compare_with: string[];
+  status: "live" | "archived";
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// Shop Mode shipping config — one row per (listing, country). Either
+// air or sea (or both) may be priced; nulls mean "not available by that
+// route". ETA is rendered as a min-max range on the cart page.
+export type HammerexXratedShippingZone = {
+  id: string;
+  listing_id: string;
+  country_code: string;
+  country_name: string;
+  air_price_pence: number | null;
+  sea_price_pence: number | null;
+  eta_min_days: number | null;
+  eta_max_days: number | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 };

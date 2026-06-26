@@ -30,7 +30,8 @@ const nextConfig = {
         { source: "/:slug/services", destination: "/trade/:slug/services" },
         { source: "/:slug/review", destination: "/trade/:slug/review" },
         { source: "/:slug/qr.png", destination: "/trade/:slug/qr.png" },
-        { source: "/:slug/trusted-trades", destination: "/trade/:slug/trusted-trades" }
+        { source: "/:slug/trusted-trades", destination: "/trade/:slug/trusted-trades" },
+        { source: "/:slug/cart", destination: "/trade/:slug/cart" }
       ],
       fallback: []
     };
@@ -45,7 +46,8 @@ const nextConfig = {
       { source: "/trade/:slug/services", destination: "/:slug/services", permanent: true },
       { source: "/trade/:slug/review", destination: "/:slug/review", permanent: true },
       { source: "/trade/:slug/qr.png", destination: "/:slug/qr.png", permanent: true },
-      { source: "/trade/:slug/trusted-trades", destination: "/:slug/trusted-trades", permanent: true }
+      { source: "/trade/:slug/trusted-trades", destination: "/:slug/trusted-trades", permanent: true },
+      { source: "/trade/:slug/cart", destination: "/:slug/cart", permanent: true }
     ];
   }
 };

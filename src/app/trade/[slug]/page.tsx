@@ -39,6 +39,9 @@ import { QrFooterDock } from "@/components/xrated/profile/QrFooterDock";
 import { PremiumStickyTrust } from "@/components/xrated/profile/PremiumStickyTrust";
 import { ProfileExpandPanels } from "@/components/xrated/profile/ProfileExpandPanels";
 import { AboutBio } from "@/components/xrated/profile/AboutBio";
+import { ProductCardGrid } from "@/components/xrated/profile/ProductCardGrid";
+import { ShopCartIsland } from "@/components/xrated/profile/ShopCartIsland";
+import { isShopModeOn } from "@/lib/xratedAddons";
 import {
   supabase,
   type HammerexTradeOffListing,
@@ -467,6 +470,11 @@ function PremiumLayout({
   tier: "free" | "paid";
 }) {
   const isPaid = tier === "paid";
+  // Shop Mode swap — only honour when the add-on is on AND the
+  // tradesperson is on a paid tier (the add-on is gated on the
+  // dashboard but we double-check here so a leaked toggle on a free
+  // profile can't bypass the gate).
+  const shopMode = isPaid && isShopModeOn(listing);
   return (
     <>
       <PremiumHero listing={listing} waUrl={waUrl} tier={tier} />
@@ -482,13 +490,17 @@ function PremiumLayout({
       )}
 
       <AboutAndVideo listing={listing} showVideo={isPaid} />
-      <ServicesTabbedGallery
-        slug={listing.slug}
-        pricedServices={listing.priced_services ?? []}
-        servicesOffered={listing.services_offered ?? []}
-        reviews={reviews}
-        stripped={!isPaid}
-      />
+      {shopMode ? (
+        <ProductCardGrid listing={listing} />
+      ) : (
+        <ServicesTabbedGallery
+          slug={listing.slug}
+          pricedServices={listing.priced_services ?? []}
+          servicesOffered={listing.services_offered ?? []}
+          reviews={reviews}
+          stripped={!isPaid}
+        />
+      )}
       <ClientsCarousel
         listing={listing}
         reviews={reviews}
@@ -519,17 +531,21 @@ function PremiumLayout({
       <PoweredByXratedFooter slug={listing.slug} />
       {isPaid && (
         <>
-          {/* Spacer reserves the height of the fixed sticky bar so the
-              footer + last content always have room to breathe when the
-              sticky is visible. The sticky auto-hides via Intersection-
-              Observer once the global XratedFooter scrolls in, but the
-              spacer ensures the footer is always reachable. */}
+          {/* Spacer reserves the height of the fixed sticky element so
+              the footer + last content always have room to breathe. In
+              Shop Mode the floating cart island replaces the sticky
+              trust bar (otherwise both fixed-bottom elements would
+              collide). */}
           <div aria-hidden="true" className="h-[72px]" />
-          <PremiumStickyTrust
-            ratingAvg={listing.rating_avg}
-            ratingCount={listing.rating_count}
-            whatsappHref={waUrl}
-          />
+          {shopMode ? (
+            <ShopCartIsland slug={listing.slug} />
+          ) : (
+            <PremiumStickyTrust
+              ratingAvg={listing.rating_avg}
+              ratingCount={listing.rating_count}
+              whatsappHref={waUrl}
+            />
+          )}
         </>
       )}
     </>
