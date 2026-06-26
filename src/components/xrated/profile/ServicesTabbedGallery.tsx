@@ -43,6 +43,37 @@ function imagesOf(svc: PricedService): string[] {
   return Array.from(new Set(all)).slice(0, 3);
 }
 
+type ServiceRatingReview = {
+  service_name: string | null;
+  overall_rating: number;
+  status?: "live" | "disputed" | string;
+};
+
+/** Per-service star rating — only returns a number when there are at
+ *  least 3 live reviews tied to this service name. Below the threshold
+ *  the badge stays hidden so a single grumpy review doesn't tank the
+ *  card. Reviews on disputed status are excluded from the count. */
+const RATING_BADGE_MIN = 3;
+function getServiceRating(
+  serviceName: string,
+  reviews: ServiceRatingReview[] | undefined
+): { avg: number; count: number } | null {
+  if (!reviews || reviews.length === 0) return null;
+  const target = serviceName.trim().toLowerCase();
+  if (!target) return null;
+  const matching = reviews.filter(
+    (r) =>
+      (r.status === "live" || r.status === undefined) &&
+      typeof r.service_name === "string" &&
+      r.service_name.trim().toLowerCase() === target &&
+      typeof r.overall_rating === "number" &&
+      r.overall_rating > 0
+  );
+  if (matching.length < RATING_BADGE_MIN) return null;
+  const sum = matching.reduce((acc, r) => acc + r.overall_rating, 0);
+  return { avg: sum / matching.length, count: matching.length };
+}
+
 type Tab = {
   name: string;
   service: PricedService | null;
@@ -52,11 +83,16 @@ export function ServicesTabbedGallery({
   slug,
   pricedServices,
   servicesOffered,
+  reviews,
   stripped = false
 }: {
   slug: string;
   pricedServices: PricedService[];
   servicesOffered: string[];
+  /** Live reviews used for the per-service star badge. When omitted,
+   *  no badge renders — same as having zero reviews. Each review must
+   *  carry `service_name` for it to count toward a service's rating. */
+  reviews?: ServiceRatingReview[];
   /** Free-tier strip-down — when true, every card shows just the image
    *  + service name; price, description and the Enquire button are
    *  hidden. The lightbox stays unavailable so customers can't tap
@@ -148,6 +184,7 @@ export function ServicesTabbedGallery({
               slug={slug}
               onOpenLightbox={openLightbox}
               stripped={stripped}
+              rating={getServiceRating(t.name, reviews)}
             />
           ))}
         </div>
@@ -159,6 +196,7 @@ export function ServicesTabbedGallery({
           slug={slug}
           onOpenLightbox={openLightbox}
           stripped={stripped}
+          reviews={reviews}
         />
       )}
 
@@ -184,7 +222,8 @@ function ServiceCarousel({
   onActiveChange,
   slug,
   onOpenLightbox,
-  stripped = false
+  stripped = false,
+  reviews
 }: {
   tabs: Tab[];
   activeIndex: number;
@@ -192,6 +231,7 @@ function ServiceCarousel({
   slug: string;
   onOpenLightbox: (svc: PricedService, startIndex: number) => void;
   stripped?: boolean;
+  reviews?: ServiceRatingReview[];
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -324,6 +364,7 @@ function ServiceCarousel({
                 onOpenLightbox={onOpenLightbox}
                 large={tabIndex === activeIndex}
                 stripped={stripped}
+                rating={getServiceRating(t.name, reviews)}
               />
             </div>
           );
@@ -340,7 +381,8 @@ function ServiceCard({
   slug,
   onOpenLightbox,
   large,
-  stripped = false
+  stripped = false,
+  rating
 }: {
   tab: Tab;
   slug: string;
@@ -350,6 +392,9 @@ function ServiceCard({
    *  price, no Enquire button. Photo still opens the lightbox so the
    *  customer can see the work full-size. */
   stripped?: boolean;
+  /** Per-service rating badge — only rendered when ≥3 live reviews
+   *  are tied to this service. null means the badge stays hidden. */
+  rating?: { avg: number; count: number } | null;
 }) {
   const { name, service: svc } = tab;
 
@@ -389,6 +434,26 @@ function ServiceCard({
             className="h-full w-full object-cover object-top transition group-hover:scale-[1.03]"
             style={svc.image_position ? { objectPosition: svc.image_position } : undefined}
           />
+          {/* Per-service star badge — top-right of the cover image.
+              Only renders when the service has ≥3 live reviews tied to
+              it, so sparse-data services stay quiet. Yellow brand pill
+              with star + average + review count. */}
+          {rating && rating.count >= 3 && (
+            <span
+              className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-extrabold text-neutral-900 shadow-md"
+              style={{ background: "#FFB300", boxShadow: "0 4px 12px rgba(0,0,0,0.25)" }}
+              aria-label={`${rating.avg.toFixed(1)} stars from ${rating.count} reviews`}
+              title={`${rating.avg.toFixed(1)} from ${rating.count} reviews`}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+              </svg>
+              {rating.avg.toFixed(1)}
+              <span className="text-[10px] font-bold text-neutral-900/65">
+                ({rating.count})
+              </span>
+            </span>
+          )}
           {images.length > 1 && (
             <span
               aria-hidden="true"

@@ -486,6 +486,7 @@ function PremiumLayout({
         slug={listing.slug}
         pricedServices={listing.priced_services ?? []}
         servicesOffered={listing.services_offered ?? []}
+        reviews={reviews}
         stripped={!isPaid}
       />
       <ClientsCarousel
@@ -494,10 +495,17 @@ function PremiumLayout({
         allowAddReview={isPaid}
       />
       <TeamGrid listing={listing} />
-      {/* My Trusted Trades — server-component card grid of other Xrated
-          tradespeople this person vouches for. Paid tier only; the
-          server fetch is one batch query, fast. Hidden when empty. */}
-      {isPaid && <RecommendedTrades listing={listing} />}
+      {/* My Trusted Trades — link to the dedicated sub-page. Recommendation
+          cards now live exclusively on /<slug>/trusted-trades to give
+          them room to breathe. We surface the count + a yellow CTA here
+          so the customer knows to tap through. Paid tier only. */}
+      {isPaid && Array.isArray(listing.recommendations) && listing.recommendations.length > 0 && (
+        <TrustedTradesCta
+          slug={listing.slug}
+          firstName={listing.display_name.split(/\s+/)[0] ?? listing.display_name}
+          count={listing.recommendations.length}
+        />
+      )}
       <ShareAndContactCta
         listing={listing}
         waUrl={waUrl}
@@ -570,49 +578,99 @@ function FreeTierUpgradeBanner({
   );
 }
 
+// ─── Trusted Trades CTA card ────────────────────────────────────────
+// Replaces the inline RecommendedTrades grid on the main profile. The
+// full grid now lives at /<slug>/trusted-trades where it has room to
+// breathe. This card surfaces the count + a yellow CTA so the customer
+// knows to tap through.
+function TrustedTradesCta({
+  slug,
+  firstName,
+  count
+}: {
+  slug: string;
+  firstName: string;
+  count: number;
+}) {
+  return (
+    <section className="mx-auto w-full max-w-6xl px-4 pt-10 sm:px-6 sm:pt-12">
+      <a
+        href={`/${slug}/trusted-trades`}
+        className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-[#FFB300] hover:shadow-lg sm:p-6"
+      >
+        <div className="min-w-0 flex-1">
+          <p
+            className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
+            style={{ color: "#FFB300" }}
+          >
+            My Trusted Trades
+          </p>
+          <p className="mt-1.5 text-lg font-extrabold leading-tight text-neutral-900 sm:text-xl">
+            {count} {count === 1 ? "tradesperson I personally vouch for" : "tradespeople I personally vouch for"}
+          </p>
+          <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
+            Need an electrician, a sparky or a roofer too? See who {firstName} works with.
+          </p>
+        </div>
+        <span
+          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-4 text-xs font-extrabold uppercase tracking-wider text-neutral-900 shadow-sm transition group-hover:scale-105 sm:h-12 sm:text-sm"
+          style={{ background: "#FFB300" }}
+        >
+          See all
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </span>
+      </a>
+    </section>
+  );
+}
+
 // ─── Premium social-link row ────────────────────────────────────────
 // Renders the coloured social-icon strip above the Powered-by credit.
 // Pulls every populated social field on the listing (Instagram, TikTok,
 // Facebook, X, Snapchat, Reddit, YouTube, Google Business) plus the
 // website chip. Hidden when the tradesperson hasn't filled any of them.
+// Home-page chip — website-only. The full coloured social grid moved
+// to the /contact subpage so the main profile stays uncluttered. We
+// keep the website chip on the home page because a tradesperson with
+// their own website is making a different (stronger) trust signal than
+// social handles alone — "I run a real business, not a side hustle."
 function PremiumSocialFooter({ listing }: { listing: HammerexTradeOffListing }) {
-  // Quick gate — only render the section when at least one social field
-  // resolves to a URL. The component itself returns null in that case,
-  // but bailing here avoids the empty padding wrapper.
-  const anySocial = Boolean(
-    listing.instagram ||
-      listing.tiktok ||
-      listing.facebook ||
-      listing.twitter ||
-      listing.snapchat ||
-      listing.reddit ||
-      listing.youtube ||
-      listing.google ||
-      listing.website
-  );
-  if (!anySocial) return null;
+  if (!listing.website) return null;
+  const url = websiteUrl(listing.website);
+  if (!url) return null;
+  const display = listing.website.replace(/^https?:\/\//, "").replace(/\/$/, "");
   return (
     <section className="w-full px-4 pt-8 sm:px-6">
-      <div className="mx-auto flex max-w-md flex-col items-center gap-3 text-center">
+      <div className="mx-auto flex max-w-md flex-col items-center gap-2.5 text-center">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-neutral-500">
-          Find us on
+          Our website
         </p>
-        <TradeSocialIcons listing={listing} variant="coloured" />
-        {listing.website && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-11 items-center gap-2 rounded-full border-2 px-5 text-sm font-extrabold text-neutral-900 transition hover:scale-[1.02] active:scale-[0.98]"
+          style={{ borderColor: "#FFB300", background: "#FFFFFF" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFB300" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+          </svg>
+          {display}
+        </a>
+        <p className="text-[11px] text-neutral-500">
+          Find us on social — see the{" "}
           <a
-            href={websiteUrl(listing.website) ?? "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 text-xs font-bold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] sm:text-sm"
+            href={`/${listing.slug}/contact`}
+            className="font-bold underline-offset-2 hover:underline"
+            style={{ color: "#FFB300" }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
-            </svg>
-            {listing.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+            Contact page
           </a>
-        )}
+        </p>
       </div>
     </section>
   );

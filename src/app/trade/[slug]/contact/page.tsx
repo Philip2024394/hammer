@@ -9,6 +9,8 @@ import { TrustAndLogisticsPanel } from "@/components/xrated/profile/TrustAndLogi
 import { OfficeHoursMarquee } from "@/components/xrated/profile/OfficeHoursMarquee";
 import { ContactFormPanel } from "@/components/xrated/profile/ContactFormPanel";
 import { tradeLabel, whatsappQuoteUrl } from "@/lib/tradeOff";
+import { TradeSocialIcons } from "@/components/trade-off/TradeSocialIcons";
+import { websiteUrl } from "@/lib/tradeOffSocial";
 
 export const revalidate = 300;
 
@@ -83,9 +85,71 @@ export default async function TradeContactPage({
         whatsapp={listing.whatsapp}
       />
 
+      {/* "Find us on" — the full coloured social-icon grid lives here
+          rather than the home page so the main profile stays calm and
+          single-purpose. By the time a customer reaches this page they
+          are in "tell me more" mode — that is when the IG / TikTok /
+          Facebook / X / Snapchat / Reddit / YouTube / Google taps make
+          sense. The website chip stays on the home page as the primary
+          trust signal. */}
+      <FindUsOnSection listing={listing} />
+
       <div className="mt-auto">
         <XratedFooter />
       </div>
     </main>
+  );
+}
+
+function FindUsOnSection({ listing }: { listing: HammerexTradeOffListing }) {
+  const anySocial = Boolean(
+    listing.instagram ||
+      listing.tiktok ||
+      listing.facebook ||
+      listing.twitter ||
+      listing.snapchat ||
+      listing.reddit ||
+      listing.youtube ||
+      listing.google ||
+      listing.website
+  );
+  if (!anySocial) return null;
+  return (
+    <section className="mx-auto w-full max-w-3xl px-4 pt-10 sm:px-6 sm:pt-12">
+      <div className="rounded-3xl border border-neutral-200 bg-white p-6 text-center sm:p-8">
+        <p
+          className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
+          style={{ color: "#FFB300" }}
+        >
+          Find us on
+        </p>
+        <h2 className="mt-2 text-lg font-extrabold text-neutral-900 sm:text-xl">
+          {listing.display_name.split(/\s+/)[0] ?? listing.display_name} elsewhere
+        </h2>
+        <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
+          Follow our work, message us direct, or check the website.
+        </p>
+        <div className="mt-5 flex justify-center">
+          <TradeSocialIcons listing={listing} variant="coloured" />
+        </div>
+        {listing.website && (
+          <div className="mt-5 flex justify-center">
+            <a
+              href={websiteUrl(listing.website) ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-4 text-xs font-bold text-neutral-900 transition hover:border-[#FFB300] hover:text-[#FFB300] sm:text-sm"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+              </svg>
+              {listing.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+            </a>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
