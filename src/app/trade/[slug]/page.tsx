@@ -520,11 +520,11 @@ function PremiumLayout({
           dedicated grid. */}
       {servicesGrid && <ServicesPricedSection listing={listing} />}
       <TeamGrid listing={listing} />
-      {/* My Trusted Trades — link to the dedicated sub-page. Recommendation
-          cards now live exclusively on /<slug>/trusted-trades to give
-          them room to breathe. We surface the count + a yellow CTA here
-          so the customer knows to tap through. Paid tier only. */}
-      {isPaid && Array.isArray(listing.recommendations) && listing.recommendations.length > 0 && (
+      {/* My Trusted Trades — link to the dedicated sub-page. Available
+          on every tier (free + trial + paid) as the viral acquisition
+          lever: free profiles can recommend other tradies, generating
+          backlinks that bring fresh sign-ups onto the platform. */}
+      {Array.isArray(listing.recommendations) && listing.recommendations.length > 0 && (
         <TrustedTradesCta
           slug={listing.slug}
           firstName={listing.display_name.split(/\s+/)[0] ?? listing.display_name}
