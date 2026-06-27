@@ -10,6 +10,7 @@
 // component swap.
 
 import type { HammerexTradeOffListing } from "@/lib/supabase";
+import { isMerchantGradeTrade } from "@/lib/tradeOff";
 
 export type XratedAddonPricing =
   | { kind: "free" }
@@ -234,8 +235,9 @@ export const XRATED_ADDONS: XratedAddon[] = [
     editorial_badge: "premium_credibility",
     callouts: ["Your URL", "Free SSL", "Same profile"],
     pricing: { kind: "paid", monthly_pence: 500 },
-    availability: "coming_soon",
-    hasEditor: false,
+    availability: "ready",
+    hasEditor: true,
+    editorPath: "custom-domain",
     includedWithPaid: false,
     benefits: [
       "Pro-grade URL on every quote and van vinyl",
@@ -255,8 +257,9 @@ export const XRATED_ADDONS: XratedAddon[] = [
     editorial_badge: "any_trade",
     callouts: ["Instant push", "Custom sound", "PWA install"],
     pricing: { kind: "paid", monthly_pence: 400 },
-    availability: "coming_soon",
-    hasEditor: false,
+    availability: "ready",
+    hasEditor: true,
+    editorPath: "lead-alerts",
     includedWithPaid: false,
     benefits: [
       "Instant push the moment WhatsApp is tapped — no SMS delay",
@@ -265,24 +268,47 @@ export const XRATED_ADDONS: XratedAddon[] = [
     ]
   },
   {
+    slug: "materials_network",
+    name: "Materials Network",
+    tagline: "Earn from the merchants you buy from every day",
+    summary:
+      "Pick up to 12 builder's merchants you trust — plasterboard yard, adhesive supplier, tool shop. Customers tap straight through to send a WhatsApp quote, and you earn a referral fee when the merchant fulfils it. Trust-based commission — the merchant marks each lead 'fulfilled' from their dashboard, no payment plumbing in the app. Soft disclosure to the customer keeps it honest: 'this tradesperson may earn a referral fee from these merchants — it costs you nothing extra'.",
+    glyph: "🔗",
+    image_url: null,
+    personas: ["Builders", "Plasterers", "Carpenters", "Roofers"],
+    editorial_badge: "viral_growth",
+    callouts: ["Up to 12 picks", "Earnings ledger", "Soft disclosure"],
+    pricing: { kind: "paid", monthly_pence: 300 },
+    availability: "ready",
+    hasEditor: true,
+    editorPath: "materials-network",
+    includedWithPaid: false,
+    benefits: [
+      "Pick up to 12 builder's merchants you actually buy from",
+      "Trust-based commission — merchant marks fulfilled, you see the ledger",
+      "Soft disclosure to the customer — honest by design, no hidden fees"
+    ]
+  },
+  {
     slug: "faq_page",
     name: "FAQ Page",
     tagline: "Visual knowledge base — questions, answers and ref-numbered images",
     summary:
-      "Upgrade your inline FAQ accordion into a full visual knowledge base. Each question carries an answer plus uploaded reference images, each image with its own ref number and title (FAQ-001 'Level 5 skim finish', FAQ-002 'Damp proof course detail'). Customers tap through to a dedicated /<slug>/faq page they can bookmark and share back. Perfect for trades where the customer's question is best answered with a photo.",
+      "Upgrade your inline FAQ accordion into a full visual knowledge base. Each question carries an answer plus uploaded reference images, each with its own ref number and title (FAQ-001 'Level 5 skim finish', FAQ-002 'Damp proof course detail'). Customers tap through to a dedicated /<slug>/faq page they can bookmark and share back. Perfect for trades where the customer's question is best answered with a photo.",
     glyph: "?",
     image_url: null,
-    personas: ["Plasterers", "Builders", "Tool suppliers", "Architects"],
+    personas: ["Plasterers", "Builders", "Tile suppliers", "Landscapers"],
     editorial_badge: "premium_credibility",
     callouts: ["Ref-numbered images", "Dedicated page", "Visual proof"],
     pricing: { kind: "paid", monthly_pence: 200 },
-    availability: "coming_soon",
-    hasEditor: false,
+    availability: "ready",
+    hasEditor: true,
+    editorPath: "faq-page",
     includedWithPaid: false,
     benefits: [
       "Each Q&A carries reference images with ref numbers + titles",
       "Dedicated /<slug>/faq page customers can bookmark and share",
-      "Renames the Recommended Trades container to Frequently Asked Questions"
+      "Adds a Frequently Asked Questions container alongside Trusted Trades"
     ]
   }
 ];
@@ -308,11 +334,42 @@ export function isAddonEnabled(
 
 /** Shop Mode is the canonical "swap the services carousel for products"
  *  flag. Centralised here so a future rename of the slug touches one
- *  file. */
+ *  file.
+ *
+ *  Auto-on for merchant-grade trades (kitchen-fitter, stair-fitter,
+ *  building-merchant, builders-supplies, tool-hire, heavy-machinery,
+ *  window-fitter, security-installer) on the paid tier — their whole
+ *  business is a catalogue, so the profile is "complete" rather than
+ *  nickel-and-diming a category whose whole job is selling tangible
+ *  items. See `isMerchantGradeTrade` in src/lib/tradeOff.ts. */
 export function isShopModeOn(
-  listing: Pick<HammerexTradeOffListing, "addons_enabled">
+  listing: Pick<HammerexTradeOffListing, "addons_enabled"> &
+    Partial<Pick<HammerexTradeOffListing, "primary_trade" | "tier">>
 ): boolean {
-  return (listing.addons_enabled ?? {}).shop_mode === true;
+  if ((listing.addons_enabled ?? {}).shop_mode === true) return true;
+  if (
+    listing.primary_trade &&
+    isMerchantGradeTrade(listing.primary_trade) &&
+    (listing.tier === "app_paid" || listing.tier === "app_trial")
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/** Storefront gate — true when the dedicated /<slug>/shop page and the
+ *  ShopTeaser block on the profile should render. The Phase 3 storefront
+ *  is a FREE upgrade for existing Shop Mode users AND is auto-included
+ *  with Wholesale Mode (£7/mo) so merchants get the full experience
+ *  inside that tier without a second toggle. Centralised so the page,
+ *  teaser, editor and API agree on the same predicate. */
+export function isStorefrontOn(
+  listing: Pick<HammerexTradeOffListing, "addons_enabled"> &
+    Partial<Pick<HammerexTradeOffListing, "primary_trade" | "tier">>
+): boolean {
+  const map = listing.addons_enabled ?? {};
+  if (map.shop_mode === true || map.wholesale_mode === true) return true;
+  return isShopModeOn(listing);
 }
 
 /** Services Prices add-on — when on, the public profile renders the
@@ -354,6 +411,60 @@ export function isWholesaleModeOn(
   listing: Pick<HammerexTradeOffListing, "addons_enabled">
 ): boolean {
   return (listing.addons_enabled ?? {}).wholesale_mode === true;
+}
+
+/** Lead Alerts add-on — when on, the tradesperson gets real-time PWA
+ *  web-push notifications the second a customer taps WhatsApp on their
+ *  profile. Per-device subscriptions live in
+ *  hammerex_xrated_push_subscriptions; the add-on toggle only governs
+ *  whether the subscribe UI is unlocked. Paid-only (£4/mo). */
+export function isLeadAlertsOn(
+  listing: Pick<HammerexTradeOffListing, "addons_enabled">
+): boolean {
+  return (listing.addons_enabled ?? {}).lead_alerts === true;
+}
+
+/** Materials Network add-on — when on, the public profile surfaces an
+ *  inline merchant teaser and a dedicated /<slug>/materials page where
+ *  customers can browse the tradesperson's curated merchants. The cart
+ *  attribution layer + merchant fulfilment ledger live behind this flag.
+ *  Paid-only (£3/mo). */
+export function isMaterialsNetworkOn(
+  listing: Pick<HammerexTradeOffListing, "addons_enabled">
+): boolean {
+  return (listing.addons_enabled ?? {}).materials_network === true;
+}
+
+/** Custom Domain add-on — true when the tradesperson has switched the
+ *  add-on on AND the domain is currently routing traffic (`status='live'`).
+ *  The middleware host-router cares about the status field, not this
+ *  flag; this helper is for dashboard UI (show the "your domain is live"
+ *  green badge) and any future profile-level chrome (e.g. "Powered by
+ *  Xrated" footer). Paid-only (£5/mo, first 30 days free). */
+export function isCustomDomainOn(
+  listing: Pick<
+    HammerexTradeOffListing,
+    "addons_enabled" | "custom_domain" | "custom_domain_status"
+  >
+): boolean {
+  const enabled = (listing.addons_enabled ?? {}).custom_domain === true;
+  if (!enabled) return false;
+  return (
+    !!listing.custom_domain && listing.custom_domain_status === "live"
+  );
+}
+
+/** FAQ Page add-on — when on, the public profile renders a yellow CTA
+ *  card linking to the dedicated /<slug>/faq sub-page where customers
+ *  read ref-numbered Q&As with reference images. Sits ALONGSIDE Trusted
+ *  Trades (does not replace it). Paid-only (£2/mo). The free-tier
+ *  faq_items JSONB column + FaqAccordion on the contact page remain
+ *  untouched so a profile that toggles the add-on off falls back to the
+ *  inline accordion without losing data. */
+export function isFaqPageOn(
+  listing: Pick<HammerexTradeOffListing, "addons_enabled">
+): boolean {
+  return (listing.addons_enabled ?? {}).faq_page === true;
 }
 
 /** Format a paid add-on's monthly price for UI rendering. */
