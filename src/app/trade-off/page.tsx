@@ -145,10 +145,10 @@ export default async function TradeOffLandingPage() {
               <span style={{ color: XRATED_BRAND.accent }}>One link.</span>
             </h1>
 
-            {/* Add-ons teaser — small pill linking to the add-ons
-                marketing page. Above the URL-claim widget so it shows
-                up in the first eye-frame without competing with the
-                headline. */}
+            {/* Add-ons teaser — small yellow pill linking to the
+                add-ons marketing page. Above the URL-claim widget so it
+                shows up in the first eye-frame without competing with
+                the headline. */}
             <a
               href="/trade-off/add-ons"
               className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-full bg-white/95 px-3 text-[11px] font-extrabold uppercase tracking-wider text-neutral-900 shadow-lg transition hover:bg-white sm:text-xs"
@@ -457,7 +457,7 @@ export default async function TradeOffLandingPage() {
               step: 1,
               title: "Claim your URL",
               body:
-                "Type your name on the home page and tap Start free trial. You're in your dashboard in 5 seconds — no signup form, no card."
+                "Type your name on the home page and tap Join XratedTrade. You're in your dashboard in 5 seconds — no signup form, no card."
             },
             {
               step: 2,
@@ -526,7 +526,7 @@ export default async function TradeOffLandingPage() {
                 boxShadow: `0 4px 14px ${XRATED_BRAND.accent}55`
               }}
             >
-              Start free trial
+              Join XratedTrade
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="m9 18 6-6-6-6" />
               </svg>
