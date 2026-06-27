@@ -7,204 +7,6 @@ export const supabase = createClient(url, anonKey, {
   auth: { persistSession: false }
 });
 
-export type HammerexCategory = {
-  id: string;
-  slug: string;
-  name: string;
-  image_url: string | null;
-  card_image_url: string | null;
-  card_show_label: boolean;
-  sort_order: number;
-  is_tool_type?: boolean | null;
-};
-
-export type HammerexProductCategoryLite = { slug: string; name: string };
-
-export type HammerexProduct = {
-  id: string;
-  category_id: string | null;
-  category?: HammerexProductCategoryLite | null;
-  name: string;
-  description: string | null;
-  price_idr: number;
-  image_url: string | null;
-  is_featured: boolean;
-  slug: string | null;
-  sku: string | null;
-  brand: string | null;
-  model_number: string | null;
-  weight_kg: number | null;
-  dispatch_cutoff_local: string | null;
-  warranty_years: number | null;
-  country_of_assembly: string | null;
-  overview: string | null;
-  features: { icon: string; label: string }[] | null;
-  stock_count: number | null;
-  compare_at_idr: number | null;
-  qty_discount_tiers: { min: number; pct: number }[] | null;
-  is_accessory: boolean | null;
-  rating_avg: number | null;
-  rating_count: number | null;
-  base_currency: string | null;
-  sizes: string[] | null;
-  dispatch_lead_days: number | null;
-  delivery_quote_only: boolean | null;
-  purchase_notes: string[] | null;
-  badge_label: string | null;
-  subtitle: string | null;
-  home_sort_order: number | null;
-  thread_color_option_idr: number | null;
-  backpack_straps_option_idr: number | null;
-  is_universal: boolean | null;
-  shipping_per_unit_idr: number | null;
-  // SEA-only override price in IDR. Shown to ID/MY/VN visitors (with FX
-  // for MY/VN). 0 means "Quoted at checkout" — admin sets per product.
-  price_idr_sea: number;
-  // Display-only flag: when true, ID/MY/VN visitors see Rp 0 shipping
-  // (the FX-converted equivalent for MY/VN). Does not affect UK shipping.
-  free_shipping_sea: boolean;
-  hide_from_upsell?: boolean;
-  upsell_image_url?: string | null;
-  compare_with?: string[] | null;
-  faq: { q: string; a: string }[] | null;
-  // Per-product marquee shown under the hero image on the PDP. Falls back
-  // to the brand-wide rotation when null.
-  running_notice?: string | null;
-  // Optional product video. Supports YouTube watch URLs, youtu.be short
-  // URLs, and YouTube Shorts URLs. Rendered by ProductVideo on the PDP
-  // only when set.
-  video_url?: string | null;
-  // Optional custom poster shown as a click-to-play facade over the video
-  // block. When set, the PDP renders this image with a red YouTube play
-  // button overlay; clicking loads the iframe with autoplay.
-  video_cover_url?: string | null;
-};
-
-export type HammerexGuide = {
-  id: string;
-  slug: string;
-  title: string;
-  meta_description: string;
-  intro: string;
-  body_md: string;
-  hero_image_url: string | null;
-  faq: { q: string; a: string }[] | null;
-  related_product_slugs: string[] | null;
-  published: boolean;
-  created_at: string;
-  updated_at: string;
-};
-
-export type HammerexProductVariant = {
-  id: string;
-  product_id: string;
-  label: string;
-  sku: string | null;
-  price_idr: number;
-  // SEA-only variant override. 0 = inherit parent's price_idr_sea.
-  price_idr_sea: number;
-  image_url: string | null;
-  model_number: string | null;
-  stock_count: number | null;
-  sort_order: number;
-  is_default: boolean;
-};
-
-export type HammerexDealBreaker = {
-  id: string;
-  anchor_product_id: string;
-  item_product_id: string;
-  deal_price_idr: number;
-  sort_order: number;
-  item: HammerexProduct;
-  variants: HammerexProductVariant[];
-};
-
-export type HammerexBundle = {
-  id: string;
-  anchor_product_id: string;
-  title: string;
-  discount_pct: number;
-  items: { id: string; qty: number; product: HammerexProduct }[];
-};
-
-export type HammerexPairWith = {
-  id: string;
-  product_id: string;
-  accessory_product_id: string;
-  reason: string | null;
-  sort_order: number;
-  accessory: HammerexProduct;
-};
-
-export type HammerexReview = {
-  id: string;
-  product_id: string;
-  reviewer_name: string;
-  reviewer_type: "pro" | "hobbyist" | "first-timer" | "vendor" | null;
-  rating: number;
-  pillars: Record<string, number> | null;
-  title: string | null;
-  body: string | null;
-  photos: string[] | null;
-  verified_purchase: boolean;
-  helpful_count: number;
-  created_at: string;
-  status: "pending" | "approved" | "rejected";
-  reviewer_whatsapp: string | null;
-  reviewer_country: string | null;
-  reviewed_at: string | null;
-};
-
-export type HammerexQuestion = {
-  id: string;
-  product_id: string;
-  asked_by: string | null;
-  body: string;
-  created_at: string;
-  answers: { id: string; body: string; by_name: string | null; by_vendor: boolean; created_at: string }[];
-};
-
-export type HammerexProductMedia = {
-  id: string;
-  product_id: string;
-  kind: "image" | "video" | "360";
-  url: string;
-  alt: string | null;
-  sort_order: number;
-};
-
-export type HammerexProductSpec = {
-  id: string;
-  product_id: string;
-  group_name: string;
-  label: string;
-  value: string;
-  sort_order: number;
-};
-
-export type HammerexWhatInBox = {
-  id: string;
-  product_id: string;
-  label: string;
-  qty: number;
-  image_url: string | null;
-  sort_order: number;
-};
-
-export type HammerexProductDeal = {
-  id: string;
-  product_id: string;
-  sort_order: number;
-  qty: number;
-  label: string;
-  banner_url: string;
-  name: string;
-  price_idr: number;
-  description: string | null;
-  icon_emoji: string | null;
-};
-
 export type HammerexTradeOffListing = {
   id: string;
   slug: string;
@@ -267,34 +69,14 @@ export type HammerexTradeOffListing = {
   priced_services: {
     name: string;
     image_url: string | null;
-    /** Up to 2 additional images (3 total with image_url). Each card on
-     *  the pricing carousel can show 3 photos that all open in the same
-     *  lightbox so customers can preview the workmanship before tapping
-     *  Enquire. Backwards compatible — empty/missing array means
-     *  single-image card. */
     image_urls?: string[];
-    /** Optional "before" image — shown in the View-card lightbox tabs
-     *  alongside the After. Tradies who upload before/after pairs see
-     *  significantly higher engagement because the transformation
-     *  carries more cognitive weight than the finished work alone.
-     *  Skip if your trade is install-only (no meaningful "before"). */
     before_image_url?: string | null;
     price: number;
     unit: string;
     description?: string | null;
   }[];
-  // "Trades On Standby" advertised availability — the editor enforces
-  // the allowed values; null = not opted into the standby feed.
   availability: "now" | "tomorrow" | "this_week" | "next_week" | "two_weeks" | "later" | null;
-  // Headline starting rate shown on the standby card. Separate from
-  // priced_services so the tradie can advertise a single from-price.
   headline_rate: { amount: number; unit: string; currency: string } | null;
-  // Trust & logistics — surfaced on the "What to know" panel of the
-  // premium profile. All nullable / defaulted false so legacy rows
-  // render as "Not confirmed".
-  /** Trusted Trades — array of other Xrated tradespeople this person
-   *  vouches for. Shown as a recommendation grid on the public profile
-   *  (paid tier only). Capped at 12 entries by the update API. */
   recommendations: { slug: string; note?: string }[];
   is_insured: boolean;
   insurance_cover_gbp: number | null;
@@ -310,29 +92,14 @@ export type HammerexTradeOffListing = {
   current_status_note: string | null;
   ready_date: string | null;
   promo_text: string | null;
-  // Conversion mechanics — track WhatsApp clicks so we can nudge trial
-  // tradies toward annual upgrade when they're getting real leads.
   whatsapp_click_count: number;
   last_whatsapp_click_at: string | null;
   upgrade_nudge_dismissed_at: string | null;
-  // Annual paid members can upload a custom app-page hero banner that
-  // overrides the per-trade default. Null for everyone else.
   custom_app_hero_url: string | null;
-  // X-Rated trust level admin override (3-5). NULL = auto-derive from
-  // current listing data (see src/lib/xratedTrustLevel.ts).
   trust_level_override: number | null;
-  // Optional 60-second-max intro video. YouTube watch / youtu.be / Shorts
-  // URL — shown as a thumbnail in the About section, opens a lightbox on
-  // click. `video_cover_url` overrides the auto-poster (falls back to a
-  // portfolio photo when null).
   video_url: string | null;
   video_cover_url: string | null;
-  // Short label rendered next to the video tile (e.g. "Level 5 skim
-  // example"). Editor caps to 60 chars.
   video_caption: string | null;
-  // "Meet the team" — optional team-member roster shown on the premium
-  // profile when length >= 2. Avatar URL is optional; missing photos
-  // fall back to initials on a yellow circle.
   team_members: {
     name: string;
     role: string;
@@ -340,70 +107,132 @@ export type HammerexTradeOffListing = {
     avatar_url: string | null;
     skills: string[];
   }[];
-  // Add-ons toggle map — keyed by add-on slug from src/lib/xratedAddons.ts.
-  // Presence + true = on. Absence or false = off. Default {} = none active.
-  // Trusted Trades is NOT tracked here — it's always-on for paid tier.
   addons_enabled: Record<string, boolean>;
+  // Wholesale Mode — yard origin + delivery config. Lat/lng nullable
+  // so a listing can enable wholesale_mode and complete the yard
+  // setup later. distance_fudge maps straight-line km to road km
+  // (1.0 = pure crow-fly, default 1.40, max 3.0).
+  wholesale_origin_address: string | null;
+  wholesale_origin_postcode: string | null;
+  wholesale_origin_lat: number | null;
+  wholesale_origin_lng: number | null;
+  wholesale_distance_fudge: number;
+  wholesale_allow_pickup: boolean;
+  wholesale_currency: string;
+  wholesale_prices_ex_vat: boolean;
+  // Materials Network add-on. Three role-specific columns:
+  //   merchant_*: only used when this listing IS a merchant accepting
+  //   referrals from other tradespeople (configured per-merchant in the
+  //   commission editor). Rate is % of fulfilled order value, min_pence
+  //   is the floor commission per referral.
+  //   materials_network_opted_in_at: timestamp of first opt-in for the
+  //   merchant side (audit trail).
+  //   materials_network_paused: merchant can pause new referrals without
+  //   archiving picks (existing pending referrals continue).
+  merchant_commission_rate: number | null;
+  merchant_commission_min_pence: number;
+  merchant_commission_terms: string | null;
+  materials_network_opted_in_at: string | null;
+  materials_network_paused: boolean;
+  // Custom Domain add-on — point your own domain at this profile.
+  //   custom_domain: lowercase host the customer typed (with or without
+  //     "www." — middleware does the dual-match). UNIQUE — one listing
+  //     per domain.
+  //   custom_domain_apex: apex form (no leading "www."). We always
+  //     attach both apex + www at Vercel and redirect www → apex.
+  //   custom_domain_status: lifecycle enum. 'pending' = freshly created
+  //     row, no Vercel call yet. 'dns_pending' = Vercel returned
+  //     verification records, awaiting customer DNS. 'verifying' = DNS
+  //     looks right, Vercel issuing SSL. 'live' = traffic is routing +
+  //     SSL valid. 'ssl_failed' / 'dns_lost' / 'expired' / 'blocked' =
+  //     error states. 'disconnected' = customer pressed Disconnect.
+  //   custom_domain_verification: Vercel's verification challenge
+  //     records (TXT / CNAME the customer must add at their registrar).
+  //   custom_domain_vercel_id: opaque Vercel domain ID, used for detach.
+  //   *_added_at / *_verified_at / *_ssl_verified_at: audit timestamps.
+  //   custom_domain_last_check_at: most recent health-check ping.
+  //   custom_domain_last_error: human-readable error string from Vercel.
+  //   custom_domain_failure_count: cron-incremented; ≥3 = dns_lost.
+  //   custom_domain_addon_active: free first 30 days, then auto-charge.
+  //     Drives the billing reconciliation job — not the route gate.
+  custom_domain: string | null;
+  custom_domain_apex: string | null;
+  custom_domain_status:
+    | "pending"
+    | "dns_pending"
+    | "verifying"
+    | "live"
+    | "ssl_failed"
+    | "dns_lost"
+    | "expired"
+    | "disconnected"
+    | "blocked"
+    | null;
+  custom_domain_verification: {
+    type: string;
+    domain: string;
+    value: string;
+    reason?: string;
+  }[] | null;
+  custom_domain_vercel_id: string | null;
+  custom_domain_added_at: string | null;
+  custom_domain_verified_at: string | null;
+  custom_domain_ssl_verified_at: string | null;
+  custom_domain_last_check_at: string | null;
+  custom_domain_last_error: string | null;
+  custom_domain_failure_count: number;
+  custom_domain_addon_active: boolean;
   joined_at: string;
   created_at: string;
   updated_at: string;
 };
 
-// Shop Mode add-on — a tradesperson's product catalog. When the add-on
-// is enabled, public profile swaps its services carousel for a product
-// card grid. All monetary values are integer pence (GBP only in v1).
+// Shop Mode add-on — a tradesperson's product catalog.
 export type HammerexXratedProduct = {
   id: string;
   listing_id: string;
-  // 'product' = physical item shipped to the customer (Shop Mode add-on).
-  // 'service' = labour / hire / rental priced by hour, sqm, tree, day,
-  //              etc. (Services Prices add-on). Same table, two surfaces.
   kind: "product" | "service";
-  // Pricing unit for services — "per hour", "per sqm", "per tree",
-  // "per day", "per kg", etc. Null = flat item price (the default for
-  // physical products).
   unit: string | null;
-  // Optional grouping for the Services Prices grid: "gardening",
-  // "machinery", "hire", etc. Null = ungrouped. Render layer can
-  // sub-section the grid by category when set.
   category: string | null;
   name: string;
   description: string | null;
   price_pence: number;
   stock_count: number | null;
   cover_url: string | null;
-  // Up to 3 additional photos. Cover + gallery = 4 images total in the
-  // product modal lightbox.
   gallery_urls: string[];
   dispatch_days: number | null;
-  // Single-axis variants — every entry MUST share the same `axis` value
-  // ("size" OR "colour"). The editor enforces this. price_delta_pence
-  // is added to the parent product's price_pence at cart time; can be
-  // negative for cheaper sizes. stock_count overrides the parent stock
-  // when present (null = inherit parent).
   variants: {
     axis: "size" | "colour";
     label: string;
     stock_count?: number | null;
     price_delta_pence?: number | null;
   }[];
-  // Uploaded sizing chart image + unit picker. When set, the customer
-  // modal renders a "View size chart" sub-overlay so the customer can
-  // pick the right variant before adding to cart.
   size_chart_url: string | null;
   size_chart_unit: "size" | "kg" | "litre" | "cm" | "other" | null;
-  // Sibling product ids the tradesperson wants surfaced in the Compare
-  // modal. Empty array = auto-pick by same category in Phase 2.
+  // Wholesale Mode bulk-pricing tiers. Empty array = no tier pricing.
+  // Shape per row: { min_qty, max_qty?, price_pence }. Top tier omits
+  // max_qty ("50+ each"). API enforces ascending min_qty + non-
+  // overlapping + ≤5 tiers per product.
+  bulk_tiers: {
+    min_qty: number;
+    max_qty?: number | null;
+    price_pence: number;
+  }[];
   compare_with: string[];
   status: "live" | "archived";
   sort_order: number;
+  // Phase 3 storefront — slug is the per-product URL handle (unique per
+  // listing among live rows). featured_at is the "front window"
+  // timestamp set when the tradesperson drags a product into one of the
+  // 6 Featured slots on the editor. NULL = not featured. The teaser +
+  // /<slug>/shop default sort both rank featured_at DESC NULLS LAST.
+  slug: string | null;
+  featured_at: string | null;
   created_at: string;
   updated_at: string;
 };
 
-// Shop Mode shipping config — one row per (listing, country). Either
-// air or sea (or both) may be priced; nulls mean "not available by that
-// route". ETA is rendered as a min-max range on the cart page.
+// Shop Mode shipping config — one row per (listing, country).
 export type HammerexXratedShippingZone = {
   id: string;
   listing_id: string;
@@ -416,6 +245,110 @@ export type HammerexXratedShippingZone = {
   sort_order: number;
   created_at: string;
   updated_at: string;
+};
+
+// Wholesale Mode delivery zone — one row per listing (we keep it as
+// a table for future "named regions" headroom). banded_pricing is an
+// ordered array of distance bands; the first band whose max_km the
+// customer's distance falls under is applied.
+export type HammerexXratedWholesaleZone = {
+  id: string;
+  listing_id: string;
+  free_radius_km: number | null;
+  free_postcodes: string[];
+  banded_pricing: {
+    max_km: number;
+    price_pence: number;
+    min_order_pence?: number;
+  }[];
+  min_order_pence: number;
+  max_delivery_km: number | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// Downloads add-on — per-listing file library. PDFs, Word/Excel docs,
+// images that a tradesperson uploads for customers to fetch (brochures,
+// trade-account forms, RAMS, qualifications). `file_url` is a public
+// Supabase Storage URL under product-images/downloads/. When
+// `requires_email=true`, the public surface gates the download behind
+// an email capture (lead row in HammerexXratedDownloadLead).
+export type HammerexXratedDownload = {
+  id: string;
+  listing_id: string;
+  name: string;
+  description: string | null;
+  file_url: string;
+  file_type: "pdf" | "doc" | "docx" | "xls" | "xlsx" | "jpg" | "jpeg" | "png" | "other";
+  file_size_bytes: number | null;
+  category: "brochure" | "form" | "compliance" | "catalogue" | "qualification" | "other";
+  requires_email: boolean;
+  cover_image_url: string | null;
+  download_count: number;
+  status: "live" | "archived";
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// Captured email lead for an email-gated download. One row per download
+// event (rate-limit / dedupe is handled at the API layer, not the table).
+export type HammerexXratedDownloadLead = {
+  id: string;
+  download_id: string;
+  customer_email: string;
+  customer_name: string | null;
+  ip_hash: string | null;
+  downloaded_at: string;
+};
+
+// Job Diary add-on — public project a tradesperson advertises. Each
+// project carries a live update stream (HammerexXratedProjectUpdate)
+// and is hard-gated behind a privacy disclaimer (no faces / no
+// addresses / customer agreed) before it can be saved. `status='live'`
+// shows on the profile; `completed` archives into the past-projects
+// strip; `archived` is soft-hidden (right-to-removal or tradesperson
+// choice).
+export type HammerexXratedProject = {
+  id: string;
+  listing_id: string;
+  title: string;
+  location_label: string;
+  started_at: string;
+  estimated_complete_at: string | null;
+  completed_at: string | null;
+  cover_image_url: string;
+  final_summary: string | null;
+  status: "live" | "completed" | "archived";
+  privacy_disclaimer_confirmed_at: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// One "post" within a Job Diary project. status_chip is a controlled
+// enum of 8 neutral-framed values (see lib/xratedAddons.ts /
+// JobDiaryStatusPicker for the labels and colours). image_urls capped
+// at 4 to keep update cards scannable.
+export type HammerexXratedProjectUpdate = {
+  id: string;
+  project_id: string;
+  status_chip:
+    | "on_track"
+    | "stage_complete"
+    | "inspection_passed"
+    | "weather_delay"
+    | "materials_delay"
+    | "scope_change"
+    | "snagging"
+    | "completed";
+  image_urls: string[];
+  note: string | null;
+  shared_platforms: string[];
+  ip_hash: string | null;
+  posted_at: string;
+  created_at: string;
 };
 
 export type HammerexTradeOffMessage = {
@@ -505,6 +438,194 @@ export type HammerexXratedVoucher = {
   admin_note: string | null;
 };
 
+// Hammerex Standard products surface — when a tradesperson opts into
+// the "Hammerex Standard" badge, they pick from a shortlist of Hammerex
+// products. Xrated Trades reads only the public fields needed to render
+// the linked product card on the profile (slug + name + image). The
+// underlying rows live in the Hammerex `hammerex_products` table —
+// shared while both apps point at the same Supabase project; will move
+// to its own table once Xrated forks the database.
+export type HammerexProduct = {
+  id: string;
+  slug: string | null;
+  name: string;
+  image_url: string | null;
+};
+
+// Materials Network add-on — tradesperson's curated merchant picks.
+// Each row binds one tradie listing to one merchant listing with an
+// optional intro_note (≤200 chars) and a sort_order for drag-reorder.
+// status='archived' soft-hides without breaking historical referrals.
+export type HammerexXratedMerchantPick = {
+  id: string;
+  tradie_listing_id: string;
+  merchant_listing_id: string;
+  intro_note: string | null;
+  sort_order: number;
+  status: "live" | "archived";
+  created_at: string;
+  updated_at: string;
+};
+
+// Materials Network — single referral. Created when a customer composes
+// a WhatsApp quote from /<slug>/materials/<merchantSlug>. ref_code is
+// the human-visible attribution token ("MN-A4F2K7"). Last-click 24h
+// sticky: a repeat send by the same customer_wa_hash + merchant within
+// 24h reuses the existing ref_code instead of opening a new row.
+//
+// Privacy boundary: the tradesperson's earnings ledger NEVER reads
+// customer_name / customer_wa_e164 / customer_wa_hash fields — only
+// the merchant fulfilment panel sees those.
+export type HammerexXratedMerchantReferral = {
+  id: string;
+  ref_code: string;
+  tradie_listing_id: string;
+  merchant_listing_id: string;
+  customer_session_id: string | null;
+  customer_wa_hash: string | null;
+  customer_name: string | null;
+  customer_wa_e164: string | null;
+  cart_items_snapshot: {
+    name: string;
+    qty: number;
+    price_pence: number;
+    unit?: string | null;
+    variant_label?: string | null;
+  }[];
+  estimated_cart_total_pence: number | null;
+  status: "pending" | "fulfilled" | "declined" | "expired" | "disputed";
+  fulfilled_at: string | null;
+  fulfilled_order_value_pence: number | null;
+  commission_rate_at_fulfilment: number | null;
+  commission_pence: number | null;
+  fulfilled_note: string | null;
+  declined_reason: string | null;
+  declined_note: string | null;
+  expires_at: string;
+  created_at: string;
+};
+
+// Materials Network — earnings view per tradesperson. Aggregates the
+// referral ledger into counts + monetary totals. Read-only.
+export type HammerexXratedTradieEarnings = {
+  tradie_listing_id: string;
+  pending_count: number;
+  pending_estimate_pence: number;
+  fulfilled_count: number;
+  commission_total_pence: number;
+  declined_count: number;
+};
+
+// Lead Alerts add-on — one row per (listing, device endpoint). A
+// tradesperson can subscribe unlimited devices to one listing; each
+// device carries its own vibration_pattern, muted_events filter and
+// optional quiet-hours window. endpoint_hash is the SHA-256 of the
+// raw push endpoint URL — used for the public-facing UNIQUE key so we
+// never echo the endpoint URL back to the client.
+export type HammerexXratedPushSubscription = {
+  id: string;
+  listing_id: string;
+  endpoint: string;
+  endpoint_hash: string;
+  p256dh_key: string;
+  auth_key: string;
+  user_agent: string | null;
+  platform: "ios" | "android" | "desktop" | "unknown";
+  device_label: string | null;
+  vibration_pattern: number[];
+  muted_events: string[];
+  quiet_hours_start: number | null;
+  quiet_hours_end: number | null;
+  enabled: boolean;
+  last_used_at: string | null;
+  last_success_at: string | null;
+  failure_count: number;
+  created_at: string;
+};
+
+// Push notification delivery log. Initially a stub for Materials
+// Network commission pings; Lead Alerts upgrades it to a real
+// per-attempt delivery log keyed by subscription_id with a
+// delivery_status enum ('queued'|'sent'|'failed'|'throttled'|'muted'|
+// 'quiet_hours'). subscription_id can be NULL for legacy stub rows.
+export type HammerexXratedPushLog = {
+  id: string;
+  listing_id: string;
+  event_type: "whatsapp_click" | "commission" | "review" | "test" | "lead" | "referral_pending" | "referral_fulfilled";
+  payload: Record<string, unknown>;
+  subscription_id: string | null;
+  delivery_status: "queued" | "sent" | "failed" | "throttled" | "muted" | "quiet_hours";
+  delivery_error: string | null;
+  created_at: string;
+};
+
+// Custom Domain add-on — append-only audit log. Every state transition
+// (attach attempt, verify success / failure, SSL issued, health-check
+// failure, disconnect) writes a row here so admin can debug stuck
+// domains. Payload is the raw Vercel API response (or our own
+// {reason, message} structure for non-Vercel transitions).
+export type HammerexCustomDomainEvent = {
+  id: number;
+  listing_id: string | null;
+  domain: string;
+  event_type:
+    | "attach_attempt"
+    | "attach_success"
+    | "attach_failed"
+    | "verify_attempt"
+    | "verify_success"
+    | "verify_failed"
+    | "ssl_issued"
+    | "health_check_ok"
+    | "health_check_failed"
+    | "dns_lost"
+    | "disconnect"
+    | "blocked";
+  payload: Record<string, unknown> | null;
+  created_at: string;
+};
+
+// FAQ Page add-on — single Q&A row keyed by ref_code (FAQ-001 / FAQ-002 / …).
+// The ref_code is unique per listing and is the human-shareable handle a
+// customer types into the URL (#faq-001) or quotes in WhatsApp. Category
+// drives the filter chips on the dedicated /<slug>/faq page. Soft-archive
+// via status='archived' so old answers never break inbound links.
+export type HammerexXratedFaqItem = {
+  id: string;
+  listing_id: string;
+  ref_code: string;
+  question: string;
+  answer: string;
+  category:
+    | "general"
+    | "pricing"
+    | "process"
+    | "materials"
+    | "trust"
+    | "warranty"
+    | "aftercare";
+  status: "live" | "archived";
+  sort_order: number;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// Reference image attached to a FAQ row. Up to 3 per FAQ (DB trigger
+// enforced). image_url is a public Supabase Storage URL under the
+// shared product-images bucket. title is the headline customers see on
+// the lightbox; alt_text is the accessibility caption that doubles as
+// the search-engine signal for image SEO.
+export type HammerexXratedFaqImage = {
+  id: string;
+  faq_id: string;
+  image_url: string;
+  title: string;
+  alt_text: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
 export type HammerexShippingZone = {
   id: string;
   country_code: string;
@@ -516,4 +637,31 @@ export type HammerexShippingZone = {
   eta_max_days: number;
   is_default: boolean;
   free_shipping_threshold_idr: number;
+};
+
+// The Yard — paid-tier-only trades-to-trades board. Two kinds of post:
+//   'available' — sub-contractor advertising availability ("free next
+//                 week in Wexford, can do plastering")
+//   'needed'    — main-contractor sourcing crew ("need 3 scaffolders
+//                 immediate start Monday")
+// Free auto-expiry at 14 days keeps the feed fresh. `is_sample=true`
+// posts are seeded so the feed never reads empty in pre-liquidity v1 —
+// they render with a yellow "Sample" badge so members know.
+export type HammerexTradeOffYardPost = {
+  id: string;
+  listing_id: string;
+  kind: "available" | "needed";
+  trade_slug: string;
+  title: string;
+  body: string;
+  country: string;
+  region: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  crew_size_needed: number | null;
+  day_rate_pence: number | null;
+  is_sample: boolean;
+  status: "live" | "archived";
+  created_at: string;
+  expires_at: string;
 };
