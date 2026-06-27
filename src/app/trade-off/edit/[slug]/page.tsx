@@ -22,6 +22,9 @@ import { VideoUploadInput } from "@/components/trade-off/VideoUploadInput";
 import { WhatsappLeadsNudge } from "@/components/trade-off/WhatsappLeadsNudge";
 import { LossAversionPreview } from "@/components/trade-off/LossAversionPreview";
 import { TrustScorePanel } from "@/components/trade-off/TrustScorePanel";
+import { BusinessCardPanel } from "@/components/trade-off/BusinessCardPanel";
+import { LeadAlertsSetupCard } from "@/components/trade-off/LeadAlertsSetupCard";
+import { isLeadAlertsOn } from "@/lib/xratedAddons";
 import type { HammerexXratedVoucher } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -193,6 +196,21 @@ export default async function TradeOffEditPage({
         </a>
       </section>
 
+      {/* My Business Card — free for every tier. One-tap WhatsApp share
+          of a server-generated card PNG. Placed high in the dashboard
+          because it's the viral lever (every shared card carries the
+          slug URL + QR). */}
+      <section className="mx-auto max-w-3xl px-4 pb-6">
+        <BusinessCardPanel
+          slug={slug}
+          displayName={row.data.display_name ?? ""}
+          primaryTrade={row.data.primary_trade ?? ""}
+          city={row.data.city ?? ""}
+          whatsapp={row.data.whatsapp ?? ""}
+          tradingName={row.data.trading_name ?? null}
+        />
+      </section>
+
       {/* Trust Score panel — shows the live 0-100 gauge + the 8-item
           checklist + tip per unearned item. Sits at the top of the
           dashboard so it's the first thing the tradesperson sees and
@@ -200,6 +218,19 @@ export default async function TradeOffEditPage({
       <TrustScorePanel
         listing={row.data}
         tier={tier === "app_trial" || tier === "app_paid" ? "paid" : "free"}
+      />
+
+      {/* Lead Alerts setup card — high in the dashboard because
+          subscribing the tradesperson's phone is a critical setup
+          task, not an add-on toggle. The card itself surfaces the
+          upgrade CTA if they're not on a paid tier. */}
+      <LeadAlertsSetupCard
+        slug={slug}
+        editToken={token}
+        vapidPublicKey={process.env.NEXT_PUBLIC_XRATED_VAPID_PUBLIC_KEY ?? ""}
+        isPaidTier={tier === "app_trial" || tier === "app_paid"}
+        addonEnabled={isLeadAlertsOn(row.data)}
+        upgradeHref={upgradeHref}
       />
 
       {showLeadsNudge && (

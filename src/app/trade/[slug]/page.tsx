@@ -34,15 +34,21 @@ import { OperatingHoursPanel } from "@/components/xrated/profile/OperatingHoursP
 import { StarRatingRow } from "@/components/xrated/profile/StarRatingRow";
 import { ProfileActionTriple } from "@/components/xrated/profile/ProfileActionTriple";
 import { ShareIconButton } from "@/components/xrated/profile/ShareIconButton";
+import { ShareCardButton } from "@/components/xrated/profile/ShareCardButton";
 import { PricedServicesCarousel } from "@/components/xrated/profile/PricedServicesCarousel";
 import { QrFooterDock } from "@/components/xrated/profile/QrFooterDock";
 import { PremiumStickyTrust } from "@/components/xrated/profile/PremiumStickyTrust";
 import { ProfileExpandPanels } from "@/components/xrated/profile/ProfileExpandPanels";
 import { AboutBio } from "@/components/xrated/profile/AboutBio";
-import { ProductCardGrid } from "@/components/xrated/profile/ProductCardGrid";
+import { ShopTeaser } from "@/components/xrated/profile/ShopTeaser";
 import { ShopCartIsland } from "@/components/xrated/profile/ShopCartIsland";
 import { ServicesPricedSection } from "@/components/xrated/profile/ServicesPricedSection";
-import { isServicesGridOn, isShopModeOn } from "@/lib/xratedAddons";
+import { DownloadsSection } from "@/components/xrated/profile/DownloadsSection";
+import { JobDiarySection } from "@/components/xrated/profile/JobDiarySection";
+import { PastProjectsStrip } from "@/components/xrated/profile/PastProjectsStrip";
+import { MaterialsNetworkSection } from "@/components/xrated/profile/MaterialsNetworkSection";
+import { FaqPageCta } from "@/components/xrated/profile/FaqPageCta";
+import { isDownloadsOn, isFaqPageOn, isJobDiaryOn, isMaterialsNetworkOn, isServicesGridOn, isStorefrontOn } from "@/lib/xratedAddons";
 import {
   supabase,
   type HammerexTradeOffListing,
@@ -471,20 +477,40 @@ function PremiumLayout({
   tier: "free" | "paid";
 }) {
   const isPaid = tier === "paid";
-  // Shop Mode swap — only honour when the add-on is on AND the
-  // tradesperson is on a paid tier (the add-on is gated on the
+  // Shop Mode swap — only honour when the storefront add-on is on AND
+  // the tradesperson is on a paid tier (the add-on is gated on the
   // dashboard but we double-check here so a leaked toggle on a free
-  // profile can't bypass the gate).
-  const shopMode = isPaid && isShopModeOn(listing);
+  // profile can't bypass the gate). Phase 3: ShopTeaser drives the
+  // profile-side render; the full grid lives at /<slug>/shop. We keep
+  // the `shopMode` boolean so downstream chrome (ShopCartIsland,
+  // sticky-trust swap) wire up the same way they did in Phase 2.
+  const shopMode = isPaid && isStorefrontOn(listing);
   // Services Prices add-on swap — only honour when the add-on is on AND
   // the tradesperson is on a paid tier. Independent of Shop Mode — a
   // tradesperson can run both at the same time (kit they sell + labour
   // priced by the hour). Double-checks the gate here so a leaked toggle
   // on a free profile can't bypass it.
   const servicesGrid = isPaid && isServicesGridOn(listing);
+  // Job Diary gate — paid tier AND add-on flag on.
+  const jobDiaryOn = isPaid && isJobDiaryOn(listing);
+  // Materials Network gate — paid tier AND add-on flag on. When true,
+  // the inline merchant teaser renders just above TrustedTradesCta and
+  // the CTA copy is rebranded (see TrustedTradesCta below).
+  const materialsOn = isPaid && isMaterialsNetworkOn(listing);
+  // FAQ Page gate — paid tier AND add-on flag on. The CTA card renders
+  // BELOW TrustedTradesCta (additive — does not replace any existing
+  // container). FaqPageCta server-component self-hides when there are
+  // zero live FAQ rows.
+  const faqPageOn = isPaid && isFaqPageOn(listing);
   return (
     <>
       <PremiumHero listing={listing} waUrl={waUrl} tier={tier} />
+
+      {/* Past projects swipeable strip — sits just below the hero so
+          "what we've delivered" lands before "what we're working on
+          now". Self-hides when there are zero completed projects
+          (per the no-empty-graveyard default). */}
+      {jobDiaryOn && <PastProjectsStrip listing={listing} />}
 
       {/* Free-tier upgrade banner — pinned high under the hero so it's
           one of the first things visitors see, BUT below the hero so
@@ -498,7 +524,7 @@ function PremiumLayout({
 
       <AboutAndVideo listing={listing} showVideo={isPaid} />
       {shopMode ? (
-        <ProductCardGrid listing={listing} />
+        <ShopTeaser listing={listing} />
       ) : (
         <ServicesTabbedGallery
           slug={listing.slug}
@@ -519,18 +545,43 @@ function PremiumLayout({
           section. View-all link to /<slug>/services-prices for the
           dedicated grid. */}
       {servicesGrid && <ServicesPricedSection listing={listing} />}
+      {/* Downloads inline teaser — paid tier + add-on on. Server-fetches
+          up to 6 live downloads; self-hides when zero. View-all link
+          points at /<slug>/downloads where the full grid lives. */}
+      {isPaid && isDownloadsOn(listing) && <DownloadsSection listing={listing} />}
+      {/* Job Diary inline teaser — paid tier + add-on on. Surfaces the
+          single most-recent live project; self-hides when there are
+          none or when the latest update is >30 days stale (cadence
+          guard). Sits BEFORE TrustedTradesCta so the customer reads
+          "live work" → "people I recommend". */}
+      {jobDiaryOn && <JobDiarySection listing={listing} />}
+      {/* Materials Network inline teaser — paid tier + add-on on.
+          Self-renders nothing when the tradesperson has zero live
+          merchant picks. View-all link points to /<slug>/materials. */}
+      {materialsOn && <MaterialsNetworkSection listing={listing} />}
       <TeamGrid listing={listing} />
       {/* My Trusted Trades — link to the dedicated sub-page. Available
           on every tier (free + trial + paid) as the viral acquisition
           lever: free profiles can recommend other tradies, generating
-          backlinks that bring fresh sign-ups onto the platform. */}
+          backlinks that bring fresh sign-ups onto the platform.
+          When Materials Network is also on we rebrand the CTA copy to
+          "Trade Materials & Companies I Work With" so the customer sees
+          one cohesive supply-chain story rather than two competing
+          recommendations sections. */}
       {Array.isArray(listing.recommendations) && listing.recommendations.length > 0 && (
         <TrustedTradesCta
           slug={listing.slug}
           firstName={listing.display_name.split(/\s+/)[0] ?? listing.display_name}
           count={listing.recommendations.length}
+          materialsOn={materialsOn}
         />
       )}
+      {/* FAQ Page CTA card — paid tier + add-on on. Server component
+          self-hides when zero live FAQs so a freshly-toggled add-on
+          doesn't leave a dead container on the profile. Renders BELOW
+          TrustedTradesCta so the customer reads "people I recommend"
+          → "questions I answer". */}
+      {faqPageOn && <FaqPageCta listing={listing} />}
       <ShareAndContactCta
         listing={listing}
         waUrl={waUrl}
@@ -615,12 +666,24 @@ function FreeTierUpgradeBanner({
 function TrustedTradesCta({
   slug,
   firstName,
-  count
+  count,
+  materialsOn = false
 }: {
   slug: string;
   firstName: string;
   count: number;
+  /** Materials Network add-on flag. When true, the container is
+   *  rebranded from "My Trusted Trades" to "Trade Materials &
+   *  Companies I Work With" so the supply-chain story stays
+   *  consistent with the merchant-picks teaser above. */
+  materialsOn?: boolean;
 }) {
+  const eyebrow = materialsOn
+    ? "Trade Materials & Companies I Work With"
+    : "My Trusted Trades";
+  const headline = materialsOn
+    ? `${count} ${count === 1 ? "trade & supplier I work with" : "trades & suppliers I work with"}`
+    : `${count} ${count === 1 ? "tradesperson I personally vouch for" : "tradespeople I personally vouch for"}`;
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-10 sm:px-6 sm:pt-12">
       <a
@@ -632,10 +695,10 @@ function TrustedTradesCta({
             className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
             style={{ color: "#FFB300" }}
           >
-            My Trusted Trades
+            {eyebrow}
           </p>
           <p className="mt-1.5 text-lg font-extrabold leading-tight text-neutral-900 sm:text-xl">
-            {count} {count === 1 ? "tradesperson I personally vouch for" : "tradespeople I personally vouch for"}
+            {headline}
           </p>
           <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
             Need an electrician, a sparky or a roofer too? See who {firstName} works with.
@@ -994,6 +1057,22 @@ function ShareAndContactCta({
               </svg>
               Call Now
             </a>
+          </div>
+          {/* Share business card — secondary CTA. Does NOT compete with
+              WhatsApp / phone as the primary contact actions; one tap
+              hands the customer a polished PNG to forward on. Every
+              shared card carries the slug URL + QR (xratedtrade.com
+              advertising). */}
+          <div className="mt-2">
+            <ShareCardButton
+              slug={listing.slug}
+              displayName={listing.display_name}
+              primaryTrade={tradeLabel(listing.primary_trade)}
+              city={listing.city}
+              tradingName={listing.trading_name}
+              whatsapp={listing.whatsapp}
+              variant="profile"
+            />
           </div>
         </div>
       </div>
