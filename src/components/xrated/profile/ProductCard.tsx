@@ -12,15 +12,21 @@ export function ProductCard({
   product,
   slug,
   siblings,
-  themeColor
+  themeColor,
+  acceptingJobs = false,
+  operatingHours = null
 }: {
   product: HammerexXratedProduct;
   slug: string;
   siblings: HammerexXratedProduct[];
   themeColor: string;
+  acceptingJobs?: boolean;
+  operatingHours?: import("@/lib/availabilityStatus").OperatingHours | null;
 }) {
   const [open, setOpen] = useState(false);
   const stockBadge = stockBadgeFor(product.stock_count);
+  const hasBulkTiers =
+    Array.isArray(product.bulk_tiers) && product.bulk_tiers.length > 0;
 
   return (
     <>
@@ -72,6 +78,18 @@ export function ProductCard({
               {product.dispatch_days === 1 ? "day" : "days"}
             </p>
           )}
+          {hasBulkTiers && (
+            <span
+              className="mt-1 inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[13px] font-extrabold"
+              style={{
+                background: "#FFB30022",
+                color: "#0A0A0A",
+                borderColor: "#FFB300"
+              }}
+            >
+              Bulk tiers available
+            </span>
+          )}
         </div>
       </button>
 
@@ -82,6 +100,8 @@ export function ProductCard({
           siblings={siblings}
           themeColor={themeColor}
           onClose={() => setOpen(false)}
+          acceptingJobs={acceptingJobs}
+          operatingHours={operatingHours}
         />
       )}
     </>

@@ -41,6 +41,8 @@ import {
   ProductReviewsChart,
   type ProductStats
 } from "./ProductReviewsChart";
+import { BulkTierTable, tierForQty } from "./BulkTierTable";
+import { AvailabilityPill } from "./AvailabilityPill";
 
 // Mirror of ServicesTabbedGallery's RATING_BADGE_MIN — we only show the
 // star row above the price when the product has at least 3 live reviews
@@ -81,13 +83,17 @@ export function ProductModal({
   slug,
   siblings,
   themeColor,
-  onClose
+  onClose,
+  acceptingJobs = false,
+  operatingHours = null
 }: {
   product: HammerexXratedProduct;
   slug: string;
   siblings: HammerexXratedProduct[];
   themeColor: string;
   onClose: () => void;
+  acceptingJobs?: boolean;
+  operatingHours?: import("@/lib/availabilityStatus").OperatingHours | null;
 }) {
   const images = useMemo(() => {
     const all = [product.cover_url, ...(product.gallery_urls ?? [])].filter(
@@ -103,6 +109,7 @@ export function ProductModal({
   const [statsLoaded, setStatsLoaded] = useState(false);
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
+  const [qty, setQty] = useState<number>(1);
 
   const variants = product.variants ?? [];
   const hasVariants = variants.length > 0;
@@ -177,10 +184,20 @@ export function ProductModal({
   const needsVariantPick = hasVariants && selectedVariantIdx === null;
   const addDisabled = outOfStock || needsVariantPick;
 
+  const bulkTiers = Array.isArray(product.bulk_tiers) ? product.bulk_tiers : [];
+  const hasBulkTiers = bulkTiers.length > 0;
+  const matchedTier = hasBulkTiers ? tierForQty(bulkTiers, qty) : null;
+
   const computedPricePence = useMemo(() => {
     const delta = selectedVariant?.price_delta_pence ?? 0;
-    return product.price_pence + (delta ?? 0);
-  }, [product.price_pence, selectedVariant]);
+    // Wholesale bulk tier wins over the base price when qty falls
+    // inside a band. Variant delta is added on top so a "large bag"
+    // variant of a tier-priced product still reflects its surcharge.
+    const base = matchedTier ? matchedTier.price_pence : product.price_pence;
+    return base + (delta ?? 0);
+  }, [product.price_pence, selectedVariant, matchedTier]);
+
+  const lineTotalPence = computedPricePence * Math.max(1, qty);
 
   // Phase 2: Compare is always available. Manual siblings render
   // immediately; if there are none the modal auto-fetches from the
@@ -198,7 +215,8 @@ export function ProductModal({
       name: product.name,
       price_pence: computedPricePence,
       cover_url: product.cover_url,
-      variant_label: selectedVariant?.label ?? null
+      variant_label: selectedVariant?.label ?? null,
+      qty: Math.max(1, Math.min(99, qty))
     });
     setToast(`Added — ${cartItemCount(next)} in cart`);
     window.setTimeout(() => {
@@ -278,6 +296,11 @@ export function ProductModal({
               selectedVariant={selectedVariant}
               onOpenSizeChart={() => setSizeChartOpen(true)}
               hasSizeChart={Boolean(product.size_chart_url)}
+              bulkTiers={bulkTiers}
+              qty={qty}
+              setQty={setQty}
+              lineTotalPence={lineTotalPence}
+              matchedBulkTier={matchedTier !== null}
             />
           </div>
 
@@ -293,9 +316,16 @@ export function ProductModal({
           </div>
 
           <div
-            className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-neutral-200 bg-white p-4 sm:flex-row sm:p-5"
+            className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-neutral-200 bg-white p-4 sm:p-5"
             style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           >
+            {!flipped && (
+              <AvailabilityPill
+                acceptingJobs={acceptingJobs}
+                operatingHours={operatingHours}
+              />
+            )}
+            <div className="flex flex-col gap-2 sm:flex-row">
             {flipped ? (
               <button
                 type="button"
@@ -366,6 +396,7 @@ export function ProductModal({
                 )}
               </>
             )}
+            </div>
           </div>
 
           {toast && (
@@ -425,7 +456,12 @@ function ProductDetailView({
   computedPricePence,
   selectedVariant,
   onOpenSizeChart,
-  hasSizeChart
+  hasSizeChart,
+  bulkTiers,
+  qty,
+  setQty,
+  lineTotalPence,
+  matchedBulkTier
 }: {
   product: HammerexXratedProduct;
   images: string[];
@@ -446,6 +482,11 @@ function ProductDetailView({
   selectedVariant: Variant | null;
   onOpenSizeChart: () => void;
   hasSizeChart: boolean;
+  bulkTiers: HammerexXratedProduct["bulk_tiers"];
+  qty: number;
+  setQty: (n: number) => void;
+  lineTotalPence: number;
+  matchedBulkTier: boolean;
 }) {
   const hasVariants = variants.length > 0;
   const eyebrowLabel = variantAxis === "colour" ? "CHOOSE COLOUR" : "CHOOSE SIZE";
@@ -594,6 +635,56 @@ function ProductDetailView({
           <p className="text-[13px] leading-relaxed text-neutral-700 sm:text-sm">
             {product.description}
           </p>
+        )}
+
+        {Array.isArray(bulkTiers) && bulkTiers.length > 0 && (
+          <>
+            <BulkTierTable tiers={bulkTiers} currentQty={qty} />
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-3">
+              <div>
+                <p
+                  className="text-[10px] font-extrabold uppercase tracking-[0.22em]"
+                  style={{ color: "#FFB300" }}
+                >
+                  Quantity
+                </p>
+                <p className="mt-1 text-[13px] text-neutral-500">
+                  {matchedBulkTier ? "Tier price applied" : "Base price"}
+                </p>
+              </div>
+              <div className="inline-flex items-center overflow-hidden rounded-lg border border-neutral-200">
+                <button
+                  type="button"
+                  onClick={() => setQty(Math.max(1, qty - 1))}
+                  aria-label="Decrease quantity"
+                  className="inline-flex h-11 w-11 items-center justify-center text-base font-extrabold text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-40"
+                  disabled={qty <= 1}
+                >
+                  −
+                </button>
+                <span className="inline-flex h-11 min-w-[2.25rem] items-center justify-center bg-white px-2 text-sm font-extrabold text-neutral-900">
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQty(Math.min(99, qty + 1))}
+                  aria-label="Increase quantity"
+                  className="inline-flex h-11 w-11 items-center justify-center text-base font-extrabold text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-40"
+                  disabled={qty >= 99}
+                >
+                  +
+                </button>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-neutral-500">
+                  Line total
+                </p>
+                <p className="mt-1 text-base font-extrabold text-neutral-900">
+                  {formatGbp(lineTotalPence)}
+                </p>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
